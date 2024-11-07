@@ -1,50 +1,71 @@
-# React + TypeScript + Vite
+# Заказной сервис
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Это веб-приложение для создания и управления заказами для клиентов и администраторов. Клиенты могут создавать заказы, загружать фото и описания, просматривать свои заказы, а администраторы могут управлять ценами, импортировать данные, выдавать товары и управлять клиентами.
 
-Currently, two official plugins are available:
+## Установка
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. Клонируйте репозиторий на ваш локальный компьютер:
 
-## Expanding the ESLint configuration
+   ```bash
+   git clone https://github.com/AbdullaevN/arzan-al.git
+Перейдите в каталог проекта:
+cd arzan-al
+Установите зависимости:
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+Для использования npm:
+ 
+npm install
+Для использования yarn:
+ 
+yarn install
+Запуск проекта
+После установки зависимостей, вы можете запустить проект локально.
 
-- Configure the top-level `parserOptions` property like this:
+Для запуска локального сервера, используйте команду:
+npm run dev
+Или для использования yarn:
+ 
+yarn dev
+Теперь приложение будет доступно по адресу http://localhost:3000.
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+Структура проекта
+src — исходный код приложения.
+components — компоненты интерфейса.
+assets — изображения и другие ресурсы.
+pages — страницы приложения для клиентов и администраторов.
+styles — файлы стилей.
+public — публичные ресурсы (например, иконки).
+Основной функционал
+Для клиента:
+Регистрация и логин.
+Создание заказов с фото и описанием.
+Просмотр всех заказов.
+Поиск заказов по коду.
+Архив заказов.
+Информация о текущем статусе заказов.
+Для администратора:
+Управление ценами.
+История всех заказов с фильтрацией.
+Импорт документов (например, CSV/Excel).
+Страница для выдачи товаров клиентам.
+Управление данными клиентов.
+Базовые команды для разработки
+npm run dev — запуск приложения в режиме разработки.
+npm run build — создание сборки проекта для продакшн.
+npm run start — запуск продакшн-сервера.
+Технологии
+React — библиотека для построения пользовательского интерфейса.
+Vite — сборщик для разработки на JavaScript.
+Tailwind CSS — утилитарный фреймворк для CSS.
+Node.js — среда выполнения JavaScript на серверной стороне.
+Лицензия
+Этот проект лицензирован на условиях MIT License. Подробности см. в файле LICENSE.
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+### Описание файла:
+- В `README.md` указаны основные шаги для установки и запуска проекта.
+- Приведены команды для разработки и сборки.
+- Описан функционал для пользователей (клиентов и администраторов).
+- Указаны используемые технологии (React, Vite, Tailwind CSS и т. д.).
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+Этот файл будет полезен для всех, кто хочет начать работать с проектом или понять, как его настроить.
