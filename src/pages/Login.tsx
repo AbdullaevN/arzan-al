@@ -1,25 +1,39 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // Импортируем Link
 
-const Login = () => {
-  const [email, setEmail] = useState('user@example.com');
-  const [password, setPassword] = useState('password123');
+interface LoginProps {
+  setUserRole: React.Dispatch<React.SetStateAction<string | null>>; // Указание типа для setUserRole
+}
+const Login:React.FC<LoginProps> = ({ setUserRole }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e:any) => {
     e.preventDefault();
-    
-    if (email === 'user@example.com' && password === 'password123') {
-      // Save login status in localStorage
-      localStorage.setItem('isLoggedIn', 'true');
+
+    if (email === 'user@mail.com' && password === 'user') {
+      localStorage.setItem('userRole', 'client');
+      setUserRole('client'); // Обновляем состояние
+      navigate('/dashboard');
+    } else if (email === 'admin@example.com' && password === 'admin') {
+      localStorage.setItem('userRole', 'admin');
+      setUserRole('admin'); // Обновляем состояние
       navigate('/dashboard');
     } else {
       console.log('Invalid login credentials');
     }
   };
+  
+
+  const handleLogout = () => {
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('isLoggedIn');
+    navigate('/login');
+  };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 py-10">
       <div className="w-full max-w-md p-8 bg-white shadow-lg rounded-lg">
         <h2 className="text-2xl font-semibold text-center mb-6">Login</h2>
         <form onSubmit={handleSubmit}>
@@ -55,11 +69,20 @@ const Login = () => {
           >
             Login
           </button>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="mt-4 w-full py-2 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
+          >
+            Logout
+          </button>
         </form>
+        
+        {/* Добавляем ссылку на страницу регистрации */}
         <div className="mt-4 text-center">
           <p className="text-sm text-gray-600">
             Don't have an account?{' '}
-            <a href="/register" className="text-blue-500 hover:underline">Register</a>
+            <Link to="/register" className="text-blue-500 hover:underline">Register</Link>
           </p>
         </div>
       </div>
