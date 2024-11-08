@@ -21,35 +21,40 @@ const Header = () => {
   };
 
   return (
+    <>
+   
+
     <header>
-      <div className="container px-4  text-black flex justify-between items-center">
-        {/* Logo Section */}
-        <div className="flex items-center">
-          <Link to={userRole === "admin" ? "/dashboard" : userRole === "client" ? "/dashboard" : "/login"}>
-            <img src={logo} alt="Logo" className="w-28 h-20 mr-4 object-cover" />
-          </Link>
-        </div>
+      <div className="container px-4 text-black flex justify-between items-center">
+  {/* Logo Section */}
+  <div className="flex items-center justify-center w-full md:w-auto">
+    <Link to={userRole === "admin" ? "/dashboard" : userRole === "client" ? "/dashboard" : "/login"}>
+      <img src={logo} alt="Logo" className="w-28 h-20 object-cover" />
+    </Link>
+  </div>
 
-        {/* Empty middle space */}
-        <div className="flex-grow"></div>
+  {/* Empty middle space */}
+  <div className="flex-grow"></div>
 
-        {/* Menu Section */}
-        <div className={`menu ${toggleMenu ? 'active' : ''}`}>
-          <ul className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6">
-            <li className="cursor-pointer hover:text-gray-500 border-b md:border-none py-2 px-3">Токмок</li>
-            <li className="cursor-pointer hover:text-gray-500 border-b md:border-none py-2 px-3 text-black">{userRole}</li>
-            <li onClick={handleLogout} className="cursor-pointer hover:text-gray-500 border-b md:border-none py-2 px-3">Выход</li>
-          </ul>
-        </div>
+  {/* Menu Section */}
+  <div className={`menu ${toggleMenu ? 'active' : ''}`}>
+    <ul className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6">
+      <li className="cursor-pointer hover:text-gray-500 border-b md:border-none py-2 px-3">Токмок</li>
+      <li className="cursor-pointer hover:text-gray-500 border-b md:border-none py-2 px-3 text-black">{userRole}</li>
+      <li onClick={handleLogout} className="cursor-pointer hover:text-gray-500 border-b md:border-none py-2 px-3">Выход</li>
+    </ul>
+  </div>
 
-        {/* Hamburger Menu for Mobile */}
-        <div className="cursor-pointer md:hidden">
-          <span onClick={handleToggle} className="menu-icon flex items-center relative">
-            <span className={`navicon ${toggleMenu ? 'active' : ''}`}></span>
-          </span>
-        </div>
-      </div>
+  {/* Hamburger Menu for Mobile */}
+  <div className="cursor-pointer md:hidden">
+    <span onClick={handleToggle} className="menu-icon flex items-center relative">
+      <span className={`navicon ${toggleMenu ? 'active' : ''}`}></span>
+    </span>
+  </div>
+</div>
+
     </header>
+    </>
   );
 };
 
