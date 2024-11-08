@@ -1,35 +1,80 @@
-import   { useState } from 'react';
-import { OrderForm } from './OrderForm';
+import { useState } from 'react';
 import { OrderList } from './OrderList';
-import { Archive } from './Archive';
-import { Information } from './Information';
-
-// Функции для отображения модальных окон, добавления заказов, удаления, и поиска.
+import Notification from './Notification';
+import { Link } from 'react-router-dom';
+// import Modal from '../../components/ClientComponents/InformationModal';
+import AddItemModal from '../../components/ClientComponents/AddItemModal'; // Import AddItemModal
+import InformationModal from '../../components/ClientComponents/InformationModal';
  
 const DashboardClient = () => {
-  const [showForm, setShowForm] = useState(false); // Показывать форму создания заказа
+  const [showForm, setShowForm] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+
+  const openAddModal = () => {
+    setIsAddModalOpen(true);
+  };
+
+  const closeAddModal = () => {
+    setIsAddModalOpen(false);
+  };
+
+  const openInfoModal = () => {
+    setIsInfoModalOpen(true);
+  };
+
+  const closeInfoModal = () => {
+    setIsInfoModalOpen(false);
+  };
+
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
 
   return (
-    <div className="dashboard">
-      <h1>Добро пожаловать в Личный Кабинет</h1>
+    <div className="dashboard container px-3">
+      <h1 className='py-8'>Добро пожаловать в Личный Кабинет</h1>
 
-      {/* Кнопка для создания нового заказа */}
-      <button onClick={() => setShowForm(!showForm)} className="btn-create-order">
-        {showForm ? 'Закрыть форму создания заказа' : 'Создать заказ'}
-      </button>
+      <Notification />
 
-      {/* Форма для создания заказа */}
-      {showForm && <OrderForm />}
+     
 
-      <div className="dashboard-sections">
-        {/* Раздел "Все заказы" */}
+      <div className="dashboard-sections flex gap-4 p-4 flex-col">
+        <div className="flex gap-1 items-center justify-around md:justify-start md:gap-4">
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
+            onClick={openAddModal}
+          >
+            Добавить
+          </button>
+          <button
+            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
+            onClick={openInfoModal}
+          >
+            Информация
+          </button>
+          <Link to="/archive">
+            <button className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700">
+              Архив
+            </button>
+          </Link>
+        </div>
+
         <OrderList />
 
-        {/* Раздел "Архив" */}
-        <Archive />
+        {/* Modal for Add Item */}
+        <AddItemModal isOpen={isAddModalOpen} closeModal={closeAddModal} />
 
-        {/* Раздел "Информация" */}
-        <Information />
+        {/* Modal for Information */}
+        <InformationModal isOpen={isInfoModalOpen} closeModal={closeInfoModal} />
+
+        {/* General Modal */}
+        {/* <Modal isOpen={isModalOpen} closeModal={closeModal} /> */}
       </div>
     </div>
   );

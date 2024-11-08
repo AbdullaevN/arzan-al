@@ -22,7 +22,7 @@ const Header = () => {
 
   return (
     <header>
-      <div className="container px-4 py-7 text-black flex justify-between items-center">
+      <div className="container px-4  text-black flex justify-between items-center">
         {/* Logo Section */}
         <div className="flex items-center">
           <Link to={userRole === "admin" ? "/dashboard" : userRole === "client" ? "/dashboard" : "/login"}>

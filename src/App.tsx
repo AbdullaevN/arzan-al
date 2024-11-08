@@ -6,6 +6,7 @@ import DashboardClient from "./pages/DashboardClient/DashboardClient";
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
 import Register from "./pages/Register";
+import { Archive } from "./pages/DashboardClient/Archive";
 
 function App() {
   const [userRole, setUserRole] = useState(localStorage.getItem("userRole"));
@@ -33,6 +34,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login setUserRole={setUserRole} />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/archive" element={<Archive />} />
 
         {/* Условный рендеринг для Dashboard */}
         <Route

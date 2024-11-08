@@ -1,13 +1,19 @@
- import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
-import { BrowserRouter } from 'react-router-dom'
+// index.tsx
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { Provider } from 'react-redux';
+import { BrowserRouter } from 'react-router-dom';
+import store from './store';
+import App from './App';
+import './index.css';
 
-createRoot(document.getElementById('root')!).render(
-  <BrowserRouter  future={{
-    v7_startTransition: true,
-    v7_relativeSplatPath: true,
-  }}>
-    <App />
-  </BrowserRouter>,
-)
+const rootElement = document.getElementById('root')!;
+const root = createRoot(rootElement);
+
+root.render(
+  <Provider store={store}>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </Provider>
+);
