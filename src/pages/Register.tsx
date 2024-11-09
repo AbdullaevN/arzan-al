@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { registerUser } from '../store/userSlice';
 import { RootState, AppDispatch } from '../store';
+import { API } from '../constants/api';
 
 const Register: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -12,9 +13,21 @@ const Register: React.FC = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit =async (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(registerUser(formData));
+    // dispatch(registerUser(formData));
+    try{
+      const res = await API.post('/api/auth/registration',{
+        clientId:formData.username,
+        password:formData.password,
+        phone:'0500737080'
+      })
+      console.log(111,res);
+      
+    }catch(e){
+      console.error(e)
+    }
+
   };
 
   return (

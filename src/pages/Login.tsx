@@ -1,34 +1,53 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; // Импортируем Link
+import { useNavigate, Link } from 'react-router-dom';
+import { API } from '../constants/api';
 
 interface LoginProps {
-  setUserRole: React.Dispatch<React.SetStateAction<string | null>>; // Указание типа для setUserRole
+  setUserRole: React.Dispatch<React.SetStateAction<string | null>>;
 }
-const Login:React.FC<LoginProps> = ({ setUserRole }) => {
+
+const Login: React.FC<LoginProps> = ({ setUserRole }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e:any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(''); // Clear previous error messages
 
-    if (email === 'user@mail.com' && password === 'user') {
-      localStorage.setItem('userRole', 'client');
-      setUserRole('client'); // Обновляем состояние
-      navigate('/dashboard');
-    } else if (email === 'admin@example.com' && password === 'admin') {
+    // Check for admin credentials
+    if (email === 'admin' && password === 'admin') {
       localStorage.setItem('userRole', 'admin');
-      setUserRole('admin'); // Обновляем состояние
-      navigate('/dashboard');
+      localStorage.setItem('token', 'admin');
+
+      setUserRole('admin');
+      navigate('/dashboard'); // Navigate to the admin dashboard
     } else {
-      console.log('Invalid login credentials');
+      // Proceed with client login via API
+      try {
+        const res = await API.post('/api/auth/login', {
+          clientId: email,
+          password: password,
+        });
+        
+        // Store the token and client role in local storage
+        localStorage.setItem('token', res.data.token);
+        localStorage.setItem('userRole', 'client');
+        setUserRole('client');
+        
+        navigate('/clientdash'); // Navigate to the client dashboard
+      } catch (error) {
+        setErrorMessage('Invalid login credentials. Please try again.');
+        console.error('Login error:', error);
+      }
     }
   };
-  
 
   const handleLogout = () => {
+    localStorage.removeItem('token');
     localStorage.removeItem('userRole');
-    localStorage.removeItem('isLoggedIn');
+    setUserRole(null);
     navigate('/login');
   };
 
@@ -40,9 +59,9 @@ const Login:React.FC<LoginProps> = ({ setUserRole }) => {
           <div className="mb-4">
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
             <input
-              type="email"
               id="email"
               name="email"
+             
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -63,12 +82,18 @@ const Login:React.FC<LoginProps> = ({ setUserRole }) => {
               placeholder="Enter your password"
             />
           </div>
+
+          {/* Error Message Display */}
+          {errorMessage && <p className="text-red-500 text-sm mb-4">{errorMessage}</p>}
+
           <button
             type="submit"
             className="w-full py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             Login
           </button>
+          
+          {/* Logout Button */}
           <button
             type="button"
             onClick={handleLogout}
@@ -78,7 +103,7 @@ const Login:React.FC<LoginProps> = ({ setUserRole }) => {
           </button>
         </form>
         
-        {/* Добавляем ссылку на страницу регистрации */}
+        {/* Link to Register Page */}
         <div className="mt-4 text-center">
           <p className="text-sm text-gray-600">
             Don't have an account?{' '}

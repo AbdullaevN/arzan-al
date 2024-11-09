@@ -1,16 +1,39 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { OrderList } from './OrderList';
 import Notification from './Notification';
 import { Link } from 'react-router-dom';
-// import Modal from '../../components/ClientComponents/InformationModal';
-import AddItemModal from '../../components/ClientComponents/AddItemModal'; // Import AddItemModal
+ import AddItemModal from '../../components/ClientComponents/AddItemModal'; // Import AddItemModal
 import InformationModal from '../../components/ClientComponents/InformationModal';
+import { API } from '../../constants/api';
  
 const DashboardClient = () => {
   const [showForm, setShowForm] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [orders, setOrders] = useState([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+
+  console.log('order',orders);
+  
+
+const fetchOrders = async () => {
+
+try {
+  const res  = await API.get('/api/orders/history')
+  setOrders(res.data)
+
+  }catch(e){
+console.log(e);
+
+  }
+}
+useEffect(()=>{
+fetchOrders()
+},[])
+
+
+
+
 
   const openAddModal = () => {
     setIsAddModalOpen(true);
@@ -42,6 +65,11 @@ const DashboardClient = () => {
 
       <Notification />
 
+
+
+
+
+
      
 
       <div className="dashboard-sections flex gap-4 p-4 flex-col">
@@ -64,6 +92,21 @@ const DashboardClient = () => {
             </button>
           </Link>
         </div>
+
+
+
+
+        {orders.map((order) => (
+
+          <>
+          <div>
+            
+          </div>
+          </>
+        ))}
+
+
+
 
         <OrderList />
 

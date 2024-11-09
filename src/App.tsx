@@ -1,4 +1,4 @@
-import   { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import DashboardAdmin from "./pages/DashboardAdmin";
@@ -15,28 +15,21 @@ function App() {
     const handleStorageChange = () => {
       setUserRole(localStorage.getItem("userRole"));
     };
-    console.log("User role is now:", userRole);
-
-
-    // Обновляем `userRole` при каждом изменении `localStorage`
+    
     window.addEventListener("storage", handleStorageChange);
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-    };
-    console.log("User role is now:", userRole);
-
-  }, [userRole]);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   return (
     <>
-      <Header />
+     <Header userRole={userRole} setUserRole={setUserRole} />
+
       <Routes>
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login setUserRole={setUserRole} />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/clientdash" element={<DashboardClient />} />
         <Route path="/archive" element={<Archive />} />
-
-        {/* Условный рендеринг для Dashboard */}
         <Route
           path="/dashboard"
           element={

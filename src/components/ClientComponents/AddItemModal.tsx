@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
+import { API } from '../../constants/api';
+
+
+
+
 
 const AddItemModal = ({ isOpen, closeModal }: { isOpen: boolean, closeModal: () => void }) => {
   const [description, setDescription] = useState('');
+  const [trackCode, setTrackCode] = useState('');
   const [file, setFile] = useState<File | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -13,12 +19,32 @@ const AddItemModal = ({ isOpen, closeModal }: { isOpen: boolean, closeModal: () 
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDescription(e.target.value);
   };
+  const handleTrackCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTrackCode(e.target.value);
+  };
 
-  const handleAdd = () => {
+  const handleAdd = async  () => {
     console.log('File:', file);
     console.log('Description:', description);
     closeModal();
+
+
+    try{
+
+      const res = await API.post('/api/orders/create',{
+        
+issued:false, price:0, name:description, createdDate:Date.now(), paid:false, weight:0, amount:1, dateOfPayment:0, deliveredDate:0,deliverTo:"Tokmok",receiventInChina:false, trackCode:trackCode
+      })
+      console.log(111,res);
+
+
+    }catch(e){
+      console.log(e);
+      
+    }
   };
+
+  
 
   if (!isOpen) return null;
 
@@ -28,7 +54,7 @@ const AddItemModal = ({ isOpen, closeModal }: { isOpen: boolean, closeModal: () 
         <h2 className="text-xl font-semibold mb-6 text-gray-800">Добавить товар</h2>
 
         {/* File input */}
-        <div className="mb-6">
+        {/* <div className="mb-6">
           <label htmlFor="file" className="block text-sm font-medium text-gray-700 mb-2">Загрузить фото</label>
           <input
             type="file"
@@ -37,10 +63,26 @@ const AddItemModal = ({ isOpen, closeModal }: { isOpen: boolean, closeModal: () 
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
             onChange={handleFileChange}
           />
-        </div>
+        </div> */}
 
         {/* Description input */}
         <div className="mb-6">
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">Трек код</label>
+          <input
+            type="text"
+            id="description"
+            // className="mt-1 block w-full text-sm text-gray-700 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 ease-in-out"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+            placeholder="Введите трек код"
+            value={trackCode}
+            onChange={handleTrackCodeChange}
+          />
+        </div>
+
+
+
+  {/* Description input */}
+  <div className="mb-6">
           <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">Описание</label>
           <input
             type="text"
@@ -52,6 +94,15 @@ const AddItemModal = ({ isOpen, closeModal }: { isOpen: boolean, closeModal: () 
             onChange={handleDescriptionChange}
           />
         </div>
+
+
+
+
+
+
+
+
+
 
         {/* Buttons */}
         <div className="flex gap-4">
