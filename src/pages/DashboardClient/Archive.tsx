@@ -8,7 +8,7 @@ interface Order {
   warehouseChina: boolean;
   warehouseTokmok: boolean;
   deliveredToClient: boolean;
-  issued: boolean; // Assuming you have this field to check if the order is finished
+  issued: boolean;  
 }
 
 export const Archive = () => {
@@ -18,7 +18,7 @@ export const Archive = () => {
   const fetchHistory = async () => {
     try {
       const res = await API.get('/api/orders/history');
-      // Filter orders based on issued status
+     
       const completedOrders = res.data.filter((order: Order) => order.issued === true);
       setOrders(completedOrders);
       console.log(completedOrders, 'completed orders');
@@ -38,8 +38,7 @@ export const Archive = () => {
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value.toLowerCase();
-    // Filter orders based on search term
-    const filteredOrders = orders.filter((order) =>
+     const filteredOrders = orders.filter((order) =>
       order.id.toLowerCase().includes(searchTerm)
     );
     setOrders(filteredOrders);

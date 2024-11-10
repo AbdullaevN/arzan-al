@@ -8,7 +8,7 @@ import { API } from '../../constants/api';
 const AddItemModal = ({ isOpen, closeModal }: { isOpen: boolean, closeModal: () => void }) => {
   const [description, setDescription] = useState('');
   const [trackCode, setTrackCode] = useState('');
-  const [file, setFile] = useState<File | null>(null);
+  // const [file, setFile] = useState<File | null>(null);
 
   // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   //   if (e.target.files) {
@@ -24,7 +24,7 @@ const AddItemModal = ({ isOpen, closeModal }: { isOpen: boolean, closeModal: () 
   };
 
   const handleAdd = async  () => {
-    console.log('File:', file);
+    // console.log('File:', file);
     console.log('Description:', description);
     closeModal();
 

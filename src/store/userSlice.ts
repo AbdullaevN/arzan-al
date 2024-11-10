@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { RootState } from './index';
-
+ 
 interface UserState {
   user: any; // Define a more specific type for user if possible
   status: 'idle' | 'loading' | 'succeeded' | 'failed';

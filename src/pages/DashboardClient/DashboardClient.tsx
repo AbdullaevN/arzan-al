@@ -17,7 +17,7 @@ import { API } from '../../constants/api';
 
 const DashboardClient = () => {
   // const [showForm, setShowForm] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
   const [orders, setOrders] = useState([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
