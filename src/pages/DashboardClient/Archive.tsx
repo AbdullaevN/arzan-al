@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API } from '../../constants/api';
 
 interface Order {
   id: string;
@@ -7,69 +8,45 @@ interface Order {
   warehouseChina: boolean;
   warehouseTokmok: boolean;
   deliveredToClient: boolean;
+  issued: boolean; // Assuming you have this field to check if the order is finished
 }
 
 export const Archive = () => {
   const [orders, setOrders] = useState<Order[]>([]);
 
-  useEffect(() => {
-    // Check for orders in localStorage
-    const storedOrders = localStorage.getItem('orders');
-    if (storedOrders) {
-      setOrders(JSON.parse(storedOrders));
-    } else {
-      // Fake data to display initially if no orders in localStorage
-      const initialOrders: Order[] = [
-        {
-          id: '12345',
-          description: 'Order for electronics',
-          createdAt: '2024-11-01',
-          warehouseChina: true,
-          warehouseTokmok: false,
-          deliveredToClient: false,
-        },
-        {
-          id: '67890',
-          description: 'Order for clothing',
-          createdAt: '2024-11-03',
-          warehouseChina: true,
-          warehouseTokmok: true,
-          deliveredToClient: false,
-        },
-        {
-          id: '11223',
-          description: 'Order for furniture',
-          createdAt: '2024-11-05',
-          warehouseChina: true,
-          warehouseTokmok: true,
-          deliveredToClient: true,
-        },
-      ];
-      setOrders(initialOrders);
-      localStorage.setItem('orders', JSON.stringify(initialOrders));
+  // Fetch data from the API
+  const fetchHistory = async () => {
+    try {
+      const res = await API.get('/api/orders/history');
+      // Filter orders based on issued status
+      const completedOrders = res.data.filter((order: Order) => order.issued === true);
+      setOrders(completedOrders);
+      console.log(completedOrders, 'completed orders');
+    } catch (e) {
+      console.log(e);
     }
+  };
+
+  useEffect(() => {
+    fetchHistory();
   }, []);
 
   const deleteOrder = (orderId: string) => {
     const updatedOrders = orders.filter((order) => order.id !== orderId);
     setOrders(updatedOrders);
-    localStorage.setItem('orders', JSON.stringify(updatedOrders));
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const searchTerm = e.target.value;
-    const storedOrders = localStorage.getItem('orders');
-    const allOrders = storedOrders ? JSON.parse(storedOrders) : [];
-
+    const searchTerm = e.target.value.toLowerCase();
     // Filter orders based on search term
-    const filteredOrders = allOrders.filter((order: Order) =>
-      order.id.includes(searchTerm)
+    const filteredOrders = orders.filter((order) =>
+      order.id.toLowerCase().includes(searchTerm)
     );
     setOrders(filteredOrders);
   };
 
   return (
-    <div className="order-list p-4 ">
+    <div className="order-list p-4">
       <h2 className="text-2xl font-bold mb-4">Ваши заказы</h2>
 
       {/* Поиск по заказам */}
@@ -86,13 +63,10 @@ export const Archive = () => {
         {orders.map((order) => (
           <div
             key={order.id}
-            className="bg-white shadow-md p-4 rounded-lg border border-gray-200 relative 
-            max-w-sm rounded overflow-hidden shadow-lg  
-            "
+            className="bg-white shadow-md p-4 rounded-lg border border-gray-200 relative max-w-sm rounded overflow-hidden shadow-lg"
           >
-            
             <div className="flex justify-between mb-2">
-              <h3 className="text-lg font-semibold">Заказ #{order.id}</h3>
+              <h3 className="text-lg font-semibold">Заказ № {order.description}</h3>
               <button
                 onClick={() => deleteOrder(order.id)}
                 className="text-red-500 hover:text-red-700"
@@ -126,7 +100,7 @@ export const Archive = () => {
                   readOnly
                   className="mr-2"
                 />
-                <span>Токмок - склад в Бишкеке</span>
+                <span>Склад в Бишкеке</span>
               </div>
 
               <div className="flex items-center">

@@ -6,6 +6,16 @@ import { Link } from 'react-router-dom';
 import InformationModal from '../../components/ClientComponents/InformationModal';
 import { API } from '../../constants/api';
  
+
+// Define the Order type
+interface Order {
+  id: number;
+  description: string;
+  issued: boolean;
+  // Add other properties as needed
+}
+
+
 const DashboardClient = () => {
   const [showForm, setShowForm] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -21,6 +31,8 @@ const fetchOrders = async () => {
 try {
   const res  = await API.get('/api/orders/history')
   setOrders(res.data)
+  console.log(res,'res');
+  
 
   }catch(e){
 console.log(e);
@@ -30,6 +42,8 @@ console.log(e);
 useEffect(()=>{
 fetchOrders()
 },[])
+
+
 
 
 
@@ -95,15 +109,7 @@ fetchOrders()
 
 
 
-
-        {orders.map((order) => (
-
-          <>
-          <div>
-            
-          </div>
-          </>
-        ))}
+          
 
 
 
