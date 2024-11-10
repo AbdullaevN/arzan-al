@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { registerUser } from '../store/userSlice';
-import { RootState, AppDispatch } from '../store';
+// import { useDispatch, useSelector } from 'react-redux';
+//  import { RootState, AppDispatch } from '../store';
 import { API } from '../constants/api';
 
 const Register: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
+  // const dispatch = useDispatch<AppDispatch>();
   const [formData, setFormData] = useState({ username: '', password: '' });
-  const { status, error } = useSelector((state: RootState) => state.user);
+  // const { status, error } = useSelector((state: RootState) => state.user);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -47,8 +46,8 @@ const Register: React.FC = () => {
         placeholder="Password"
       />
       <button type="submit">Register</button>
-      {status === 'loading' && <p>Loading...</p>}
-      {status === 'failed' && <p>Error: {error}</p>}
+      {/* {status === 'loading' && <p>Loading...</p>}
+      {status === 'failed' && <p>Error: {error}</p>} */}
     </form>
   );
 };

@@ -8,16 +8,15 @@ import { API } from '../../constants/api';
  
 
 // Define the Order type
-interface Order {
-  id: number;
-  description: string;
-  issued: boolean;
-  // Add other properties as needed
-}
+// interface Order {
+//   id: number;
+//   description: string;
+//   issued: boolean;
+//  }
 
 
 const DashboardClient = () => {
-  const [showForm, setShowForm] = useState(false);
+  // const [showForm, setShowForm] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [orders, setOrders] = useState([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -65,13 +64,13 @@ fetchOrders()
     setIsInfoModalOpen(false);
   };
 
-  const openModal = () => {
-    setIsModalOpen(true);
-  };
+  // const openModal = () => {
+  //   setIsModalOpen(true);
+  // };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
+  // const closeModal = () => {
+  //   setIsModalOpen(false);
+  // };
 
   return (
     <div className="dashboard container px-3">
