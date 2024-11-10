@@ -62,7 +62,7 @@ export const Archive = () => {
         {orders.map((order) => (
           <div
             key={order.id}
-            className="bg-white shadow-md p-4 rounded-lg border border-gray-200 relative max-w-sm rounded overflow-hidden shadow-lg"
+            className="bg-white shadow-md p-4 rounded-lg border border-gray-200 relative max-w-sm  overflow-hidden  "
           >
             <div className="flex justify-between mb-2">
               <h3 className="text-lg font-semibold">Заказ № {order.description}</h3>

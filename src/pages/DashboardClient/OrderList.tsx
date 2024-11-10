@@ -63,7 +63,7 @@ export const OrderList = () => {
         {orders.map((order) => (
           <div
             key={order.id}
-            className="bg-white shadow-md p-4 rounded-lg border border-gray-200 relative max-w-sm rounded overflow-hidden shadow-lg"
+            className="bg-white shadow-md p-4 rounded-lg border border-gray-200 relative max-w-sm  overflow-hidden"
           >
             <div className="flex justify-between bg-slate-700 py-2 px-4 rounded-t-lg">
               <h3 className="text-lg font-semibold text-white">Заказ #{order.id}</h3>
