@@ -14,8 +14,8 @@
       {
         "source": "/:match*",
         "destination": "/index.html",
-        "statusCode": 200,
-        "permanent": false
+        "statusCode": 200
+       
       }
     ]
   }

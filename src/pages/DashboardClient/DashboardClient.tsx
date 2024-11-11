@@ -8,13 +8,22 @@ import { API } from '../../constants/api';
 
 interface Order {
   id: string;
-  description: string;
+  name: string;
   createdDate: string;
-  warehouseChina: boolean;
-  warehouseTokmok: boolean;
-  deliveredToClient: boolean;
-  weight?: number;
-  amount?: number;
+  price: number;
+  weight: number;
+  amount: number;
+  dateOfPayment: number;
+  deliveredDate: number;
+  deliverTo: string;
+  trackCode: string;
+  issued: boolean;
+  paid: boolean;
+  receiventInChina: boolean;
+  description?: string;
+  warehouseChina?: string;
+  warehouseTokmok?: string;
+  deliveredToClient?: boolean;
 }
 
 const DashboardClient = () => {
@@ -57,6 +66,8 @@ const DashboardClient = () => {
   const addNewOrder = (newOrder: Order) => {
     setOrders((prevOrders) => [...prevOrders, newOrder]);
   };
+
+  console.log(orders, 'orders');
 
   return (
     <div className="dashboard container px-3">

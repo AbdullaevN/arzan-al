@@ -2,7 +2,7 @@ import { useState } from "react";
 import { API } from "../../constants/api";
 
 // Определение интерфейса Order, если нужно
-interface Order {
+interface OrderDetails {
   id: string;
   name: string;
   createdDate: string;
@@ -18,11 +18,15 @@ interface Order {
   receiventInChina: boolean;
 }
 
+// Use OrderDetails in AddItemModalProps
 interface AddItemModalProps {
   isOpen: boolean;
   closeModal: () => void;
-  addNewOrder: (newOrder: Order) => void;
+  addNewOrder: (newOrder: OrderDetails) => void;
 }
+
+
+ 
 
 const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal, addNewOrder }) => {
   const [description, setDescription] = useState('');

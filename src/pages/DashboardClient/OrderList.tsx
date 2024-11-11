@@ -10,7 +10,7 @@ interface Order {
   deliveredToClient: boolean;
   weight?: number;
   amount?: number;
-  trackCode?:number;
+  trackCode: number; // Используем trackCode для удаления
 }
 
 interface OrderListProps {
@@ -21,19 +21,33 @@ export const OrderList: React.FC<OrderListProps> = ({ orders }) => {
   const [filteredOrders, setFilteredOrders] = useState<Order[]>(orders);
 
   useEffect(() => {
+    console.log(orders); // Логируем заказ перед его рендером
     setFilteredOrders(orders);
   }, [orders]);
 
-  const deleteOrder = (orderId: string) => {
-    const updatedOrders = filteredOrders.filter((order) => order.id !== orderId);
-    setFilteredOrders(updatedOrders);
-    localStorage.setItem('orders', JSON.stringify(updatedOrders));
+  const deleteOrder = async (trackCode: number) => {
+    if (!trackCode) {
+      console.error('Ошибка: нет trackCode заказа');
+      return;
+    }
+
+    console.log('Удаляем заказ с trackCode:', trackCode);
+
+    try {
+      const response = await API.delete(`/delete/${trackCode}`); // Удаляем по trackCode
+      console.log('Удален заказ:', response);
+      const updatedOrders = filteredOrders.filter((order) => order.trackCode !== trackCode);
+      setFilteredOrders(updatedOrders);
+      localStorage.setItem('orders', JSON.stringify(updatedOrders));
+    } catch (e) {
+      console.error('Ошибка при удалении заказа:', e);
+    }
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value.toLowerCase();
     const filtered = orders.filter((order) =>
-      order.id.toLowerCase().includes(searchTerm) ||
+      order.trackCode.toString().includes(searchTerm) || 
       order.description.toLowerCase().includes(searchTerm)
     );
     setFilteredOrders(filtered);
@@ -55,13 +69,19 @@ export const OrderList: React.FC<OrderListProps> = ({ orders }) => {
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {filteredOrders.map((order) => (
           <div
-            key={order.id}
+            key={order.trackCode} // Используем trackCode как ключ
             className="bg-white shadow-md p-4 rounded-lg border border-gray-200 relative max-w-sm overflow-hidden"
           >
             <div className="flex justify-between bg-slate-700 py-2 px-4 rounded-t-lg">
-            <h3 className="text-lg font-semibold">Заказ № {order.trackCode}</h3>
-            <button
-                onClick={() => deleteOrder(order.id)}
+              <h3 className="text-lg font-semibold">Заказ № {order.trackCode}</h3>
+              <button
+                onClick={() => {
+                  if (!order.trackCode) {
+                    console.error('trackCode не найден для заказа:', order);
+                    return;
+                  }
+                  deleteOrder(order.trackCode); // Удаляем по trackCode
+                }}
                 className="text-red-500 hover:text-red-700"
                 title="Удалить заказ"
               >
@@ -69,8 +89,8 @@ export const OrderList: React.FC<OrderListProps> = ({ orders }) => {
               </button>
             </div>
 
-            <p className="text-sm text-gray-600 mb-2 py-5">            
-                Дата регистрации: {new Date(order.createdDate).toLocaleDateString('ru-RU')}
+            <p className="text-sm text-gray-600 mb-2 py-5">
+              Дата регистрации: {new Date(order.createdDate).toLocaleDateString('ru-RU')}
             </p>
 
             <h4>{order.description}</h4>
