@@ -2,89 +2,66 @@ import { useEffect, useState } from 'react';
 import { OrderList } from './OrderList';
 import Notification from './Notification';
 import { Link } from 'react-router-dom';
- import AddItemModal from '../../components/ClientComponents/AddItemModal'; // Import AddItemModal
+import AddItemModal from '../../components/ClientComponents/AddItemModal';
 import InformationModal from '../../components/ClientComponents/InformationModal';
 import { API } from '../../constants/api';
- 
 
-// Define the Order type
-// interface Order {
-//   id: number;
-//   description: string;
-//   issued: boolean;
-//  }
-
+interface Order {
+  id: string;
+  description: string;
+  createdDate: string;
+  warehouseChina: boolean;
+  warehouseTokmok: boolean;
+  deliveredToClient: boolean;
+  weight?: number;
+  amount?: number;
+}
 
 const DashboardClient = () => {
-  // const [showForm, setShowForm] = useState(false);
-  // const [isModalOpen, setIsModalOpen] = useState(false);
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
 
-  console.log('order',orders);
-  
-
-const fetchOrders = async () => {
-
-try {
-  const res  = await API.get('/api/orders/history')
-  setOrders(res.data)
-  console.log(res,'res');
-  
-
-  }catch(e){
-console.log(e);
-
-  }
-}
-useEffect(()=>{
-fetchOrders()
-},[])
-
-
-
-
-
-
-
-  const openAddModal = () => {
-    setIsAddModalOpen(true);
+  const fetchOrders = async () => {
+    try {
+      const res = await API.get('/api/orders/history');
+      const ordersWithWeightAndAmount = res.data.map((order: any) => ({
+        ...order,
+        weight: order.weight || 0,
+        amount: order.amount || 0,
+      }));
+      setOrders(ordersWithWeightAndAmount);
+    } catch (e) {
+      console.error('Error fetching orders:', e);
+    }
   };
 
-  const closeAddModal = () => {
-    setIsAddModalOpen(false);
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const openAddModal = () => setIsAddModalOpen(true);
+  const closeAddModal = () => setIsAddModalOpen(false);
+
+  const openInfoModal = () => setIsInfoModalOpen(true);
+  const closeInfoModal = () => setIsInfoModalOpen(false);
+
+  const getNotificationData = () => {
+    const totalOrders = orders.length;
+    const totalWeight = orders.reduce((acc, order) => acc + (order.weight || 0), 0);
+    const totalAmount = orders.reduce((acc, order) => acc + (order.amount || 0), 0);
+
+    return { totalOrders, totalWeight, totalAmount };
   };
 
-  const openInfoModal = () => {
-    setIsInfoModalOpen(true);
+  const addNewOrder = (newOrder: Order) => {
+    setOrders((prevOrders) => [...prevOrders, newOrder]);
   };
-
-  const closeInfoModal = () => {
-    setIsInfoModalOpen(false);
-  };
-
-  // const openModal = () => {
-  //   setIsModalOpen(true);
-  // };
-
-  // const closeModal = () => {
-  //   setIsModalOpen(false);
-  // };
 
   return (
     <div className="dashboard container px-3">
-      <h1 className='py-8'>Добро пожаловать в Личный Кабинет</h1>
-
-      <Notification />
-
-
-
-
-
-
-     
-
+      <h1 className="py-8">Добро пожаловать в Личный Кабинет</h1>
+      <Notification {...getNotificationData()} />
       <div className="dashboard-sections flex gap-4 p-4 flex-col">
         <div className="flex gap-1 items-center justify-around md:justify-start md:gap-4">
           <button
@@ -105,24 +82,9 @@ fetchOrders()
             </button>
           </Link>
         </div>
-
-
-
-          
-
-
-
-
-        <OrderList />
-
-        {/* Modal for Add Item */}
-        <AddItemModal isOpen={isAddModalOpen} closeModal={closeAddModal} />
-
-        {/* Modal for Information */}
+        <OrderList orders={orders} />
+        <AddItemModal isOpen={isAddModalOpen} closeModal={closeAddModal} addNewOrder={addNewOrder} />
         <InformationModal isOpen={isInfoModalOpen} closeModal={closeInfoModal} />
-
-        {/* General Modal */}
-        {/* <Modal isOpen={isModalOpen} closeModal={closeModal} /> */}
       </div>
     </div>
   );

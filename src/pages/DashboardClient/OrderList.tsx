@@ -4,46 +4,39 @@ import { API } from '../../constants/api';
 interface Order {
   id: string;
   description: string;
-  createdAt: string;
+  createdDate: string;
   warehouseChina: boolean;
   warehouseTokmok: boolean;
   deliveredToClient: boolean;
+  weight?: number;
+  amount?: number;
+  trackCode?:number;
 }
 
-export const OrderList = () => {
-  const [orders, setOrders] = useState<Order[]>([]);
+interface OrderListProps {
+  orders: Order[];
+}
 
-  // Fetch orders from API on component mount
+export const OrderList: React.FC<OrderListProps> = ({ orders }) => {
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>(orders);
+
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const res = await API.get('/api/orders');
-        setOrders(res.data); // Assumes the API response is an array of orders
-        localStorage.setItem('orders', JSON.stringify(res.data)); // Cache orders in localStorage
-      } catch (error) {
-        console.error("Error fetching orders:", error);
-      }
-    };
+    setFilteredOrders(orders);
+  }, [orders]);
 
-    fetchOrders();
-  }, []);
-
-  // Delete order from state and localStorage
   const deleteOrder = (orderId: string) => {
-    const updatedOrders = orders.filter((order) => order.id !== orderId);
-    setOrders(updatedOrders);
+    const updatedOrders = filteredOrders.filter((order) => order.id !== orderId);
+    setFilteredOrders(updatedOrders);
     localStorage.setItem('orders', JSON.stringify(updatedOrders));
   };
 
-  // Filter orders based on search term
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const searchTerm = e.target.value;
-    const storedOrders = localStorage.getItem('orders');
-    const allOrders = storedOrders ? JSON.parse(storedOrders) : [];
-    const filteredOrders = allOrders.filter((order: Order) =>
-      order.id.includes(searchTerm)
+    const searchTerm = e.target.value.toLowerCase();
+    const filtered = orders.filter((order) =>
+      order.id.toLowerCase().includes(searchTerm) ||
+      order.description.toLowerCase().includes(searchTerm)
     );
-    setOrders(filteredOrders);
+    setFilteredOrders(filtered);
   };
 
   return (
@@ -60,14 +53,14 @@ export const OrderList = () => {
       </div>
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        {orders.map((order) => (
+        {filteredOrders.map((order) => (
           <div
             key={order.id}
-            className="bg-white shadow-md p-4 rounded-lg border border-gray-200 relative max-w-sm  overflow-hidden"
+            className="bg-white shadow-md p-4 rounded-lg border border-gray-200 relative max-w-sm overflow-hidden"
           >
             <div className="flex justify-between bg-slate-700 py-2 px-4 rounded-t-lg">
-              <h3 className="text-lg font-semibold text-white">Заказ #{order.id}</h3>
-              <button
+            <h3 className="text-lg font-semibold">Заказ № {order.trackCode}</h3>
+            <button
                 onClick={() => deleteOrder(order.id)}
                 className="text-red-500 hover:text-red-700"
                 title="Удалить заказ"
@@ -76,12 +69,12 @@ export const OrderList = () => {
               </button>
             </div>
 
-            <p className="text-sm text-gray-600 mb-2 py-5">
-              Дата регистрации: {order.createdAt}
+            <p className="text-sm text-gray-600 mb-2 py-5">            
+                Дата регистрации: {new Date(order.createdDate).toLocaleDateString('ru-RU')}
             </p>
 
             <h4>{order.description}</h4>
-            <h3>{order.createdAt}</h3>
+            <h3>{order.createdDate}</h3>
 
             <div className="space-y-2">
               <div className="flex items-center">
