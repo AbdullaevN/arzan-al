@@ -2,10 +2,10 @@
   "version": 2,
   "builds": [
     {
-      "src": "index.html",
-      "use": "@vercel/static-build",
+      "src": "package.json",
+      "use": "@vercel/node",
       "config": {
-        "distDir": "dist"   
+        "maxLambdaSize": "50mb"
       }
     }
   ],
