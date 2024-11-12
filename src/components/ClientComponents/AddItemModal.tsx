@@ -125,7 +125,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal, addNewO
             className="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600"
             onClick={handleAdd}
           >
-            Добав ить
+            Добавить
           </button>
         </div>
       </div>
