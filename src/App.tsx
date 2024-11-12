@@ -15,6 +15,7 @@ import ImportPage from "./pages/DashboardAdmin/ImportPage";
 import ImportIssuedProductsPage from "./pages/DashboardAdmin/ImportIssuedProductsPage";
 import IssueProductsPage from "./pages/DashboardAdmin/IssueProductsPage";
 import PaymentsPage from "./pages/DashboardAdmin/PaymentsPage";
+import ContactPage from "./pages/Contact";
 
 
 
@@ -49,6 +50,7 @@ function App() {
         <Route path="/issued-imports" element={<ImportIssuedProductsPage />} />
         <Route path="/issue-product" element={<IssueProductsPage />} />
 
+        <Route path="/contact" element={<ContactPage />} />
 
         
         

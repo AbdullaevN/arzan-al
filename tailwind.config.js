@@ -8,6 +8,7 @@ export default {
     extend: {
       colors: {
         customGreen: '#97ff9c', // добавляем пользовательский цвет
+        customBlue:'#284A7E'
       },
     },
   },

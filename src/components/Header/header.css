@@ -5,10 +5,13 @@ body {
 }
 
 header {
-  background-color: #97ff9c;
-  height: 4rem;
+  background-color: #284A7E;
+  height: 5rem;
+  padding: 0 1rem;
   display: flex;
-  padding: 3rem 0;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem 0;
 }
 
 .menu-btn {
@@ -54,6 +57,7 @@ header {
 /* Menu */
 .menu {
   display: flex;
+  justify-content: flex-end;
 }
 
 .menu.active {
@@ -66,19 +70,6 @@ header {
   margin: 0;
 }
 
-.menu li {
-  padding: 10px;
-  font-size: 1rem;
-}
-
-.menu li:hover {
-  color: #b0b0b0;
-}
-
-.menu li a {
-  text-decoration: none;
-}
-
 /* Responsiveness */
 @media (max-width: 768px) {
   .menu {
@@ -86,7 +77,7 @@ header {
     top: 0;
     left: 0;
     width: 100%;
-    background-color: #97ff9c;
+    background-color: #447BD4;
     padding-top: 60px;
     display: none;
     flex-direction: column;
@@ -105,4 +96,13 @@ header {
     text-align: center;
     width: 100%;
   }
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }

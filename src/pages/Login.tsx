@@ -101,13 +101,13 @@ const Login: React.FC<LoginProps> = ({ setUserRole }) => {
           </button>
           
           {/* Logout Button */}
-          <button
+          {/* <button
             type="button"
             onClick={handleLogout}
             className="mt-4 w-full py-2 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
           >
             Logout
-          </button>
+          </button> */}
         </form>
         
         {/* Link to Register Page */}
