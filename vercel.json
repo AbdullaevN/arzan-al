@@ -5,6 +5,7 @@
       "src": "package.json",
       "use": "@vercel/node",
       "config": {
+        "distDir": "dist",
         "maxLambdaSize": "50mb"
       }
     }
