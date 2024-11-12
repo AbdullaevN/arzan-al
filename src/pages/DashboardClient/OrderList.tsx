@@ -6,28 +6,27 @@ interface Order {
   name: string;
   description?: string;
   createdDate: string;
-  warehouseChina: boolean; // Ensure this is a boolean
-  warehouseTokmok: boolean;
-  deliveredToClient: boolean;
+  warehouseChina: boolean; // Обязательно
+  warehouseTokmok: boolean; // Обязательно
+  deliveredToClient: boolean; // Обязательно
   weight?: number;
   amount?: number;
-  trackCode: number; // Keep this as number if it is supposed to be a track code
+  trackCode: string; // Должен быть строкой, если это трек-код
 }
 
-
 interface OrderListProps {
-  orders: (Order & { deliveredToClient?: boolean })[]; // Make 'deliveredToClient' optional
+  orders: (Order & { deliveredToClient?: boolean })[]; // Сделать 'deliveredToClient' необязательным
 }
 
 export const OrderList: React.FC<OrderListProps> = ({ orders }) => {
   const [filteredOrders, setFilteredOrders] = useState<Order[]>(orders);
 
   useEffect(() => {
-    console.log(orders); // Логируем заказ перед его рендером
+    console.log(orders); // Логируем заказы перед их рендером
     setFilteredOrders(orders);
   }, [orders]);
 
-  const deleteOrder = async (trackCode: number) => {
+  const deleteOrder = async (trackCode: string) => {
     if (!trackCode) {
       console.error('Ошибка: нет trackCode заказа');
       return;
@@ -49,7 +48,7 @@ export const OrderList: React.FC<OrderListProps> = ({ orders }) => {
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value.toLowerCase();
     const filtered = orders.filter((order) =>
-      order.trackCode.toString().includes(searchTerm) || 
+      order.trackCode.toLowerCase().includes(searchTerm) || 
       order.description?.toLowerCase().includes(searchTerm)
     );
     setFilteredOrders(filtered);
@@ -76,7 +75,7 @@ export const OrderList: React.FC<OrderListProps> = ({ orders }) => {
           >
             <div className="flex justify-between bg-slate-700 py-2 px-4 rounded-t-lg">
               <h3 className="text-lg font-semibold">Заказ № {order.trackCode}</h3>
-              <h3 className="text-lg font-semibold">Заказ № {order.name}</h3>
+              <h3 className="text-lg font-semibold">Имя: {order.name}</h3>
               <button
                 onClick={() => {
                   if (!order.trackCode) {
@@ -97,7 +96,6 @@ export const OrderList: React.FC<OrderListProps> = ({ orders }) => {
             </p>
 
             <h4>{order.description}</h4>
-            <h3>{order.createdDate}</h3>
 
             <div className="space-y-2">
               <div className="flex items-center">

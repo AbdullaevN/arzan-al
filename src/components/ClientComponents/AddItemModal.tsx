@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { API } from "../../constants/api";
 
-// Определение интерфейса Order, если нужно
-// In AddItemModal.tsx
 interface OrderDetails {
   id: string;
   name: string;
@@ -18,21 +16,16 @@ interface OrderDetails {
   paid: boolean;
   receiventInChina: boolean;
   description?: string;
-  warehouseChina?: boolean; // Add this property if it's required
-  warehouseTokmok?: boolean;
-  deliveredToClient?: boolean;
+  warehouseChina: boolean; // Обязательно
+  warehouseTokmok: boolean; // Обязательно
+  deliveredToClient: boolean; // Обязательно
 }
 
-
-// Use OrderDetails in AddItemModalProps
 interface AddItemModalProps {
   isOpen: boolean;
   closeModal: () => void;
   addNewOrder: (newOrder: OrderDetails) => void;
 }
-
-
- 
 
 const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal, addNewOrder }) => {
   const [description, setDescription] = useState('');
@@ -50,7 +43,6 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal, addNewO
     console.log('Description:', description);
     closeModal();
 
-    // Формирование объекта данных для нового заказа
     try {
       const res = await API.post('/api/orders/create', {
         issued: false,
@@ -69,7 +61,6 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal, addNewO
 
       console.log(111, res);
 
-      // Если запрос прошел успешно, можно добавить новый заказ
       addNewOrder({
         id: res.data.id, // предполагается, что сервер возвращает id
         name: description,
@@ -84,6 +75,9 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal, addNewO
         issued: false,
         paid: false,
         receiventInChina: false,
+        warehouseChina: false, // Убедитесь, что это значение установлено
+        warehouseTokmok: false, // Убедитесь, что это значение установлено
+        deliveredToClient: false, // Убедитесь, что это значение установлено
       });
 
     } catch (e) {
@@ -131,7 +125,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal, addNewO
             className="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600"
             onClick={handleAdd}
           >
-            Добавить
+            Добав ить
           </button>
         </div>
       </div>
