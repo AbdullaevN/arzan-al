@@ -15,12 +15,12 @@ const Login: React.FC<LoginProps> = ({ setUserRole }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(''); // Clear previous error messages
-
+  
     // Check for admin credentials
     if (email === 'admin' && password === 'admin') {
       localStorage.setItem('userRole', 'admin');
       localStorage.setItem('token', 'admin');
-
+  
       setUserRole('admin');
       navigate('/dashboard'); // Navigate to the admin dashboard
     } else {
@@ -30,19 +30,26 @@ const Login: React.FC<LoginProps> = ({ setUserRole }) => {
           clientId: email,
           password: password,
         });
-        
-        // Store the token and client role in local storage
-        localStorage.setItem('token', res.data.token);
-        localStorage.setItem('userRole', 'client');
-        setUserRole('client');
-        
-        navigate('/clientdash'); // Navigate to the client dashboard
+  
+        console.log('API Response:', res);  // Log the response
+  
+        if (res.data && res.data.token) {
+          localStorage.setItem('token', res.data.token);
+          localStorage.setItem('userRole', 'client');
+          console.log('LocalStorage after saving:', localStorage.getItem('token'), localStorage.getItem('userRole'));
+          
+          setUserRole('client');
+          navigate('/clientdash'); // Navigate to the client dashboard
+        } else {
+          setErrorMessage('Invalid login credentials. Please try again.');
+        }
       } catch (error) {
         setErrorMessage('Invalid login credentials. Please try again.');
         console.error('Login error:', error);
       }
     }
   };
+  
 
   const handleLogout = () => {
     localStorage.removeItem('token');

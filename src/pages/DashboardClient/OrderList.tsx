@@ -3,18 +3,20 @@ import { API } from '../../constants/api';
 
 interface Order {
   id: string;
-  description: string;
+  name: string;
+  description?: string;
   createdDate: string;
-  warehouseChina: boolean;
+  warehouseChina: boolean; // Ensure this is a boolean
   warehouseTokmok: boolean;
   deliveredToClient: boolean;
   weight?: number;
   amount?: number;
-  trackCode: number; // Используем trackCode для удаления
+  trackCode: number; // Keep this as number if it is supposed to be a track code
 }
 
+
 interface OrderListProps {
-  orders: Order[];
+  orders: (Order & { deliveredToClient?: boolean })[]; // Make 'deliveredToClient' optional
 }
 
 export const OrderList: React.FC<OrderListProps> = ({ orders }) => {
@@ -48,7 +50,7 @@ export const OrderList: React.FC<OrderListProps> = ({ orders }) => {
     const searchTerm = e.target.value.toLowerCase();
     const filtered = orders.filter((order) =>
       order.trackCode.toString().includes(searchTerm) || 
-      order.description.toLowerCase().includes(searchTerm)
+      order.description?.toLowerCase().includes(searchTerm)
     );
     setFilteredOrders(filtered);
   };
@@ -74,6 +76,7 @@ export const OrderList: React.FC<OrderListProps> = ({ orders }) => {
           >
             <div className="flex justify-between bg-slate-700 py-2 px-4 rounded-t-lg">
               <h3 className="text-lg font-semibold">Заказ № {order.trackCode}</h3>
+              <h3 className="text-lg font-semibold">Заказ № {order.name}</h3>
               <button
                 onClick={() => {
                   if (!order.trackCode) {

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { API } from "../../constants/api";
 
 // Определение интерфейса Order, если нужно
+// In AddItemModal.tsx
 interface OrderDetails {
   id: string;
   name: string;
@@ -16,7 +17,12 @@ interface OrderDetails {
   issued: boolean;
   paid: boolean;
   receiventInChina: boolean;
+  description?: string;
+  warehouseChina?: boolean; // Add this property if it's required
+  warehouseTokmok?: boolean;
+  deliveredToClient?: boolean;
 }
+
 
 // Use OrderDetails in AddItemModalProps
 interface AddItemModalProps {

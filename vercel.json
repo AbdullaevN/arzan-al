@@ -1,22 +1,19 @@
 {
-    "version": 2,
-    "builds": [
-      {
-        "src": "index.html",
-        "use": "@vercel/static"
-      },
-      {
-        "src": "dist/**/*",
-        "use": "@vercel/static"
+  "version": 2,
+  "builds": [
+    {
+      "src": "index.html",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"  
       }
-    ],
-    "redirects": [
-      {
-        "source": "/:match*",
-        "destination": "/index.html",
-        "statusCode": 200
-       
-      }
-    ]
-  }
-  
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/:match*",
+      "destination": "/index.html",
+      "statusCode": 200
+    }
+  ]
+}

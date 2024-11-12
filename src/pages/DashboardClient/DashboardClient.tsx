@@ -21,8 +21,8 @@ interface Order {
   paid: boolean;
   receiventInChina: boolean;
   description?: string;
-  warehouseChina?: string;
-  warehouseTokmok?: string;
+  warehouseChina: boolean;
+  warehouseTokmok: boolean;
   deliveredToClient?: boolean;
 }
 
@@ -64,10 +64,14 @@ const DashboardClient = () => {
   };
 
   const addNewOrder = (newOrder: Order) => {
-    setOrders((prevOrders) => [...prevOrders, newOrder]);
+    const order: Order = {
+      ...newOrder,
+      warehouseChina: newOrder.warehouseChina || false,
+      warehouseTokmok: newOrder.warehouseTokmok || false,
+      deliveredToClient: newOrder.deliveredToClient ?? false, // Ensure a boolean value
+    };
+    setOrders((prevOrders) => [...prevOrders, order]);
   };
-
-  console.log(orders, 'orders');
 
   return (
     <div className="dashboard container px-3">

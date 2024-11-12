@@ -1,12 +1,23 @@
 import { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
-import DashboardAdmin from "./pages/DashboardAdmin";
+import DashboardAdmin from "./pages/DashboardAdmin/DashboardAdmin";
 import DashboardClient from "./pages/DashboardClient/DashboardClient";
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
 import Register from "./pages/Register";
 import { Archive } from "./pages/DashboardClient/Archive";
+import PricingPage from "./pages/DashboardAdmin/PricingPage";
+import ClientsPage from "./pages/DashboardAdmin/ClientsPage";
+import HistoryPage from "./pages/DashboardAdmin/HistoryPage";
+import OrderDetailsPage from "./pages/DashboardAdmin/OrderDetailsPage"; // Import for individual order details
+import ImportPage from "./pages/DashboardAdmin/ImportPage";
+import ImportIssuedProductsPage from "./pages/DashboardAdmin/ImportIssuedProductsPage";
+import IssueProductsPage from "./pages/DashboardAdmin/IssueProductsPage";
+import PaymentsPage from "./pages/DashboardAdmin/PaymentsPage";
+
+
+
 
 function App() {
   const [userRole, setUserRole] = useState(localStorage.getItem("userRole"));
@@ -22,7 +33,7 @@ function App() {
 
   return (
     <>
-     <Header userRole={userRole} setUserRole={setUserRole} />
+      <Header userRole={userRole} setUserRole={setUserRole} />
 
       <Routes>
         <Route path="/" element={<Navigate to="/login" />} />
@@ -30,6 +41,21 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/clientdash" element={<DashboardClient />} />
         <Route path="/archive" element={<Archive />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/clients" element={<ClientsPage />} />
+        <Route path="/history" element={<HistoryPage />} />
+        <Route path="/import" element={<ImportPage />} />
+        <Route path="/payment" element={<PaymentsPage />} />
+        <Route path="/issued-imports" element={<ImportIssuedProductsPage />} />
+        <Route path="/issue-product" element={<IssueProductsPage />} />
+
+
+        
+        
+        
+        {/* Define the route for order details page with /history/:id path */}
+        <Route path="/history/:id" element={<OrderDetailsPage />} />
+
         <Route
           path="/dashboard"
           element={
