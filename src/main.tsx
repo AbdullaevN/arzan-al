@@ -13,8 +13,8 @@ const root = createRoot(rootElement);
 
 root.render(
   <Provider store={store}>
-    <BrowserRouter>
-      <App />
+    <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
+      <App   />
     </BrowserRouter>
   </Provider>
 );

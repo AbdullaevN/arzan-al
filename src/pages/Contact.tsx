@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import   { useState } from 'react';
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -21,7 +21,7 @@ const ContactPage = () => {
   };
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-6 flex flex-col items-start">
       <h1 className="text-3xl font-bold mb-6 text-center">Контакты</h1>
       
       <div className="mb-8">
@@ -35,7 +35,7 @@ const ContactPage = () => {
         </ul>
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow-lg">
+      <div className="bg-white p-6 rounded-lg shadow-lg md:max-w-md w-full flex flex-col ">
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Напишите нам</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">

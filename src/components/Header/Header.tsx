@@ -34,7 +34,7 @@ const Header: React.FC<HeaderProps> = ({ userRole, setUserRole }) => {
         {/* Logo Section */}
         <div className="flex items-center justify-center w-full md:w-auto">
           <Link to={userRole === 'admin' ? '/dashboard' : userRole === 'client' ? '/clientdash' : '/login'}>
-            <img src={logo} alt="Logo" className="w-28 h-20 object-cover" />
+            <img src={logo} alt="Logo" className="w-28 h-20 object-cover" loading="lazy"/>
           </Link>
         </div>
 

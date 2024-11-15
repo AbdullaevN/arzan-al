@@ -55,7 +55,7 @@ export const OrderList: React.FC<OrderListProps> = ({ orders }) => {
   };
 
   return (
-    <div className="order-list p-4">
+    <div className="order-list p-4 w-full">
       <h2 className="text-2xl font-bold mb-4">Ваши заказы</h2>
 
       <div className="mt-4 mb-4">
@@ -71,9 +71,9 @@ export const OrderList: React.FC<OrderListProps> = ({ orders }) => {
         {filteredOrders.map((order) => (
           <div
             key={order.trackCode} // Используем trackCode как ключ
-            className="bg-white shadow-md p-4 rounded-lg border border-gray-200 relative max-w-sm overflow-hidden"
+            className="bg-white shadow-md rounded-lg border border-gray-200 relative max-w-sm overflow-hidden"
           >
-            <div className="flex justify-between bg-slate-700 py-2 px-4 rounded-t-lg">
+            <div className="flex justify-between bg-orange-400 py-2 px-4 rounded-t-lg">
               <h3 className="text-lg font-semibold">Заказ № {order.trackCode}</h3>
               <h3 className="text-lg font-semibold">Имя: {order.name}</h3>
               <button
@@ -91,7 +91,8 @@ export const OrderList: React.FC<OrderListProps> = ({ orders }) => {
               </button>
             </div>
 
-            <p className="text-sm text-gray-600 mb-2 py-5">
+         <div className='p-6'>
+         <p className="text-sm text-gray-600 mb-2 py-5">
               Дата регистрации: {new Date(order.createdDate).toLocaleDateString('ru-RU')}
             </p>
 
@@ -137,6 +138,7 @@ export const OrderList: React.FC<OrderListProps> = ({ orders }) => {
                 </label>
               </div>
             </div>
+         </div>
           </div>
         ))}
       </div>

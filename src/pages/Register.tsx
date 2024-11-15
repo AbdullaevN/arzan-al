@@ -37,25 +37,35 @@ const Register: React.FC = () => {
       <h2 className="text-2xl font-semibold text-center mb-6">Регистрация</h2>
 
       <form onSubmit={handleSubmit}>
+      <label htmlFor="email" className="block text-sm font-medium text-gray-700">Логин</label>
+
       <input
         type="text"
         name="username"
         value={formData.username}
         onChange={handleChange}
-        placeholder="Username"
-        className="w-full mt-2 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        placeholder="Введите логин"
+        className="w-full mt-2 px-4 py-2 my-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
 
       />
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">Пароль</label>
+
       <input
         type="password"
         name="password"
         value={formData.password}
         onChange={handleChange}
-        placeholder="Password"
-        className="w-full mt-2 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        placeholder="Введите пароль"
+        className="w-full mt-2 px-4 py-2 my-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
 
       />
-      <button type="submit">Register</button>
+       <button
+            type="submit"
+            className="w-full py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Зарегистрироваться
+          </button>
+      {/* <button type="submit">Register</button> */}
       {/* {status === 'loading' && <p>Loading...</p>}
       {status === 'failed' && <p>Error: {error}</p>} */}
     </form>
@@ -103,8 +113,8 @@ const Register: React.FC = () => {
       {/* Link to Register Page */}
       <div className="mt-4 text-center">
         <p className="text-sm text-gray-600">
-          Don't have an account?{' '}
-          <Link to="/login" className="text-blue-500 hover:underline">Login</Link>
+         У вас уже есть аккаунт?{' '}
+          <Link to="/login" className="text-blue-500 hover:underline">Войти</Link>
         </p>
       </div>
     </div>

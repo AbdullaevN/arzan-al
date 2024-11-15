@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
-/* @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap'); */
- 
- /* Reset */
 *,
 *::before,
 *::after {
@@ -20,14 +16,9 @@ html, body {
     font-family: 'Montserrat', sans-serif;
     font-size: 16px;
     line-height: 1.5;
-    background-color: #f9fafb; /* Light gray background */
-    /* color: #111827; Dark gray text */
-    /* background-image: url('https://cdn.gencraft.com/prod/user/7583ac5f-a76a-41f7-8e2c-0ab839676424/25098a42-364d-4866-8e62-fad76ed6a222/image/image1_0.jpg?Expires=1731094382&Signature=oKqsdaFC9l23jQ8kgX--5Ym7xr-yBrpZZpd8C~gNXl9RrfwJ0Qz0AwCwgHpDA3j5DckarRdZZcE2pkajFwlNCzDBZNb0vJIOTJJlYfB-0Lx-SmOxlZHDUwWoMFv-58sr8jp05LfJ4j3jII2DA7gFnF6K03jNjPCUjQa1HFsO2vHVVRjFwaeQgLYuBNw0QigyDY0tekauyqE5YeUUkjZe-zNsE-euKm7eTn4QwpliphLy6uQPGUemdqtiedm0vlQE-RJ3egMiChdbNG2ujEm8Mr8Q6bpmq14-LOZLFZi76WRCCy1EKLLDplTJ7-Si9vsVlxYHEzwr2m1PP~5JBuolDw__&Key-Pair-Id=K3RDDB1TZ8BHT8'); */
-    background-repeat: no-repeat;
-    background-size: cover;
+    background-color: #f9fafb;
 }
 
-/* Global Styles */
 img, svg {
     display: block;
     max-width: 100%;
@@ -43,6 +34,7 @@ button {
     cursor: pointer;
     border: none;
     outline: none;
+    transition: background-color 0.3s ease;
 }
 
 ul, ol {
@@ -51,78 +43,50 @@ ul, ol {
 
 h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
-    /* color: #111827; */
 }
 
-p {
-    margin-bottom: 1rem;
-  
-}
-/* 
-.container {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 1rem;
-} */
+/* Margin utilities */
+.mt-4 { margin-top: 1rem; }
+.mb-4 { margin-bottom: 1rem; }
 
- 
-
-.mt-4 {
-    margin-top: 1rem;
-}
-
-.mb-4 {
-    margin-bottom: 1rem;
-}
-
-/* Custom CSS for the checkbox container and styles */
+/* Custom checkbox styles */
 .checkbox-container {
     position: relative;
     padding-left: 35px;
     cursor: pointer;
     user-select: none;
-  }
-  
-  .checkbox-container input {
+}
+.checkbox-container input {
     position: absolute;
     opacity: 0;
     cursor: pointer;
     height: 0;
     width: 0;
-  }
-  
-  .checkmark {
+}
+.checkmark {
     position: absolute;
     top: 0;
     left: 0;
     height: 25px;
     width: 25px;
-    border: 1px #0073aa dashed;
-    transition: all 0.5s ease-in-out;
-  }
-  
-  .checkbox-container:hover input ~ .checkmark {
+    border: 1px solid #5c676c;
+    border-radius:50%;
+    transition: all 0.3s ease-in-out;
+}
+.checkbox-container:hover input ~ .checkmark {
     background-color: #ccc;
-  }
-  
-  .checkbox-container input:checked ~ .checkmark {
+}
+.checkbox-container input:checked ~ .checkmark {
     background-color: #0073aa;
-    transition: all 0.5s ease-in-out;
     border-radius: 50%;
-  }
-  
-  /* Checkmark indicator */
-  .checkmark:after {
+}
+.checkmark:after {
     content: "";
     position: absolute;
     display: none;
-  }
-  
-  .checkbox-container input:checked ~ .checkmark:after {
+}
+.checkbox-container input:checked ~ .checkmark:after {
     display: block;
-  }
-  
-  .checkbox-container .checkmark:after {
     left: 9px;
     top: 5px;
     width: 5px;
@@ -130,5 +94,4 @@ p {
     border: solid white;
     border-width: 0 3px 3px 0;
     transform: rotate(45deg);
-  }
-  
+}

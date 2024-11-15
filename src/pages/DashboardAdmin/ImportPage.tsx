@@ -1,7 +1,7 @@
  
 const ImportPage = () => {
   return (
-    <div className="p-6 container">
+    <div className="p-6 container flex flex-col items-start justify-start">
       {/* Breadcrumbs */}
       <nav className="text-sm mb-4">
         <ol className="list-reset flex text-gray-500">
@@ -18,7 +18,7 @@ const ImportPage = () => {
       </nav>
 
       {/* File Upload Section */}
-      <div className=" container border border-gray-300 rounded-lg p-6 bg-white shadow-md md:w-3/5">
+      <div className=" border border-gray-300 rounded-lg p-6 bg-white shadow-md md:w-3/5">
         <h2 className="text-lg font-semibold mb-4">Импорт трек-кодов</h2>
         <div className="mb-4">
           <label

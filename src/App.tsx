@@ -16,6 +16,8 @@ import ImportIssuedProductsPage from "./pages/DashboardAdmin/ImportIssuedProduct
 import IssueProductsPage from "./pages/DashboardAdmin/IssueProductsPage";
 import PaymentsPage from "./pages/DashboardAdmin/PaymentsPage";
 import ContactPage from "./pages/Contact";
+import AddOrder from "./pages/DashboardAdmin/AddOrder";
+ import EditOrderPage from "./pages/DashboardAdmin/EditOrderPage";
 
 
 
@@ -36,7 +38,7 @@ function App() {
     <>
       <Header userRole={userRole} setUserRole={setUserRole} />
 
-      <Routes>
+      <Routes  >
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login setUserRole={setUserRole} />} />
         <Route path="/register" element={<Register />} />
@@ -46,6 +48,7 @@ function App() {
         <Route path="/clients" element={<ClientsPage />} />
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/import" element={<ImportPage />} />
+        <Route path="/add" element={<AddOrder />} />
         <Route path="/payment" element={<PaymentsPage />} />
         <Route path="/issued-imports" element={<ImportIssuedProductsPage />} />
         <Route path="/issue-product" element={<IssueProductsPage />} />
@@ -57,6 +60,11 @@ function App() {
         
         {/* Define the route for order details page with /history/:id path */}
         <Route path="/history/:id" element={<OrderDetailsPage />} />
+
+        {/* <Route path="/edit/:trackCode" element={<EditOrderPage />} /> */}
+        <Route path="/edit/:id" element={<EditOrderPage />} />
+
+
 
         <Route
           path="/dashboard"

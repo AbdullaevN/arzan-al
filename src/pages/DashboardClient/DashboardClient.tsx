@@ -21,9 +21,9 @@ interface Order {
   paid: boolean;
   receiventInChina: boolean;
   description?: string;
-  warehouseChina: boolean; // Обязательно
-  warehouseTokmok: boolean; // Обязательно
-  deliveredToClient: boolean; // Обязательно
+  warehouseChina: boolean;
+  warehouseTokmok: boolean;
+  deliveredToClient: boolean;
 }
 
 const DashboardClient = () => {
@@ -31,21 +31,20 @@ const DashboardClient = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
 
-  const fetchOrders = async () => {
-    try {
-      const res = await API.get('/api/orders/history');
-      const ordersWithWeightAndAmount = res.data.map((order: any) => ({
-        ...order,
-        weight: order.weight || 0,
-        amount: order.amount || 0,
-      }));
-      setOrders(ordersWithWeightAndAmount);
-    } catch (e) {
-      console.error('Error fetching orders:', e);
-    }
-  };
-
   useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const res = await API.get('/api/orders/history');
+        const ordersWithDefaults = res.data.map((order: any) => ({
+          ...order,
+          weight: order.weight || 0,
+          amount: order.amount || 0,
+        }));
+        setOrders(ordersWithDefaults);
+      } catch (e) {
+        console.error('Error fetching orders:', e);
+      }
+    };
     fetchOrders();
   }, []);
 
@@ -57,50 +56,42 @@ const DashboardClient = () => {
 
   const getNotificationData = () => {
     const totalOrders = orders.length;
-    const totalWeight = orders.reduce((acc, order) => acc + (order.weight || 0), 0);
-    const totalAmount = orders.reduce((acc, order) => acc + (order.amount || 0), 0);
+    const totalWeight = orders.reduce((acc, order) => acc + order.weight, 0);
+    const totalAmount = orders.reduce((acc, order) => acc + order.amount, 0);
 
     return { totalOrders, totalWeight, totalAmount };
   };
 
   const addNewOrder = (newOrder: Order) => {
-    const order: Order = {
-      ...newOrder,
-      warehouseChina: newOrder.warehouseChina,
-      warehouseTokmok: newOrder.warehouseTokmok,
-      deliveredToClient: newOrder.deliveredToClient,
-    };
-    setOrders((prevOrders) => [...prevOrders, order]);
+    setOrders((prevOrders) => [...prevOrders, newOrder]);
   };
 
   return (
-    <div className="dashboard container px-3">
-      <h1 className="py-8">Добро пожаловать в Личный Кабинет</h1>
+    <div className="container px-4 flex flex-col items-start">
+      <h1 className="py-8 text-2xl font-bold">Добро пожаловать в Личный Кабинет</h1>
       <Notification {...getNotificationData()} />
-      <div className="dashboard-sections flex gap-4 p-4 flex-col">
-        <div className="flex gap-1 items-center justify-around md:justify-start md:gap-4">
-          <button
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
-            onClick={openAddModal}
-          >
-            Добавить
+      <div className="flex flex-col md:flex-row items-start gap-4 p-4">
+        <button
+          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+          onClick={openAddModal}
+        >
+          Добавить
+        </button>
+        <button
+          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+          onClick={openInfoModal}
+        >
+          Информация
+        </button>
+        <Link to="/archive">
+          <button className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-700">
+            Архив
           </button>
-          <button
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
-            onClick={openInfoModal}
-          >
-            Информация
-          </button>
-          <Link to="/archive">
-            <button className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700">
-              Архив
-            </button>
-          </Link>
-        </div>
-        <OrderList orders={orders} />
-        <AddItemModal isOpen={isAddModalOpen} closeModal={closeAddModal} addNewOrder={addNewOrder} />
-        <InformationModal isOpen={isInfoModalOpen} closeModal={closeInfoModal} />
+        </Link>
       </div>
+      <OrderList orders={orders} />
+      <AddItemModal isOpen={isAddModalOpen} closeModal={closeAddModal} addNewOrder={addNewOrder} />
+      <InformationModal isOpen={isInfoModalOpen} closeModal={closeInfoModal} />
     </div>
   );
 };
