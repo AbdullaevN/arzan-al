@@ -67,7 +67,9 @@ const DashboardClient = () => {
   };
 
   return (
-    <div className="container px-4 flex flex-col items-start">
+    <div className='bg-image'>
+
+    <div className="container  px-4 flex flex-col items-start">
       <h1 className="py-8 text-2xl font-bold">Добро пожаловать в Личный Кабинет</h1>
       <Notification {...getNotificationData()} />
       <div className="flex flex-col md:flex-row items-start gap-4 p-4">
@@ -93,6 +95,8 @@ const DashboardClient = () => {
       <AddItemModal isOpen={isAddModalOpen} closeModal={closeAddModal} addNewOrder={addNewOrder} />
       <InformationModal isOpen={isInfoModalOpen} closeModal={closeInfoModal} />
     </div>
+    </div>
+
   );
 };
 

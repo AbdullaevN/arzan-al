@@ -17,8 +17,20 @@ html, body {
     font-size: 16px;
     line-height: 1.5;
     background-color: #f9fafb;
+ 
 }
 
+.bg-image{
+    background-image: url('./src/assets/img/fon.png');
+    background-repeat: no-repeat;
+  
+    backface-visibility: visible;
+    /* background-clip: content-box; */
+    background-repeat: round;
+    background-clip: content-box;
+    /* background-size: 100vh; */
+    
+}
 img, svg {
     display: block;
     max-width: 100%;

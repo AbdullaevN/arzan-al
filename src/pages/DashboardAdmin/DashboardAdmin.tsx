@@ -18,7 +18,9 @@ const DashboardAdmin: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8 container flex flex-col items-start">
+    <div className='bg-image  '>
+
+    <div className=" min-h-screen   p-8 container flex flex-col items-start w-full">
       <h1 className="text-3xl font-bold text-start mb-8">Панель Администратора</h1>
 
     
@@ -45,6 +47,8 @@ const DashboardAdmin: React.FC = () => {
         ))}
       </div>
     </div>
+    </div>
+
   );
 };
 

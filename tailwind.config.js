@@ -7,7 +7,8 @@ export default {
   theme: {
     extend: {
       colors: {
-        customGreen: '#97ff9c', // добавляем пользовательский цвет
+        customGreen: '#97ff9c', 
+        bgGreen: '#89e828', 
         customBlue:'#284A7E'
       },
     },

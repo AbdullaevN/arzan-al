@@ -18,6 +18,7 @@ import PaymentsPage from "./pages/DashboardAdmin/PaymentsPage";
 import ContactPage from "./pages/Contact";
 import AddOrder from "./pages/DashboardAdmin/AddOrder";
  import EditOrderPage from "./pages/DashboardAdmin/EditOrderPage";
+import OrderManagement from "./pages/DashboardAdmin/OrderManagement";
 
 
 
@@ -54,6 +55,9 @@ function App() {
         <Route path="/issue-product" element={<IssueProductsPage />} />
 
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/management" element={<OrderManagement />} />
+
+        
 
         
         
