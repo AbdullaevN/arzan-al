@@ -8,6 +8,11 @@ export default defineConfig(
   
   
   {
+    server: {
+      proxy: {
+        '/delete': 'https://cargo-back.onrender.com',
+      },
+    },
   plugins: [react(),
  
 

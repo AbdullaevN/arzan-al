@@ -7,11 +7,11 @@ const DashboardAdmin: React.FC = () => {
   const navigate = useNavigate();
 
   const sections = [
-    { name: 'Добавить заказ', path: '/add' },
+    // { name: 'Добавить заказ', path: '/add' },
     { name: 'История заказов', path: '/history' },
     { name: 'Импорт', path: '/import' },
-    { name: 'Выдать товар клиенту', path: '/issue-product' },
-    { name: 'Импорт выданных товаров', path: '/issued-imports' },
+    // { name: 'Выдать товар клиенту', path: '/issue-product' },
+    // { name: 'Импорт выданных товаров', path: '/issued-imports' },
     { name: 'Клиенты', path: '/clients' },
     { name: 'Цена', path: '/pricing' },
     { name: 'Оплата', path: '/payment' },
@@ -20,7 +20,7 @@ const DashboardAdmin: React.FC = () => {
   return (
     <div className='bg-image  '>
 
-    <div className=" min-h-screen   p-8 container flex flex-col items-start w-full">
+    <div className=" min-h-full   p-8 container flex flex-col items-start w-full">
       <h1 className="text-3xl font-bold text-start mb-8">Панель Администратора</h1>
 
     

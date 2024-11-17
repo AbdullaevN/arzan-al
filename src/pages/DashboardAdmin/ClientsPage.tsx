@@ -71,6 +71,19 @@ const ClientsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
+      <nav className="text-sm mb-4">
+        <ol className="list-reset flex text-gray-500">
+          <li>
+            <a href="/dashboard" className="text-blue-500 hover:underline">
+              Главная
+            </a>
+          </li>
+          <li>
+            <span className="mx-2">/</span>
+          </li>
+          <li>Клиенты</li>
+        </ol>
+      </nav>
       {/* Форма добавления нового клиента */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4">Добавить клиента</h2>

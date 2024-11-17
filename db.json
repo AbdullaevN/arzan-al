@@ -10,13 +10,22 @@
       "isActive": true
     },
     {
-      "id": 0,
+      "id": "0",
       "phone": "+9993334576789",
       "firstName": "Имя",
       "lastName": "ФМИ",
-      "code": "ИК123",
+      "code": "1111111",
       "password": "123456",
       "isActive": true
+    },
+    {
+      "id": 0,
+      "phone": "9999999",
+      "firstName": "999999",
+      "lastName": "999999",
+      "code": "99999",
+      "password": "9999999999",
+      "isActive": false
     }
   ]
 }

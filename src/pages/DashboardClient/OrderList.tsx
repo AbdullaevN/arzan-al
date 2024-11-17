@@ -1,55 +1,36 @@
-import React, { useState, useEffect } from 'react';
-import { API } from '../../constants/api';
+import { useEffect, useState } from "react";
 
 interface Order {
   id: string;
   name: string;
   description?: string;
   createdDate: string;
-  warehouseChina: boolean; // Обязательно
-  warehouseTokmok: boolean; // Обязательно
-  deliveredToClient: boolean; // Обязательно
+  warehouseChina: boolean;
+  warehouseTokmok: boolean;
+  deliveredToClient: boolean;
   weight?: number;
   amount?: number;
-  trackCode: string; // Должен быть строкой, если это трек-код
+  trackCode: string;
 }
 
 interface OrderListProps {
-  orders: (Order & { deliveredToClient?: boolean })[]; // Сделать 'deliveredToClient' необязательным
+  orders: Order[];
+  onDeleteOrder: (trackCode: string) => Promise<void>;  
 }
 
-export const OrderList: React.FC<OrderListProps> = ({ orders }) => {
+export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder }) => {
   const [filteredOrders, setFilteredOrders] = useState<Order[]>(orders);
 
   useEffect(() => {
-    console.log(orders); // Логируем заказы перед их рендером
     setFilteredOrders(orders);
   }, [orders]);
 
-  const deleteOrder = async (trackCode: string) => {
-    if (!trackCode) {
-      console.error('Ошибка: нет trackCode заказа');
-      return;
-    }
-
-    console.log('Удаляем заказ с trackCode:', trackCode);
-
-    try {
-      const response = await API.delete(`/delete/${trackCode}`); // Удаляем по trackCode
-      console.log('Удален заказ:', response);
-      const updatedOrders = filteredOrders.filter((order) => order.trackCode !== trackCode);
-      setFilteredOrders(updatedOrders);
-      localStorage.setItem('orders', JSON.stringify(updatedOrders));
-    } catch (e) {
-      console.error('Ошибка при удалении заказа:', e);
-    }
-  };
-
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value.toLowerCase();
-    const filtered = orders.filter((order) =>
-      order.trackCode.toLowerCase().includes(searchTerm) || 
-      order.description?.toLowerCase().includes(searchTerm)
+    const filtered = orders.filter(
+      (order) =>
+        order.trackCode.toLowerCase().includes(searchTerm) ||
+        order.description?.toLowerCase().includes(searchTerm)
     );
     setFilteredOrders(filtered);
   };
@@ -70,7 +51,7 @@ export const OrderList: React.FC<OrderListProps> = ({ orders }) => {
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {filteredOrders.map((order) => (
           <div
-            key={order.trackCode} // Используем trackCode как ключ
+            key={order.trackCode}
             className="bg-white shadow-md rounded-lg border border-gray-200 relative max-w-sm overflow-hidden"
           >
             <div className="flex justify-between bg-orange-400 py-2 px-4 rounded-t-lg">
@@ -82,7 +63,7 @@ export const OrderList: React.FC<OrderListProps> = ({ orders }) => {
                     console.error('trackCode не найден для заказа:', order);
                     return;
                   }
-                  deleteOrder(order.trackCode); // Удаляем по trackCode
+                  onDeleteOrder(order.trackCode); 
                 }}
                 className="text-red-500 hover:text-red-700"
                 title="Удалить заказ"
@@ -91,54 +72,54 @@ export const OrderList: React.FC<OrderListProps> = ({ orders }) => {
               </button>
             </div>
 
-         <div className='p-6'>
-         <p className="text-sm text-gray-600 mb-2 py-5">
-              Дата регистрации: {new Date(order.createdDate).toLocaleDateString('ru-RU')}
-            </p>
+            <div className='p-6'>
+              <p className="text-sm text-gray-600 mb-2 py-5">
+                Дата регистрации: {new Date(order.createdDate).toLocaleDateString('ru-RU')}
+              </p>
 
-            <h4>{order.description}</h4>
+              <h4>{order.description}</h4>
 
-            <div className="space-y-2">
-              <div className="flex items-center">
-                <label className="checkbox-container flex items-center text-lg cursor-pointer">
-                  <span className="mr-2">Склад в Китае</span>
-                  <input
-                    type="checkbox"
-                    checked={order.warehouseChina}
-                    readOnly
-                    className="opacity-0 absolute"
-                  />
-                  <span className="checkmark"></span>
-                </label>
-              </div>
+              <div className="space-y-2">
+                <div className="flex items-center">
+                  <label className="checkbox-container flex items-center text-lg cursor-pointer">
+                    <span className="mr-2">Склад в Китае</span>
+                    <input
+                      type="checkbox"
+                      checked={order.warehouseChina}
+                      readOnly
+                      className="opacity-0 absolute"
+                    />
+                    <span className="checkmark"></span>
+                  </label>
+                </div>
 
-              <div className="flex items-center">
-                <label className="checkbox-container flex items-center text-lg cursor-pointer">
-                  <span className="mr-2">Токмок - склад в Бишкеке</span>
-                  <input
-                    type="checkbox"
-                    checked={order.warehouseTokmok}
-                    readOnly
-                    className="opacity-0 absolute"
-                  />
-                  <span className="checkmark"></span>
-                </label>
-              </div>
+                <div className="flex items-center">
+                  <label className="checkbox-container flex items-center text-lg cursor-pointer">
+                    <span className="mr-2">Токмок - склад в Бишкеке</span>
+                    <input
+                      type="checkbox"
+                      checked={order.warehouseTokmok}
+                      readOnly
+                      className="opacity-0 absolute"
+                    />
+                    <span className="checkmark"></span>
+                  </label>
+                </div>
 
-              <div className="flex items-center">
-                <label className="checkbox-container flex items-center text-lg cursor-pointer">
-                  <span className="mr-2">Выдан клиенту</span>
-                  <input
-                    type="checkbox"
-                    checked={order.deliveredToClient}
-                    readOnly
-                    className="opacity-0 absolute"
-                  />
-                  <span className="checkmark"></span>
-                </label>
+                <div className="flex items-center">
+                  <label className="checkbox-container flex items-center text-lg cursor-pointer">
+                    <span className="mr-2">Выдан клиенту</span>
+                    <input
+                      type="checkbox"
+                      checked={order.deliveredToClient}
+                      readOnly
+                      className="opacity-0 absolute"
+                    />
+                    <span className="checkmark"></span>
+                  </label>
+                </div>
               </div>
             </div>
-         </div>
           </div>
         ))}
       </div>

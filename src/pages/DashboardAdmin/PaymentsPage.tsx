@@ -1,5 +1,12 @@
+import { useState } from "react";
+ 
  
 const PaymentsPage = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const toggleModal = () => {
+    setIsModalOpen(!isModalOpen);
+  };
   return (
     <div className="p-6">
       {/* Breadcrumbs */}
@@ -7,7 +14,7 @@ const PaymentsPage = () => {
         <ol className="list-reset flex text-gray-500">
           <li>
             <a href="/dashboard" className="text-blue-500 hover:underline">
-              Dashboard
+            Главная
             </a>
           </li>
           <li>
@@ -19,16 +26,19 @@ const PaymentsPage = () => {
 
       {/* Action Buttons */}
       <div className="flex gap-4 mb-4">
-        <button className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg">
+        {/* <button className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg">
           Выдача товаров
-        </button>
+        </button> */}
         <button className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg">
           Неоплаченные
+        </button>
+        <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
+          Оплаченные
         </button>
       </div>
 
       {/* Date Pickers */}
-      <div className="flex gap-4 mb-4">
+      {/* <div className="flex gap-4 mb-4">
         <div className="flex flex-col">
           <label className="text-sm font-medium mb-1">Период</label>
           <input type="date" className="p-2 border border-gray-300 rounded-lg" />
@@ -40,9 +50,9 @@ const PaymentsPage = () => {
         <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
           Список оплаченных
         </button>
-      </div>
+      </div> */}
 
-      <div className="flex gap-4 mb-4">
+      {/* <div className="flex gap-4 mb-4">
         <div className="flex flex-col">
           <label className="text-sm font-medium mb-1">Дата</label>
           <input type="date" className="p-2 border border-gray-300 rounded-lg" />
@@ -50,7 +60,7 @@ const PaymentsPage = () => {
         <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg mt-6">
           Получить
         </button>
-      </div>
+      </div> */}
 
       {/* Search */}
       <div className="flex gap-4 mb-4">
@@ -83,12 +93,96 @@ const PaymentsPage = () => {
       {/* Download Button and Add Button */}
       <div className="flex justify-between items-center mb-4">
         <button className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg">
-          Данные за 2024-11-12: Скачать
+          --
         </button>
-        <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
+       {/* <Link to={'/add'} > */}
+       <button onClick={toggleModal} className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
           + Добавить
         </button>
+       {/* </Link> */}
       </div>
+
+
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white rounded-lg shadow-lg w-96 p-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Добавить товар</h2>
+            
+            {/* Form Fields */}
+            <form>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Код клиента
+                </label>
+                <input
+                  type="text"
+                  className="w-full p-2 border border-gray-300 rounded-lg"
+                  placeholder="Код клиента"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                Количество товаров
+                </label>
+                <input
+                  type="number"
+                  className="w-full p-2 border border-gray-300 rounded-lg"
+                  placeholder="Введите количество"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                 Вес в кг
+                </label>
+                <input
+                  type="number"
+                  className="w-full p-2 border border-gray-300 rounded-lg"
+                  placeholder="Введите вес"
+                />
+              </div>
+              {/* <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Описание
+                </label>
+                <textarea
+                  className="w-full p-2 border border-gray-300 rounded-lg"
+                  placeholder="Введите описание"
+                  rows={3}
+                ></textarea>
+              </div> */}
+
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Сумма
+                </label>
+                <input
+                  type="number"
+                  className="w-full p-2 border border-gray-300 rounded-lg"
+                  placeholder="Итоговая сумма (зависит от указанной цены)"
+                />
+              </div>
+
+              {/* Buttons */}
+              <div className="flex justify-end gap-4">
+                <button
+                  type="button"
+                  className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-2 px-4 rounded-lg"
+                  onClick={toggleModal}
+                >
+                  Отмена
+                </button>
+                <button
+                  type="submit"
+                  className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg"
+                >
+                  Сохранить
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Payment Table */}
       <div className="border border-gray-300 rounded-lg bg-white shadow-md mb-6">
@@ -141,6 +235,14 @@ const PaymentsPage = () => {
         </div>
       </div>
     </div>
+
+
+
+
+
+
+
+
   );
 };
 

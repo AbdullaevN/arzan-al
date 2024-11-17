@@ -44,7 +44,7 @@ const Login: React.FC<LoginProps> = ({ setUserRole }) => {
           setErrorMessage('Invalid login credentials. Please try again.');
         }
       } catch (error) {
-        setErrorMessage('Invalid login credentials. Please try again.');
+        setErrorMessage('Неверные учетные данные. Попробуйте еще раз.');
         console.error('Login error:', error);
       }
     }
@@ -72,7 +72,7 @@ const Login: React.FC<LoginProps> = ({ setUserRole }) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full mt-2 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full mt-2 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-300"
               placeholder="Введите ваш логин"
             />
           </div>
@@ -85,19 +85,19 @@ const Login: React.FC<LoginProps> = ({ setUserRole }) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full mt-2 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full mt-2 px-4 py-2 my-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-300"
               placeholder="Введите ваш пароль"
             />
           </div>
 
           {/* Error Message Display */}
-          {errorMessage && <p className="text-red-500 text-sm mb-4">{errorMessage}</p>}
+          {errorMessage && <p className="text-red-600 font-bold text-sm mb-4">{errorMessage}</p>}
 
           <button
             type="submit"
-            className="w-full py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full py-2 bg-lime-500 text-white font-semibold rounded-md hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-orange-300"
           >
-            Login
+            Войти
           </button>
           
           {/* Logout Button */}

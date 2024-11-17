@@ -7,7 +7,7 @@ const IssueProductsPage = () => {
         <ol className="list-reset flex text-gray-500">
           <li>
             <a href="/dashboard" className="text-blue-500 hover:underline">
-              Dashboard
+            Главная
             </a>
           </li>
           <li>
