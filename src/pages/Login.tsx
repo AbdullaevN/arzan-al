@@ -59,7 +59,9 @@ const Login: React.FC<LoginProps> = ({ setUserRole }) => {
   // };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 py-10">
+    <div className='bg-image'>
+
+    <div className="flex items-center justify-center min-h-screen py-10">
       <div className="w-full max-w-md p-8 bg-white shadow-lg rounded-lg">
         <h2 className="text-2xl font-semibold text-center mb-6">Войти</h2>
         <form onSubmit={handleSubmit}>
@@ -119,6 +121,8 @@ const Login: React.FC<LoginProps> = ({ setUserRole }) => {
         </div>
       </div>
     </div>
+    </div>
+
   );
 };
 
