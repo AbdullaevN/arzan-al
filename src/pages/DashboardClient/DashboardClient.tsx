@@ -55,9 +55,10 @@ const DashboardClient: React.FC = () => {
   const closeInfoModal = () => setIsInfoModalOpen(false);
 
   const getNotificationData = () => {
-    const totalOrders = orders.length;
-    const totalWeight = orders.reduce((acc, order) => acc + order.weight, 0);
-    const totalAmount = orders.reduce((acc, order) => acc + order.amount, 0);
+    const unpaidOrders = orders.filter((order) => !order.paid);  // Фильтруем неоплаченные заказы
+    const totalOrders = unpaidOrders.length;
+    const totalWeight = unpaidOrders.reduce((acc, order) => acc + order.weight, 0);
+    const totalAmount = unpaidOrders.reduce((acc, order) => acc + order.amount, 0);
 
     return { totalOrders, totalWeight, totalAmount };
   };
@@ -84,7 +85,10 @@ const DashboardClient: React.FC = () => {
     <div className='bg-image'>
       <div className="container px-4 flex flex-col items-start">
         <h1 className="py-8 text-2xl font-bold">Добро пожаловать в Личный Кабинет</h1>
-        <Notification {...getNotificationData()} />
+        {/* Рендерим Notification только если есть неоплаченные заказы */}
+        {getNotificationData().totalOrders > 0 && (
+          <Notification {...getNotificationData()} />
+        )}
         <div className="flex flex-col md:flex-row items-start gap-4 p-4">
           <button
             className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700"
@@ -104,12 +108,13 @@ const DashboardClient: React.FC = () => {
             </button>
           </Link>
         </div>
-        <OrderList orders={orders}  onDeleteOrder={deleteOrder} />
+        <OrderList orders={orders} onDeleteOrder={deleteOrder} />
         <AddItemModal isOpen={isAddModalOpen} closeModal={closeAddModal} addNewOrder={addNewOrder} />
         <InformationModal isOpen={isInfoModalOpen} closeModal={closeInfoModal} />
       </div>
     </div>
   );
 };
+
 
 export default DashboardClient;
