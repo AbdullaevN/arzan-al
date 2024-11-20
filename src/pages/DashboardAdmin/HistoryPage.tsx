@@ -7,12 +7,18 @@ const HistoryPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>(''); 
   const navigate = useNavigate();
 
-  // Fetch all orders
   const fetchOrders = () => {
     API.get('/api/orders/allOrders')
-      .then((response) => setOrders(response.data))
+      .then((response) => {
+        // Filter the orders based on the search term if it's provided
+        const filteredOrders = response.data.filter((order: Order) =>
+          order.trackCode.includes(searchTerm)
+        );
+        setOrders(filteredOrders);
+      })
       .catch((error) => console.error('Ошибка загрузки заказов:', error));
   };
+  
 
   // const handleDelete = async (trackCode: string) => {
   //   if (window.confirm('Вы уверены, что хотите удалить этот заказ?')) {
@@ -60,15 +66,22 @@ const HistoryPage: React.FC = () => {
           <li>Клиенты</li>
         </ol>
       </nav>
-      <div className="mb-8">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Поиск по трек-коду"
-          className="px-4 py-2 border rounded w-full"
-        />
-      </div>
+      <div className="mb-8 flex space-x-2">
+  <input
+    type="text"
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    placeholder="Поиск по трек-коду"
+    className="px-4 py-2 border rounded w-full"
+  />
+  <button
+    onClick={() => fetchOrders()}  // Optionally filter or trigger search
+    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
+  >
+    Поиск
+  </button>
+</div>
+
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white rounded-lg shadow-lg">
           <thead>
