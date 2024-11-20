@@ -30,16 +30,23 @@ const Login: React.FC<LoginProps> = ({ setUserRole }) => {
           clientId: email,
           password: password,
         });
-  
         console.log('API Response:', res);  // Log the response
   
         if (res.data && res.data.token) {
           localStorage.setItem('token', res.data.token);
           localStorage.setItem('userRole', 'client');
           console.log('LocalStorage after saving:', localStorage.getItem('token'), localStorage.getItem('userRole'));
-          
-          setUserRole('client');
-          navigate('/clientdash'); // Navigate to the client dashboard
+          if(  email==="admin"){
+            localStorage.setItem('userRole', 'admin');
+      // localStorage.setItem('token', 'admin');
+            setUserRole('admin')
+            navigate('/dashboard'); // Navigate to the client dashboard
+            
+          }else{
+            setUserRole('client');
+            navigate('/clientdash'); // Navigate to the client dashboard
+          }
+    
         } else {
           setErrorMessage('Invalid login credentials. Please try again.');
         }

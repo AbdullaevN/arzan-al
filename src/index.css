@@ -19,18 +19,19 @@ html, body {
     background-color: #f9fafb;
  
 }
-
-.bg-image{
+.bg-image {
     background-image: url('./src/assets/img/fon.png');
     background-repeat: no-repeat;
-  
-    backface-visibility: visible;
-    /* background-clip: content-box; */
-    background-repeat: round;
+    background-size: cover; /* Чтобы фон масштабировался */
     background-clip: content-box;
-    /* background-size: 100vh; */
-    
+    /* filter: blur(5px)  */
+    position: relative; /* Для наложения контента поверх */
 }
+
+ 
+
+
+
 img, svg {
     display: block;
     max-width: 100%;

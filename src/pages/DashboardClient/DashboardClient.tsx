@@ -69,7 +69,7 @@ const DashboardClient: React.FC = () => {
   const deleteOrder = async (trackCode: string) => {
     try {
       // Ваш запрос на удаление
-      const response = await API.delete(`/delete/${trackCode}`);
+      const response = await API.delete(`/api/orders/delete/${trackCode}`);
       console.log('Удален заказ:', response);
 
       // Обновляем список заказов

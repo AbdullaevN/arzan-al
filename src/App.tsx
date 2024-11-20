@@ -19,6 +19,8 @@ import ContactPage from "./pages/Contact";
 import AddOrder from "./pages/DashboardAdmin/AddOrder";
  import EditOrderPage from "./pages/DashboardAdmin/EditOrderPage";
 import OrderManagement from "./pages/DashboardAdmin/OrderManagement";
+import Unpaid from "./pages/DashboardAdmin/Unpaid";
+import Paid from "./pages/DashboardAdmin/Paid";
 
 
 
@@ -50,7 +52,11 @@ function App() {
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/import" element={<ImportPage />} />
         <Route path="/add" element={<AddOrder />} />
+
         <Route path="/payment" element={<PaymentsPage />} />
+        <Route path="/unpaid" element={<Unpaid />} />
+        <Route path="/paid" element={<Paid />} />
+
         <Route path="/issued-imports" element={<ImportIssuedProductsPage />} />
         <Route path="/issue-product" element={<IssueProductsPage />} />
 
@@ -65,8 +71,7 @@ function App() {
         {/* Define the route for order details page with /history/:id path */}
         <Route path="/history/:id" element={<OrderDetailsPage />} />
 
-        {/* <Route path="/edit/:trackCode" element={<EditOrderPage />} /> */}
-        <Route path="/edit/:id" element={<EditOrderPage />} />
+         <Route path="/edit/:trackCode" element={<EditOrderPage />} />
 
 
 

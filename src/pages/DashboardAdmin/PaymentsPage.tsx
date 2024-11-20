@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
  
  
 const PaymentsPage = () => {
@@ -8,7 +9,8 @@ const PaymentsPage = () => {
     setIsModalOpen(!isModalOpen);
   };
   return (
-    <div className="p-6">
+  <div className="bg-image min-h-screen">
+      <div className="p-6">
       {/* Breadcrumbs */}
       <nav className="text-sm mb-4">
         <ol className="list-reset flex text-gray-500">
@@ -29,12 +31,18 @@ const PaymentsPage = () => {
         {/* <button className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg">
           Выдача товаров
         </button> */}
+       <Link to={'/unpaid'}>
+
         <button className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg">
           Неоплаченные
         </button>
-        <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
+       </Link>
+
+      <Link to={'/paid'}>
+      <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
           Оплаченные
         </button>
+      </Link>
       </div>
 
       {/* Date Pickers */}
@@ -236,6 +244,7 @@ const PaymentsPage = () => {
       </div>
     </div>
 
+  </div>
 
 
 
