@@ -137,8 +137,8 @@ const ClientsPage: React.FC = () => {
         <th className="px-4 py-2 border-b">Имя пользователя</th>
         <th className="px-4 py-2 border-b">Телефон</th>
         <th className="px-4 py-2 border-b">Заказы</th>
-        <th className="px-4 py-2 border-b">Цена</th>
-        <th className="px-4 py-2 border-b">Статус</th>
+        {/* <th className="px-4 py-2 border-b">Цена</th> */}
+        {/* <th className="px-4 py-2 border-b">Статус</th> */}
         <th className="px-4 py-2 border-b">Действия</th>
       </tr>
     </thead>
@@ -147,14 +147,12 @@ const ClientsPage: React.FC = () => {
         <tr key={client._id} className="hover:bg-gray-100">
           <td className="px-4 py-2 border-b text-center">{client.clientId}</td> {/* Updated ID */}
           <td className="px-4 py-2 border-b text-center">{client.phone}</td>
-          <td className="px-4 py-2 border-b text-center">
-            {/* Assuming you want to display a count of orders or a specific field */}
-            {client.orders.length > 0 ? `${client.orders.length} заказ(ов)` : 'Нет заказов'}
+          {/* <td className="px-4 py-2 border-b text-center">
+             {client.orders.length > 0 ? `${client.orders.length} заказ(ов)` : 'Нет заказов'}
           </td>
           <td className="px-4 py-2 border-b text-center">
-            {/* Showing the total price of all orders */}
-            {client.orders.reduce((total, order) => total + order.price, 0)} 
-          </td>
+             {client.orders.reduce((total, order) => total + order.price, 0)} 
+          </td> */}
           <td className="px-4 py-2 border-b text-center">
             {client.isActive ? 'Активен' : 'Неактивен'}
           </td>

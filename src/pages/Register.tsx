@@ -35,14 +35,14 @@ const Register: React.FC = () => {
       const res = await API.post('/api/auth/registration', {
         clientId: formData.username,
         password: formData.password,
-        phone: formData.phone,  // Sending phone number as well
+        phone: formData.phone,   
       });
 
       if (res.status === 200) {
         setResponseMessage('Регистрация успешна! Перенаправление на страницу входа...');
         setTimeout(() => {
           navigate('/login');
-        }, 2000); // Add a slight delay for the message to be shown before redirecting
+        }, 2000);  
       }
     } catch (e) {
       console.error(e);

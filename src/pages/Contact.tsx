@@ -21,7 +21,7 @@ const ContactPage = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 flex flex-col items-start">
+    <div className="container mx-auto p-6 flex flex-col items-start min-h-screen justify-start">
       <h1 className="text-3xl font-bold mb-6 text-center">Контакты</h1>
       
       <div className="mb-8">
@@ -35,7 +35,7 @@ const ContactPage = () => {
         </ul>
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow-lg md:max-w-md w-full flex flex-col ">
+      {/* <div className="bg-white p-6 rounded-lg shadow-lg md:max-w-md w-full flex flex-col ">
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Напишите нам</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -84,7 +84,7 @@ const ContactPage = () => {
             Отправить сообщение
           </button>
         </form>
-      </div>
+      </div> */}
     </div>
   );
 };

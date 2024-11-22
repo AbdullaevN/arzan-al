@@ -10,6 +10,18 @@ interface OrderData {
   code: string;
   password: string;
   isActive: boolean;
+  issued?: boolean;
+  price?: number;
+  name?: string;
+  createdDate?: string;
+  paid?: boolean;
+  weight?: number;
+  amount?: number;
+  dateOfPayment?: string;
+  deliveredDate?: string;
+  deliverTo?: string;
+  receiventInChina?: string;
+  clientId?: string;
 }
 
 const EditOrderPage: React.FC = () => {
@@ -20,6 +32,8 @@ const EditOrderPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Fetch order data
+
+
   useEffect(() => {
     if (!trackCode) {
       setError('TrackCode не передан.');
@@ -27,11 +41,16 @@ const EditOrderPage: React.FC = () => {
       return;
     }
 
+    
     const fetchData = async () => {
+      console.log(trackCode,'*8888888888888888');
+      
       try {
         setLoading(true);
         const response = await API.get(`/api/orders/edit/${trackCode}`);
-        setOrderData(response.data);
+
+      
+      setOrderData(response.data);
         console.log('TrackCode:', trackCode);
 
       } catch (err: any) {

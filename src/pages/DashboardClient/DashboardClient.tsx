@@ -85,10 +85,9 @@ const DashboardClient: React.FC = () => {
     <div className='bg-image'>
       <div className="container px-4 flex flex-col items-start">
         <h1 className="py-8 text-2xl font-bold">Добро пожаловать в Личный Кабинет</h1>
-        {/* Рендерим Notification только если есть неоплаченные заказы */}
-        {getNotificationData().totalOrders > 0 && (
+         {/* {getNotificationData().totalOrders > 0 && (
           <Notification {...getNotificationData()} />
-        )}
+        )} */}
         <div className="flex flex-col md:flex-row items-start gap-4 p-4">
           <button
             className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700"

@@ -1,13 +1,62 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { API } from "../../constants/api";
  
  
 const PaymentsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+
+
+
+
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
+
+
+
+   // Загрузка заказов с сервера
+   const fetchOrders = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+        const response = await API.get('/api/orders/allOrders');
+      const filteredOrders = response.data.filter((order: Order) =>
+        order.trackCode.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setOrders(filteredOrders);
+    } catch (err: any) {
+      setError(err.message || 'Не удалось загрузить заказы');
+      console.error('Ошибка загрузки заказов:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+    // Загрузка заказов при изменении поискового термина
+    useEffect(() => {
+      fetchOrders();
+    }, [searchTerm]);
+
+
+    const handleDeleteOrder = async (orderId: string) => {
+      try {
+        await API.delete(`/api/orders/${orderId}`);
+        setOrders((prevOrders) => prevOrders.filter((order) => order.id !== orderId));
+      } catch (err) {
+        console.error('Ошибка при удалении заказа:', err);
+      }
+    };
+    
+
+
   return (
   <div className="bg-image min-h-screen">
       <div className="p-6">
@@ -195,23 +244,58 @@ const PaymentsPage = () => {
       {/* Payment Table */}
       <div className="border border-gray-300 rounded-lg bg-white shadow-md mb-6">
         <table className="min-w-full bg-white">
-          <thead>
-            <tr>
-              {["№", "Дата оплаты", "Код", "ФИ", "Оплатил?", "Сумма", "Вес", "Кол-во", "Удалить"].map((header) => (
-                <th key={header} className="py-3 px-4 border-b text-left text-sm font-semibold text-gray-700">
-                  {header}
-                </th>
-              ))}
-            </tr>
-          </thead>
+        <thead>
+    <tr>
+      {["№", "Дата оплаты", "Код", "ФИ", "Оплатил?", "Сумма", "Вес", "Кол-во", "Удалить"].map((header) => (
+        <th key={header} className="py-3 px-4 border-b text-left text-sm font-semibold text-gray-700">
+          {header}
+        </th>
+      ))}
+    </tr>
+  </thead>
           <tbody>
-            {/* Placeholder for future rows */}
-            <tr>
-              {Array(9).fill("—").map((cell, idx) => (
-                <td key={idx} className="py-3 px-4 border-b text-gray-700">{cell}</td>
-              ))}
-            </tr>
-          </tbody>
+  {loading ? (
+    <tr>
+      <td colSpan={9} className="py-3 px-4 text-center text-gray-500">
+        Загрузка...
+      </td>
+    </tr>
+  ) : error ? (
+    <tr>
+      <td colSpan={9} className="py-3 px-4 text-center text-red-500">
+        {error}
+      </td>
+    </tr>
+  ) : orders.length > 0 ? (
+    orders.map((order, idx) => (
+      <tr key={order.id}>
+        <td className="py-3 px-4 border-b text-gray-700">{idx + 1}</td>
+        <td className="py-3 px-4 border-b text-gray-700">{order.paymentDate || '—'}</td>
+        <td className="py-3 px-4 border-b text-gray-700">{order.trackCode}</td>
+        <td className="py-3 px-4 border-b text-gray-700">{order.fullName}</td>
+        <td className="py-3 px-4 border-b text-gray-700">{order.isPaid ? 'Да' : 'Нет'}</td>
+        <td className="py-3 px-4 border-b text-gray-700">{order.totalAmount} сом</td>
+        <td className="py-3 px-4 border-b text-gray-700">{order.totalWeight} кг</td>
+        <td className="py-3 px-4 border-b text-gray-700">{order.totalQuantity}</td>
+        <td className="py-3 px-4 border-b text-gray-700">
+          <button
+            className="text-red-500 hover:text-red-700"
+            onClick={() => handleDeleteOrder(order.id)}
+          >
+            Удалить
+          </button>
+        </td>
+      </tr>
+    ))
+  ) : (
+    <tr>
+      <td colSpan={9} className="py-3 px-4 text-center text-gray-500">
+        Нет данных
+      </td>
+    </tr>
+  )}
+</tbody>
+
         </table>
       </div>
 

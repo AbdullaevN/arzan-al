@@ -3,55 +3,53 @@ import { API } from "../../constants/api";
 import { useNavigate } from "react-router-dom";
 
 const HistoryPage: React.FC = () => {
-  const [orders, setOrders] = useState<Order[]>([]); 
-  const [searchTerm, setSearchTerm] = useState<string>(''); 
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const fetchOrders = () => {
-    API.get('/api/orders/allOrders')
-      .then((response) => {
-        // Filter the orders based on the search term if it's provided
+    // Загрузка заказов с сервера
+    const fetchOrders = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+          const response = await API.get('/api/orders/allOrders');
         const filteredOrders = response.data.filter((order: Order) =>
-          order.trackCode.includes(searchTerm)
+          order.trackCode.toLowerCase().includes(searchTerm.toLowerCase())
         );
         setOrders(filteredOrders);
-      })
-      .catch((error) => console.error('Ошибка загрузки заказов:', error));
-  };
-  
+      } catch (err: any) {
+        setError(err.message || 'Не удалось загрузить заказы');
+        console.error('Ошибка загрузки заказов:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // const handleDelete = async (trackCode: string) => {
-  //   if (window.confirm('Вы уверены, что хотите удалить этот заказ?')) {
-  //     try {
-  //       await API.delete(`/api/orders/delete/${trackCode}`);
-  //       // Filter out the deleted order locally without fetching again
-  //       setOrders((prevOrders) => prevOrders.filter((order) => order.trackCode !== trackCode));
-  //       console.log('Order deleted successfully');
-  //     } catch (error) {
-  //       console.error('Ошибка при удалении заказа:', error);
-  //       alert('Не удалось удалить заказ. Попробуйте снова.');
-  //     }
-  //   }
-  // };
-
+  // Удаление заказа
   const deleteOrder = async (trackCode: string) => {
     try {
-      // Ваш запрос на удаление
-      const response = await API.delete(`/api/orders/delete/${trackCode}`);
-      console.log('Удален заказ:', response);
+      if (!window.confirm('Вы уверены, что хотите удалить этот заказ?')) return;
 
-      // Обновляем список заказов
-      const updatedOrders = orders.filter(order => order.trackCode !== trackCode);
-      setOrders(updatedOrders);
-    } catch (error) {
-      console.error('Ошибка при удалении заказа:', error);
+      console.log('Попытка удалить заказ:', trackCode);
+      await API.delete(`/api/orders/delete/${trackCode}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      
+      setOrders(orders.filter(order => order.trackCode !== trackCode));
+    } catch (err: any) {
+      setError(err.message || 'Ошибка при удалении заказа');
+      console.error('Ошибка при удалении заказа:', err);
     }
   };
-  
 
+  // Загрузка заказов при изменении поискового термина
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [searchTerm]);
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -63,73 +61,75 @@ const HistoryPage: React.FC = () => {
           <li>
             <span className="mx-2">/</span>
           </li>
-          <li>Клиенты</li>
+          <li>Заказы</li>
         </ol>
       </nav>
+
+      {/* Поисковая панель */}
       <div className="mb-8 flex space-x-2">
-  <input
-    type="text"
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-    placeholder="Поиск по трек-коду"
-    className="px-4 py-2 border rounded w-full"
-  />
-  <button
-    onClick={() => fetchOrders()}  // Optionally filter or trigger search
-    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
-  >
-    Поиск
-  </button>
-</div>
-
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white rounded-lg shadow-lg">
-          <thead>
-            <tr>
-              <th className="px-4 py-2 border-b">№</th>
-              <th className="px-4 py-2 border-b">Название</th>
-              <th className="px-4 py-2 border-b">Количество</th>
-              <th className="px-4 py-2 border-b">Цена</th>
-              <th className="px-4 py-2 border-b">Дата создания</th>
-              <th className="px-4 py-2 border-b">Трек-код</th>
-              <th className="px-4 py-2 border-b">Статус оплаты</th>
-              <th className="px-4 py-2 border-b">Действия</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((order, index) => (
-              <tr key={order.id} className="hover:bg-gray-100">
-                <td className="px-4 py-2 border-b text-center">{index + 1}</td>
-                <td className="px-4 py-2 border-b text-center">{order.name}</td>
-                <td className="px-4 py-2 border-b text-center">{order.amount}</td>
-                <td className="px-4 py-2 border-b text-center">{order.price}</td>
-                <td className="px-4 py-2 border-b text-center">
-                  {new Date(order.createdDate * 1000).toLocaleDateString()}
-                </td>
-                <td className="px-4 py-2 border-b text-center">{order.trackCode}</td>
-                <td className="px-4 py-2 border-b text-center">
-                  {order.paid ? 'Оплачено' : 'Не оплачено'}
-                </td>
-                <td className="px-4 py-2 border-b text-center">
-                  <button
-                    className="px-3 py-1 mr-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
-                    onClick={() => navigate(`/edit/${order.id}`)}
-                  >
-                    Изменить
-                  </button>
-                  <button
-  className="px-3 py-1 text-sm bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none"
-  onClick={() => deleteOrder(order.trackCode)}  
->
-  Удалить
-</button>
-
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Поиск по трек-коду"
+          className="px-4 py-2 border rounded w-full"
+        />
       </div>
+
+      {/* Отображение загрузки и ошибок */}
+      {loading && <p className="text-blue-500">Загрузка заказов...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+
+      {/* Таблица заказов */}
+      {!loading && !error && (
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white rounded-lg shadow-lg">
+            <thead>
+              <tr>
+                <th className="px-4 py-2 border-b">№</th>
+                <th className="px-4 py-2 border-b">Название</th>
+                <th className="px-4 py-2 border-b">Количество</th>
+                <th className="px-4 py-2 border-b">Цена</th>
+                <th className="px-4 py-2 border-b">Дата создания</th>
+                <th className="px-4 py-2 border-b">Трек-код</th>
+                <th className="px-4 py-2 border-b">Статус оплаты</th>
+                <th className="px-4 py-2 border-b">Действия</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map((order, index) => (
+                <tr key={order.id} className="hover:bg-gray-100">
+                  <td className="px-4 py-2 border-b text-center">{index + 1}</td>
+                  <td className="px-4 py-2 border-b text-center">{order.name}</td>
+                  <td className="px-4 py-2 border-b text-center">{order.amount}</td>
+                  <td className="px-4 py-2 border-b text-center">{order.price}</td>
+                  <td className="px-4 py-2 border-b text-center">
+                    {new Date(order.createdDate * 1000).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-2 border-b text-center">{order.trackCode}</td>
+                  <td className="px-4 py-2 border-b text-center">
+                    {order.paid ? 'Оплачено' : 'Не оплачено'}
+                  </td>
+                  <td className="px-4 py-2 border-b text-center">
+                    <button
+                      className="px-3 py-1 mr-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
+                      onClick={() => navigate(`/edit/${order.trackCode}`)}
+                    >
+                      Изменить
+                    </button>
+                    <button
+                      className="px-3 py-1 text-sm bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none"
+                      onClick={() => deleteOrder(order.trackCode)}
+                    >
+                      Удалить
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };

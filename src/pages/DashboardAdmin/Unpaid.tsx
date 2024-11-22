@@ -27,20 +27,46 @@ const Unpaid: React.FC = () => {
       }
     };
   
-    // Function to mark an order as paid
-    const markAsPaid = async (orderId: string) => {
+    const markAsPaid = async (order: any) => {
       try {
-        await API.put(`/api/orders/${orderId}`, { paid: true });
-        console.log(`Order ${orderId} marked as paid`);
-        // Update the state to remove the order from the unpaid list
-        setOrders((prevOrders) =>
-          prevOrders.filter((order) => order._id !== orderId)
-        );
-      } catch (error: any) {
-        console.error("Error updating order:", error);
+        setError(null); // Clear previous errors
+        setLoading(true); // Set loading state
+    
+        console.log(`Sending request for trackCode: ${order.trackCode}`);
+    
+        // Update the order data
+        const updatedOrder = {
+          ...order,
+          paid: true,  
+        };
+        console.log(updatedOrder,'11');
+        
+    
+        // Send the updated data to the backend
+        const response = await API.put(`/api/orders/edit/${order.trackCode}`, updatedOrder);
+    
+        if (response.status === 200) {
+          console.log(`Server response:`, response.data);
+    
+          // Remove the paid order from the list of unpaid orders
+          setOrders((prevOrders) =>
+            prevOrders.filter((o) => o.trackCode !== order.trackCode)
+          );
+        } else {
+          throw new Error(`Unexpected response status: ${response.status}`);
+        }
+      } catch (err: any) {
+        console.error("Error updating order status:", err);
         setError("Не удалось обновить статус заказа. Попробуйте позже.");
+      } finally {
+        setLoading(false); // Reset loading state
       }
     };
+    
+    
+    
+    
+
   
     useEffect(() => {
       fetchUnpaidOrders();
@@ -108,15 +134,16 @@ const Unpaid: React.FC = () => {
                         {order.paid ? "Да" : "Нет"}
                       </td>
                       <td className="px-4 py-2 border-b">
-                        <button
-                          className="px-3 py-1 mr-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
-                          onClick={() => markAsPaid(order._id)}
-                        >
-                          Оплачено
-                        </button>
+                      <button
+  className="px-3 py-1 mr-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
+  onClick={() => markAsPaid(order)}
+>
+  Оплачено
+</button>
+
                         <button
                           className="px-3 py-1 mr-2 text-sm bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none"
-                          onClick={() => console.log("Delete order:", order._id)}
+                          onClick={() => console.log("Delete order:", order.trackCode)}
                         >
                           Удалить
                         </button>

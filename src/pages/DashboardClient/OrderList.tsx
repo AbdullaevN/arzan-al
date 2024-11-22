@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { API } from "../../constants/api";
+ import { API } from "../../constants/api";
 
 interface Order {
   id: string;
@@ -68,7 +67,7 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder }) =
         />
         <button
           onClick={handleSearch}
-          className=" w-3/5 px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+          className=" w-1/5 px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
         >
           Поиск
         </button>
