@@ -7,7 +7,8 @@ const Register: React.FC = () => {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
-    phone: '',  // Added phone number field
+    phone: '',  
+    city: '', 
   });
   const [responseMessage, setResponseMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -16,15 +17,15 @@ const Register: React.FC = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  console.log(
+  // console.log(
 
 
-    fetch('https://cargo-back.onrender.com/api/client')
-  .then(response => response.json())
-  .then(data => console.log(data))
-  .catch(error => console.error('Error:', error))
+  //   fetch('https://cargo-back.onrender.com/api/client')
+  // .then(response => response.json())
+  // .then(data => console.log(data))
+  // .catch(error => console.error('Error:', error))
 
-  );
+  // );
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +37,7 @@ const Register: React.FC = () => {
         clientId: formData.username,
         password: formData.password,
         phone: formData.phone,   
+        city: formData.city, 
       });
 
       if (res.status === 200) {
@@ -59,15 +61,26 @@ const Register: React.FC = () => {
         <h2 className="text-2xl font-semibold text-center mb-6">Регистрация</h2>
 
         <form onSubmit={handleSubmit}>
-          <label htmlFor="username" className="block text-sm font-medium text-gray-700">Логин</label>
+          <label htmlFor="username" className="block text-sm font-medium text-gray-700">Код</label>
           <input
             type="text"
             name="username"
             value={formData.username}
             onChange={handleChange}
-            placeholder="Введите логин"
+            placeholder="Введите код который был дан"
             className="w-full mt-2 px-4 py-2 my-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-300"
           />
+
+<label htmlFor="city" className="block text-sm font-medium text-gray-700">Город</label>
+<input
+  type="text"
+  name="city"
+  value={formData.city}
+  onChange={handleChange}
+  placeholder="Введите ваш город"
+  className="w-full mt-2 px-4 py-2 my-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-300"
+/>
+
 
           <label htmlFor="phone" className="block text-sm font-medium text-gray-700 ">Номер телефона</label>
           <input
