@@ -17,6 +17,7 @@ interface Order {
   deliveredDate: number;
   deliverTo: string;
   trackCode: string;
+  clientId: string;   
   issued: boolean;
   paid: boolean;
   receiventInChina: boolean;
@@ -31,6 +32,8 @@ const DashboardClient: React.FC = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
 
+  const [error, setError] = useState('')
+
   useEffect(() => {
     const fetchOrders = async () => {
       try {
@@ -41,6 +44,8 @@ const DashboardClient: React.FC = () => {
           amount: order.amount || 0,
         }));
         setOrders(ordersWithDefaults);
+        console.log(ordersWithDefaults,'7');
+        
       } catch (e) {
         console.error('Error fetching orders:', e);
       }
@@ -53,6 +58,8 @@ const DashboardClient: React.FC = () => {
 
   const openInfoModal = () => setIsInfoModalOpen(true);
   const closeInfoModal = () => setIsInfoModalOpen(false);
+
+
 
   const getNotificationData = () => {
     const unpaidOrders = orders.filter((order) => !order.paid);  // Фильтруем неоплаченные заказы
@@ -67,19 +74,35 @@ const DashboardClient: React.FC = () => {
     setOrders((prevOrders) => [...prevOrders, newOrder]);
   };
 
-  const deleteOrder = async (trackCode: string) => {
-    try {
-      // Ваш запрос на удаление
-      const response = await API.delete(`/api/orders/delete/${trackCode}`);
-      console.log('Удален заказ:', response);
 
-      // Обновляем список заказов
-      const updatedOrders = orders.filter(order => order.trackCode !== trackCode);
-      setOrders(updatedOrders);
-    } catch (error) {
-      console.error('Ошибка при удалении заказа:', error);
+
+  const deleteOrder = async (trackCode: string, clientId: string) => {
+
+   
+    if (!clientId || !trackCode) {
+      setError('Отсутствует идентификатор клиента');
+      console.error('Не указан clientId для заказа:', trackCode, clientId);
+      return;
+    }
+  
+    try {
+      if (!window.confirm('Вы уверены, что хотите удалить этот заказ?')) return;
+  
+      console.log('Попытка удалить заказ:', trackCode, 'для клиента:', clientId);
+      await API.delete(`/api/orders/delete/${trackCode}/${clientId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+  
+      setOrders(orders.filter(order => order.trackCode !== trackCode));
+    } catch (err: any) {
+      setError(err.message || 'Ошибка при удалении заказа');
+      console.error('Ошибка при удалении заказа:', err);
     }
   };
+  
+  
 
   return (
     <div className='bg-image'>
@@ -117,3 +140,4 @@ const DashboardClient: React.FC = () => {
 
 
 export default DashboardClient;
+ 

@@ -24,7 +24,7 @@ interface OrderData {
   clientId?: string;
 }
 
-const EditOrderPage: React.FC = () => {
+const EditOrderPage: React.FC = ({order,clientId}) => {
   const { trackCode } = useParams<{ trackCode: string }>();
   const navigate = useNavigate();
   const [orderData, setOrderData] = useState<OrderData | null>(null);
@@ -34,49 +34,48 @@ const EditOrderPage: React.FC = () => {
   // Fetch order data
 
 
-  useEffect(() => {
-    if (!trackCode) {
-      setError('TrackCode не передан.');
-      setLoading(false);
-      return;
-    }
-
-    
-    const fetchData = async () => {
-      console.log(trackCode,'*8888888888888888');
+  // useEffect(() => {
+  //   if (!trackCode) {
+  //     setError('TrackCode не передан.');
+  //     setLoading(false);
+  //     return;
+  //   }
+  //   const fetchData = async (clientId:string) => {
+  //     console.log(trackCode,'*8888888888888888');
       
-      try {
-        setLoading(true);
-        const response = await API.get(`/api/orders/edit/${trackCode}`);
+  //     try {
+  //       setLoading(true);
+  //       const response = await API.put(`/api/orders/edit/${trackCode}`, {...orderData, clientId});
+        
 
       
-      setOrderData(response.data);
-        console.log('TrackCode:', trackCode);
+  //     setOrderData(response.data);
+  //       console.log('TrackCode:', trackCode);
 
-      } catch (err: any) {
-        console.error('Ошибка загрузки данных:', err.message);
-        setError('Не удалось загрузить данные. Проверьте соединение или TrackCode.');
-      } finally {
-        setLoading(false);
-      }
-    };
+  //     } catch (err: any) {
+  //       console.error('Ошибка загрузки данных:', err.message);
+  //       setError('Не удалось загрузить данные. Проверьте соединение или TrackCode.');
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    fetchData();
-  }, [trackCode]);
+  //   // fetchData();
+  // }, [trackCode]);
 
   if (!trackCode) {
     return <p>TrackCode отсутствует. Пожалуйста, проверьте URL.</p>;
   }
 
   // Save updated order data
-  const handleSave = async () => {
+  const handleSave = async (clientId:string) => {
     if (!trackCode || !orderData) {
       alert('Невозможно сохранить. Данные отсутствуют.');
       return;
     }
 
     try {
-      await axios.put(`${API}/api/orders/edit/${trackCode}`, orderData);
+      await axios.put(`${API}/api/orders/edit/${trackCode}`, {...orderData, clientId});
       alert('Данные успешно сохранены!');
       navigate('/clients');
     } catch (err: any) {

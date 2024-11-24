@@ -20,7 +20,7 @@ html, body {
  
 }
 .bg-image {
-    background-image: url('./src/assets/img/fon.png');
+    background-image: url('../public/fon.png');
     background-repeat: no-repeat;
     background-size: cover; /* Чтобы фон масштабировался */
     background-clip: content-box;

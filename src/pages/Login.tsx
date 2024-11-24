@@ -73,7 +73,7 @@ const Login: React.FC<LoginProps> = ({ setUserRole }) => {
         <h2 className="text-2xl font-semibold text-center mb-6">Войти</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Логин</label>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Код</label>
             <input
               id="email"
               name="email"
@@ -82,7 +82,7 @@ const Login: React.FC<LoginProps> = ({ setUserRole }) => {
               onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full mt-2 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-300"
-              placeholder="Введите ваш логин"
+              placeholder="Введите ваш код"
             />
           </div>
           <div className="mb-6">

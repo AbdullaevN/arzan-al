@@ -6,39 +6,58 @@ const HistoryPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [clients, setClients] = useState<Client[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
   const navigate = useNavigate();
 
-    // Загрузка заказов с сервера
-    const fetchOrders = async () => {
+  // Fetch Clients
+  const fetchClients = async () => {
+    try {
       setLoading(true);
       setError(null);
-      try {
-          const response = await API.get('/api/orders/allOrders');
-        const filteredOrders = response.data.filter((order: Order) =>
-          order.trackCode.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        setOrders(filteredOrders);
-      } catch (err: any) {
-        setError(err.message || 'Не удалось загрузить заказы');
-        console.error('Ошибка загрузки заказов:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+      const response = await API.get('/api/orders/allClients');
+      setClients(response.data);
+    } catch (err: any) {
+      setError(err.message || 'Не удалось загрузить список клиентов');
+      console.error('Ошибка загрузки клиентов:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Удаление заказа
-  const deleteOrder = async (trackCode: string) => {
+  // Fetch Orders
+  const fetchOrders = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await API.get('/api/orders/allOrders');
+      const filteredOrders = response.data.filter((order: Order) =>
+        order.trackCode.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setOrders(filteredOrders);
+    } catch (err: any) {
+      setError(err.message || 'Не удалось загрузить заказы');
+      console.error('Ошибка загрузки заказов:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Delete Order
+  const deleteOrder = async (trackCode: string, clientId: string) => {
     try {
       if (!window.confirm('Вы уверены, что хотите удалить этот заказ?')) return;
 
-      console.log('Попытка удалить заказ:', trackCode);
-      await API.delete(`/api/orders/delete/${trackCode}`, {
+      await API.delete(`/api/orders/delete/${trackCode}/${clientId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
-      
+
+      // Remove order from the local state
       setOrders(orders.filter(order => order.trackCode !== trackCode));
     } catch (err: any) {
       setError(err.message || 'Ошибка при удалении заказа');
@@ -46,8 +65,42 @@ const HistoryPage: React.FC = () => {
     }
   };
 
-  // Загрузка заказов при изменении поискового термина
+  // Open Modal
+  const openModal = (order: Order) => {
+    setSelectedOrder(order);
+    setModalOpen(true);
+  };
+
+  // Close Modal
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedOrder(null);
+  };
+
+  // Update Order
+  const updateOrder = async (order: Order) => {
+    try {
+      await API.put(`/api/orders/edit/${order.trackCode}`, {
+        ...order,
+        clientId: order.clientId,  // Передаем clientId
+      }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      // Update the local state with the modified order
+      setOrders(orders.map(o => (o.trackCode === order.trackCode ? order : o)));
+      closeModal();
+    } catch (err: any) {
+      setError(err.message || 'Ошибка при обновлении заказа');
+      console.error('Ошибка при обновлении заказа:', err);
+    }
+  };
+
+  // Fetch clients and orders when the component is mounted or search term changes
   useEffect(() => {
+    fetchClients();
     fetchOrders();
   }, [searchTerm]);
 
@@ -65,7 +118,7 @@ const HistoryPage: React.FC = () => {
         </ol>
       </nav>
 
-      {/* Поисковая панель */}
+      {/* Search Panel */}
       <div className="mb-8 flex space-x-2">
         <input
           type="text"
@@ -76,11 +129,11 @@ const HistoryPage: React.FC = () => {
         />
       </div>
 
-      {/* Отображение загрузки и ошибок */}
+      {/* Loading and Error Message */}
       {loading && <p className="text-blue-500">Загрузка заказов...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
-      {/* Таблица заказов */}
+      {/* Orders Table */}
       {!loading && !error && (
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white rounded-lg shadow-lg">
@@ -113,13 +166,13 @@ const HistoryPage: React.FC = () => {
                   <td className="px-4 py-2 border-b text-center">
                     <button
                       className="px-3 py-1 mr-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
-                      onClick={() => navigate(`/edit/${order.trackCode}`)}
+                      onClick={() => openModal(order)} // Open modal
                     >
                       Изменить
                     </button>
                     <button
                       className="px-3 py-1 text-sm bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none"
-                      onClick={() => deleteOrder(order.trackCode)}
+                      onClick={() => deleteOrder(order.trackCode, order.clientId)} // Delete order
                     >
                       Удалить
                     </button>
@@ -128,6 +181,46 @@ const HistoryPage: React.FC = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Edit Order Modal */}
+      {modalOpen && selectedOrder && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg w-96">
+            <h2 className="text-xl font-semibold mb-4">Редактирование заказа</h2>
+            <div>
+              <label className="block mb-2">Название:</label>
+              <input
+                type="text"
+                value={selectedOrder.name}
+                onChange={(e) => setSelectedOrder({ ...selectedOrder, name: e.target.value })}
+                className="w-full px-4 py-2 border rounded mb-4"
+              />
+              <label className="block mb-2">Цена:</label>
+              <input
+                type="number"
+                value={selectedOrder.price}
+                onChange={(e) => setSelectedOrder({ ...selectedOrder, price: e.target.value })}
+                className="w-full px-4 py-2 border rounded mb-4"
+              />
+              {/* Additional fields for order editing can go here */}
+            </div>
+            <div className="flex justify-end space-x-2">
+              <button
+                className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+                onClick={closeModal} // Close modal
+              >
+                Отменить
+              </button>
+              <button
+                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                onClick={() => selectedOrder && updateOrder(selectedOrder)} // Save changes
+              >
+                Сохранить
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
