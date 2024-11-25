@@ -118,11 +118,11 @@ const Unpaid: React.FC = () => {
                   <th className="px-4 py-2 border-b">Действия</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="">
                 {orders.length > 0 ? (
                   orders.map((order, index) => (
-                    <tr key={order._id}>
-                      <td className="px-4 py-2 border-b">{index + 1}</td>
+                    <tr key={order._id}  className=" text-center">
+                      <td className="flex items-center text-center px-4 py-2 border-b">{index + 1}</td>
                       <td className="px-4 py-2 border-b">{order.name}</td>
                       <td className="px-4 py-2 border-b">{order.amount}</td>
                       <td className="px-4 py-2 border-b">{order.price} сом</td>
@@ -141,12 +141,12 @@ const Unpaid: React.FC = () => {
   Оплачено
 </button>
 
-                        <button
+                        {/* <button
                           className="px-3 py-1 mr-2 text-sm bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none"
                           onClick={() => console.log("Delete order:", order.trackCode)}
                         >
                           Удалить
-                        </button>
+                        </button> */}
                       </td>
                     </tr>
                   ))

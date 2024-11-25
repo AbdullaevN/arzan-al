@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { API } from '../constants/api';
+ 
+
 
 interface LoginProps {
   setUserRole: React.Dispatch<React.SetStateAction<string | null>>;
@@ -11,42 +13,42 @@ const Login: React.FC<LoginProps> = ({ setUserRole }) => {
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
-
+   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMessage(''); // Clear previous error messages
+    setErrorMessage(''); // Очистить предыдущие сообщения об ошибках
   
-    // Check for admin credentials
+    // Проверка на админские креды
     if (email === 'admin' && password === 'admin') {
       localStorage.setItem('userRole', 'admin');
       localStorage.setItem('token', 'admin');
-  
       setUserRole('admin');
-      navigate('/dashboard'); // Navigate to the admin dashboard
+      navigate('/dashboard'); // Перенаправление на админскую панель
     } else {
-      // Proceed with client login via API
       try {
         const res = await API.post('/api/auth/login', {
           clientId: email,
           password: password,
         });
-        console.log('API Response:', res);  // Log the response
+  
+        console.log('API Response:', res.data.id); // Лог ответа от API
   
         if (res.data && res.data.token) {
           localStorage.setItem('token', res.data.token);
           localStorage.setItem('userRole', 'client');
-          console.log('LocalStorage after saving:', localStorage.getItem('token'), localStorage.getItem('userRole'));
-          if(  email==="admin"){
-            localStorage.setItem('userRole', 'admin');
-      // localStorage.setItem('token', 'admin');
-            setUserRole('admin')
-            navigate('/dashboard'); // Navigate to the client dashboard
-            
-          }else{
-            setUserRole('client');
-            navigate('/clientdash'); // Navigate to the client dashboard
-          }
+          localStorage.setItem('clientId', res.clientId);
+  
     
+          console.log('LocalStorage after saving:', localStorage.getItem('token'), localStorage.getItem('userRole'));
+  
+          if (email === 'admin') {
+            localStorage.setItem('userRole', 'admin');
+            setUserRole('admin');
+            navigate('/dashboard'); // Перенаправление на админскую панель
+          } else {
+            setUserRole('client');
+            navigate('/clientdash'); // Перенаправление на клиентскую панель
+          }
         } else {
           setErrorMessage('Invalid login credentials. Please try again.');
         }
@@ -56,6 +58,7 @@ const Login: React.FC<LoginProps> = ({ setUserRole }) => {
       }
     }
   };
+  
   
 
   // const handleLogout = () => {

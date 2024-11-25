@@ -12,6 +12,8 @@ const Header: React.FC<HeaderProps> = ({ userRole, setUserRole }) => {
   const [toggleMenu, setToggleMenu] = useState(false);
   const navigate = useNavigate();
 
+
+
   const handleToggle = () => {
     setToggleMenu(!toggleMenu);
   };
@@ -34,7 +36,7 @@ const Header: React.FC<HeaderProps> = ({ userRole, setUserRole }) => {
         {/* Logo Section */}
         <div className="flex items-center justify-center w-full md:w-auto">
           <Link to={userRole === 'admin' ? '/dashboard' : userRole === 'client' ? '/clientdash' : '/login'}>
-            <img src={logo} alt="Logo" className="w-28 h-20 object-cover" loading="lazy"/>
+            <img src={logo} alt="Logo" className="w-48 h-32 object-cover" loading="lazy"/>
           </Link>
         </div>
 
@@ -48,10 +50,10 @@ const Header: React.FC<HeaderProps> = ({ userRole, setUserRole }) => {
             {/* <li onClick={handleMenuClick} className="text-white cursor-pointer hover:text-amber-500 border-b md:border-none py-2 px-3 text-xl font-bold">Токмок</li> */}
 
             {userRole && (
-              <li onClick={handleMenuClick} className="text-white cursor-pointer hover:text-amber-500 border-b md:border-none py-2 px-3 text-xl font-bold">{userRole}</li>
+              <li onClick={handleMenuClick} className="text-black cursor-pointer hover:text-amber-500 border-b md:border-none py-2 px-3 text-xl font-bold">{userRole}</li>
             )}
 
-            <li onClick={() => { handleLogout(); handleMenuClick(); }} className="text-white cursor-pointer hover:text-amber-500 border-b md:border-none py-2 px-3 text-xl font-bold">Выход</li>
+            <li onClick={() => { handleLogout(); handleMenuClick(); }} className="text-black cursor-pointer hover:text-amber-500 border-b md:border-none py-2 px-3 text-xl font-bold">Выход</li>
           </ul>
         </div>
 

@@ -9,7 +9,10 @@ export default {
       colors: {
         customGreen: '#97ff9c', 
         bgGreen: '#89e828', 
+        bgOrange: '#CD6E00', 
+        bgGray: '#d5dcd5', 
         customBlue:'#284A7E'
+        
       },
     },
   },

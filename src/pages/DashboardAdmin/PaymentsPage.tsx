@@ -1,10 +1,19 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { API } from "../../constants/api";
  
+
+type Order = {
+  trackCode: string;
+  clientCode: string;
+  quantity: number;
+  paid: boolean;
+};
  
 const PaymentsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [isPaid, setIsPaid] = useState(false);
 
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -12,15 +21,19 @@ const PaymentsPage = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
 
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
 
+  const navigate = useNavigate();
 
-  const toggleModal = () => {
+
+  const toggleModal = (order: Order | null) => {
+    setSelectedOrder(order);
     setIsModalOpen(!isModalOpen);
   };
+  
 
-
-
+ 
    // Загрузка заказов с сервера
    const fetchOrders = async () => {
     setLoading(true);
@@ -40,6 +53,50 @@ const PaymentsPage = () => {
   };
 
 
+ 
+  // Функция обработки оплаты
+  const handlePayOrder = async () => {
+    if (selectedOrder && isPaid) { // Проверяем, что галочка установлена
+      try {
+        // Создаем обновленный объект заказа, включая вес
+        const updatedOrder = { ...selectedOrder, paid: true };
+  
+        // Отправляем PUT-запрос на сервер
+        const response = await API.put(
+          `/api/orders/edit/${selectedOrder.trackCode}`, // URL с trackCode
+          updatedOrder // Отправляем данные с обновленным полем paid
+        );
+  
+        // Обработка ответа от сервера
+        if (response.status === 200) {
+          console.log('Заказ успешно обновлен:', response.data);
+          
+          // Закрытие модального окна
+          toggleModal(null);
+  
+          // Обновляем список заказов (если нужно)
+          setOrders((prevOrders) =>
+            prevOrders.map(order =>
+              order._id === updatedOrder._id ? updatedOrder : order
+            )
+          );
+        } else {
+          console.error('Ошибка при обновлении заказа');
+        }
+      } catch (error) {
+        console.error('Ошибка запроса:', error);
+      }
+    } else {
+      console.log('Необходимо подтвердить оплату');
+    }
+  };
+  
+  
+  
+  
+  
+
+
     // Загрузка заказов при изменении поискового термина
     useEffect(() => {
       fetchOrders();
@@ -56,6 +113,13 @@ const PaymentsPage = () => {
     };
     
 
+    console.log(selectedOrder, 'list');
+    
+
+
+    const handleBack = () => {
+      navigate(-1); // Go back to the previous page
+    };
 
   return (
   <div className="bg-image min-h-screen">
@@ -75,11 +139,16 @@ const PaymentsPage = () => {
         </ol>
       </nav>
 
+      <button
+        onClick={handleBack}
+        className="px-4 py-2 bg-blue-500 text-white rounded-md mb-4"
+      >
+        Назад
+      </button>
+
       {/* Action Buttons */}
       <div className="flex gap-4 mb-4">
-        {/* <button className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg">
-          Выдача товаров
-        </button> */}
+         
        <Link to={'/unpaid'}>
 
         <button className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg">
@@ -94,30 +163,7 @@ const PaymentsPage = () => {
       </Link>
       </div>
 
-      {/* Date Pickers */}
-      {/* <div className="flex gap-4 mb-4">
-        <div className="flex flex-col">
-          <label className="text-sm font-medium mb-1">Период</label>
-          <input type="date" className="p-2 border border-gray-300 rounded-lg" />
-        </div>
-        <div className="flex flex-col">
-          <label className="text-sm font-medium mb-1 invisible">Hidden</label>
-          <input type="date" className="p-2 border border-gray-300 rounded-lg" />
-        </div>
-        <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
-          Список оплаченных
-        </button>
-      </div> */}
-
-      {/* <div className="flex gap-4 mb-4">
-        <div className="flex flex-col">
-          <label className="text-sm font-medium mb-1">Дата</label>
-          <input type="date" className="p-2 border border-gray-300 rounded-lg" />
-        </div>
-        <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg mt-6">
-          Получить
-        </button>
-      </div> */}
+      
 
       {/* Search */}
       <div className="flex gap-4 mb-4">
@@ -152,101 +198,121 @@ const PaymentsPage = () => {
         <button className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg">
           --
         </button>
-       {/* <Link to={'/add'} > */}
-       <button onClick={toggleModal} className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
+        {/* <button onClick={toggleModal} className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
           + Добавить
-        </button>
-       {/* </Link> */}
-      </div>
+        </button> */}
+       </div>
 
 
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white rounded-lg shadow-lg w-96 p-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Добавить товар</h2>
-            
-            {/* Form Fields */}
-            <form>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Код клиента
-                </label>
-                <input
-                  type="text"
-                  className="w-full p-2 border border-gray-300 rounded-lg"
-                  placeholder="Код клиента"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                Количество товаров
-                </label>
-                <input
-                  type="number"
-                  className="w-full p-2 border border-gray-300 rounded-lg"
-                  placeholder="Введите количество"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                 Вес в кг
-                </label>
-                <input
-                  type="number"
-                  className="w-full p-2 border border-gray-300 rounded-lg"
-                  placeholder="Введите вес"
-                />
-              </div>
-              {/* <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Описание
-                </label>
-                <textarea
-                  className="w-full p-2 border border-gray-300 rounded-lg"
-                  placeholder="Введите описание"
-                  rows={3}
-                ></textarea>
-              </div> */}
+       {isModalOpen && selectedOrder && (
+  <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
+    <div className="bg-white rounded-lg shadow-lg w-96 p-6">
+      <h2 className="text-xl font-semibold text-gray-800 mb-4">Оплата заказа</h2>
 
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Сумма
-                </label>
-                <input
-                  type="number"
-                  className="w-full p-2 border border-gray-300 rounded-lg"
-                  placeholder="Итоговая сумма (зависит от указанной цены)"
-                />
-              </div>
-
-              {/* Buttons */}
-              <div className="flex justify-end gap-4">
-                <button
-                  type="button"
-                  className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-2 px-4 rounded-lg"
-                  onClick={toggleModal}
-                >
-                  Отмена
-                </button>
-                <button
-                  type="submit"
-                  className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg"
-                >
-                  Сохранить
-                </button>
-              </div>
-            </form>
-          </div>
+      {/* Форма */}
+      <form>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Код товара</label>
+          <input
+            type="text"
+            className="w-full p-2 border border-gray-300 rounded-lg"
+            value={selectedOrder.trackCode}
+            readOnly
+          />
         </div>
-      )}
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Доставить в</label>
+          <input
+            type="text"
+            className="w-full p-2 border border-gray-300 rounded-lg"
+            value={selectedOrder.deliverTo}
+            readOnly
+          />
+        </div>
+
+        {/* Редактируемое поле для веса */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Вес (кг)</label>
+          <input
+            type="number"
+            className="w-full p-2 border border-gray-300 rounded-lg"
+            value={selectedOrder.weight}
+            onChange={(e) => {
+              const updatedOrder = { ...selectedOrder, weight: e.target.value };
+              setSelectedOrder(updatedOrder); // Обновляем состояние выбранного заказа
+            }}
+          />
+        </div>
+
+        {/* Цена (из localStorage) */}
+        {/* <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Цена</label>
+          <input
+            type="number"
+            className="w-full p-2 border border-gray-300 rounded-lg"
+            value={selectedOrder.price}
+            readOnly
+          />
+        </div> */}
+
+        {/* Вычисление итоговой суммы */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Итоговая сумма</label>
+          <input
+            type="number"
+            className="w-full p-2 border border-gray-300 rounded-lg"
+            value={selectedOrder.weight * (parseFloat(localStorage.getItem("price")) || selectedOrder.price)}
+            readOnly
+          />
+        </div>
+
+        {/* Добавление чекбокса для подтверждения оплаты */}
+        <div className="mb-4">
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              className="mr-2"
+              checked={isPaid} // Статус чекбокса зависит от состояния
+              onChange={() => setIsPaid(!isPaid)} // Изменение состояния чекбокса
+            />
+            Подтверждаю оплату
+          </label>
+        </div>
+
+        {/* Кнопки */}
+        <div className="flex justify-end gap-4">
+          <button
+            type="button"
+            className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-2 px-4 rounded-lg"
+            onClick={() => toggleModal(null)}
+          >
+            Отмена
+          </button>
+          <button
+            type="button"
+            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg"
+            onClick={handlePayOrder}
+            disabled={!isPaid} // Отключаем кнопку, если галочка не установлена
+          >
+            Оплатить
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
+
+
+
+
 
       {/* Payment Table */}
-      <div className="border border-gray-300 rounded-lg bg-white shadow-md mb-6">
+      <div className="border border-gray-300 rounded-lg bg-white shadow-md mb-6 overflow-x-auto">
         <table className="min-w-full bg-white">
         <thead>
     <tr>
-      {["№", "Дата оплаты", "Код", "ФИ", "Оплатил?", "Сумма", "Вес", "Кол-во", "Удалить"].map((header) => (
+      {["№", "Дата оплаты", "Код", "ФИ", "Оплатил?", "Сумма", "Вес", "Кол-во", "Действие"].map((header) => (
         <th key={header} className="py-3 px-4 border-b text-left text-sm font-semibold text-gray-700">
           {header}
         </th>
@@ -278,13 +344,15 @@ const PaymentsPage = () => {
         <td className="py-3 px-4 border-b text-gray-700">{order.totalWeight} кг</td>
         <td className="py-3 px-4 border-b text-gray-700">{order.totalQuantity}</td>
         <td className="py-3 px-4 border-b text-gray-700">
-          <button
-            className="text-red-500 hover:text-red-700"
-            onClick={() => handleDeleteOrder(order.id)}
-          >
-            Удалить
-          </button>
-        </td>
+  <button
+    className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg"
+    onClick={() => toggleModal(order)}
+  >
+    Оплатить
+  </button>
+</td>
+
+        
       </tr>
     ))
   ) : (

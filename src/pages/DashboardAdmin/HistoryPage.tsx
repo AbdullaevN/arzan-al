@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { API } from "../../constants/api";
 import { useNavigate } from "react-router-dom";
-
+ 
 const HistoryPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -13,21 +13,27 @@ const HistoryPage: React.FC = () => {
 
   const navigate = useNavigate();
 
-  // Fetch Clients
-  const fetchClients = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await API.get('/api/orders/allClients');
-      setClients(response.data);
-    } catch (err: any) {
-      setError(err.message || 'Не удалось загрузить список клиентов');
-      console.error('Ошибка загрузки клиентов:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // const fetchClients = async () => {
+  //   try {
+  //     setLoading(true);
+  //     setError(null);
+  //     const headers = {
+  //       Authorization: `Bearer ${localStorage.getItem('token')}`,
+  //     };
+  //     const response = await API.get('/api/orders/allClients', { headers });
+  //     console.log(response.data, 'response');
+  
+  //     const clientIds = response.data.map((client) => client.clientId);
+  //     setClients(clientIds);
+  
+  //   } catch (err: any) {
+  //     setError(err.message || 'Не удалось загрузить список клиентов');
+  //     console.error('Ошибка загрузки клиентов:', err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  
   // Fetch Orders
   const fetchOrders = async () => {
     setLoading(true);
@@ -50,15 +56,16 @@ const HistoryPage: React.FC = () => {
   const deleteOrder = async (trackCode: string, clientId: string) => {
     try {
       if (!window.confirm('Вы уверены, что хотите удалить этот заказ?')) return;
-
-      await API.delete(`/api/orders/delete/${trackCode}/${clientId}`, {
+  
+      const response = await API.delete(`/api/orders/delete/${trackCode}/${clientId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
-
-      // Remove order from the local state
-      setOrders(orders.filter(order => order.trackCode !== trackCode));
+  
+      if (response.status === 200) {
+        setOrders(prevOrders => prevOrders.filter(order => order.trackCode !== trackCode));
+      }
     } catch (err: any) {
       setError(err.message || 'Ошибка при удалении заказа');
       console.error('Ошибка при удалении заказа:', err);
@@ -78,19 +85,18 @@ const HistoryPage: React.FC = () => {
   };
 
   // Update Order
-  const updateOrder = async (order: Order) => {
+  const updateOrder = async () => {
+    if (!selectedOrder) return;
+    const { trackCode, clientId, name, price } = selectedOrder;
+
     try {
-      await API.put(`/api/orders/edit/${order.trackCode}`, {
-        ...order,
-        clientId: order.clientId,  // Передаем clientId
-      }, {
+      await API.put(`/api/orders/edit/${trackCode}`, {selectedOrder}, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
 
-      // Update the local state with the modified order
-      setOrders(orders.map(o => (o.trackCode === order.trackCode ? order : o)));
+      setOrders(orders.map(order => (order.trackCode === trackCode ? selectedOrder : order)));
       closeModal();
     } catch (err: any) {
       setError(err.message || 'Ошибка при обновлении заказа');
@@ -100,9 +106,14 @@ const HistoryPage: React.FC = () => {
 
   // Fetch clients and orders when the component is mounted or search term changes
   useEffect(() => {
-    fetchClients();
+    // fetchClients();
     fetchOrders();
   }, [searchTerm]);
+
+  const handleBack = () => {
+    navigate(-1); // Go back to the previous page
+  };
+
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -117,8 +128,16 @@ const HistoryPage: React.FC = () => {
           <li>Заказы</li>
         </ol>
       </nav>
+      
+       {/* Кнопка "Назад" */}
+       <button
+        onClick={handleBack}
+        className="px-4 py-2 bg-blue-500 text-white rounded-md mb-4"
+      >
+        Назад
+      </button>
 
-      {/* Search Panel */}
+
       <div className="mb-8 flex space-x-2">
         <input
           type="text"
@@ -129,11 +148,9 @@ const HistoryPage: React.FC = () => {
         />
       </div>
 
-      {/* Loading and Error Message */}
       {loading && <p className="text-blue-500">Загрузка заказов...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
-      {/* Orders Table */}
       {!loading && !error && (
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white rounded-lg shadow-lg">
@@ -146,6 +163,7 @@ const HistoryPage: React.FC = () => {
                 <th className="px-4 py-2 border-b">Дата создания</th>
                 <th className="px-4 py-2 border-b">Трек-код</th>
                 <th className="px-4 py-2 border-b">Статус оплаты</th>
+                <th className="px-4 py-2 border-b">ID клиента</th>
                 <th className="px-4 py-2 border-b">Действия</th>
               </tr>
             </thead>
@@ -163,16 +181,17 @@ const HistoryPage: React.FC = () => {
                   <td className="px-4 py-2 border-b text-center">
                     {order.paid ? 'Оплачено' : 'Не оплачено'}
                   </td>
+                  <td className="px-4 py-2 border-b text-center">{order.clientId}</td>
                   <td className="px-4 py-2 border-b text-center">
-                    <button
+                    {/* <button
                       className="px-3 py-1 mr-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
-                      onClick={() => openModal(order)} // Open modal
+                      onClick={() => openModal(order)}
                     >
                       Изменить
-                    </button>
+                    </button> */}
                     <button
                       className="px-3 py-1 text-sm bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none"
-                      onClick={() => deleteOrder(order.trackCode, order.clientId)} // Delete order
+                      onClick={() => deleteOrder(order.trackCode, order.clientId)}
                     >
                       Удалить
                     </button>
@@ -184,7 +203,6 @@ const HistoryPage: React.FC = () => {
         </div>
       )}
 
-      {/* Edit Order Modal */}
       {modalOpen && selectedOrder && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-6 rounded-lg w-96">
@@ -195,29 +213,30 @@ const HistoryPage: React.FC = () => {
                 type="text"
                 value={selectedOrder.name}
                 onChange={(e) => setSelectedOrder({ ...selectedOrder, name: e.target.value })}
-                className="w-full px-4 py-2 border rounded mb-4"
+                className="w-full px-3 py-2 border rounded-md"
               />
+            </div>
+            <div className="mt-4">
               <label className="block mb-2">Цена:</label>
               <input
-                type="number"
+                type="text"
                 value={selectedOrder.price}
                 onChange={(e) => setSelectedOrder({ ...selectedOrder, price: e.target.value })}
-                className="w-full px-4 py-2 border rounded mb-4"
+                className="w-full px-3 py-2 border rounded-md"
               />
-              {/* Additional fields for order editing can go here */}
             </div>
-            <div className="flex justify-end space-x-2">
+            <div className="mt-6 flex justify-end space-x-4">
               <button
-                className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
-                onClick={closeModal} // Close modal
+                onClick={closeModal}
+                className="px-4 py-2 bg-gray-400 text-white rounded-md"
               >
-                Отменить
+                Закрыть
               </button>
               <button
-                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                onClick={() => selectedOrder && updateOrder(selectedOrder)} // Save changes
+                onClick={updateOrder}
+                className="px-4 py-2 bg-blue-500 text-white rounded-md"
               >
-                Сохранить
+                Сохранить изменения
               </button>
             </div>
           </div>

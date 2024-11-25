@@ -21,6 +21,7 @@ import AddOrder from "./pages/DashboardAdmin/AddOrder";
 import OrderManagement from "./pages/DashboardAdmin/OrderManagement";
 import Unpaid from "./pages/DashboardAdmin/Unpaid";
 import Paid from "./pages/DashboardAdmin/Paid";
+import { PriceProvider } from "./context/PriceProvider";
 
 
 
@@ -39,6 +40,8 @@ function App() {
 
   return (
     <>
+    <PriceProvider>
+
       <Header userRole={userRole} setUserRole={setUserRole} />
 
       <Routes  >
@@ -85,6 +88,8 @@ function App() {
         />
       </Routes>
       <Footer />
+    </PriceProvider>
+
     </>
   );
 }

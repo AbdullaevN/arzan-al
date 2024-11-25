@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { API } from "../../constants/api";
-
+import useClient from "../../store/useClient";
+ 
 interface OrderDetails {
   id: string;
   name: string;
@@ -16,9 +17,9 @@ interface OrderDetails {
   paid: boolean;
   receiventInChina: boolean;
   description?: string;
-  warehouseChina: boolean; // Обязательно
-  warehouseTokmok: boolean; // Обязательно
-  deliveredToClient: boolean; // Обязательно
+  warehouseChina: boolean;
+  warehouseTokmok: boolean;
+  deliveredToClient: boolean;
 }
 
 interface AddItemModalProps {
@@ -30,6 +31,13 @@ interface AddItemModalProps {
 const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal, addNewOrder }) => {
   const [description, setDescription] = useState('');
   const [trackCode, setTrackCode] = useState('');
+  const { clientId } = useClient();  
+  console.log(clientId,'ii');
+  // useEffect(() => {
+  //   const id = getClientIdFromSomewhere();  
+  //   useClient.getState().setClientId(id);
+  // }, []);
+  
 
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDescription(e.target.value);
@@ -57,12 +65,13 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal, addNewO
         deliverTo: "Tokmok",
         receiventInChina: false,
         trackCode: trackCode,
+        clientId: clientId, 
       });
 
       console.log(111, res);
 
       addNewOrder({
-        id: res.data.id, // предполагается, что сервер возвращает id
+        id: res.data.id, // assuming server returns id
         name: description,
         createdDate: new Date().toString(),
         price: 0,
@@ -75,9 +84,9 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal, addNewO
         issued: false,
         paid: false,
         receiventInChina: false,
-        warehouseChina: false, // Убедитесь, что это значение установлено
-        warehouseTokmok: false, // Убедитесь, что это значение установлено
-        deliveredToClient: false, // Убедитесь, что это значение установлено
+        warehouseChina: false,
+        warehouseTokmok: false,
+        deliveredToClient: false,
       });
 
     } catch (e) {
