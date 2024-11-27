@@ -66,6 +66,8 @@ const PaymentsPage: React.FC<AddItemModalProps> = () => {
 
 
   const toggleModal = (order: Order | null) => {
+    console.log(111);
+    
     setSelectedOrder(order);
     setIsModalOpen(!isModalOpen);
   };
@@ -137,7 +139,7 @@ const PaymentsPage: React.FC<AddItemModalProps> = () => {
     };
 
 
-    const handlePaid = async () => {
+    const handlePaid = async (selectedOrder:Order) => {
       console.log(selectedOrder,'SSSSSSSS');
       if (!selectedOrder ) {
 
@@ -473,7 +475,7 @@ const handleAdd = async () => {
         <td className="py-3 px-4 border-b text-gray-700">
   <button
     className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg"
-    onClick={handlePaid}
+    onClick={()=>handlePaid(order)}
   
   >
     Оплатить
