@@ -2,7 +2,7 @@
 const Footer = () => {
   return (
     <footer className="bg-bgGray text-black py-4">
-      <div className="container mx-auto px-4 flex justify-center">
+      <div className="container mx-auto px-4 flex justify-center items-center">
       <div className="flex flex-col md:flex-row justify-between items-center text-center   md:space-y-0 gap-2 md:gap-20 md:place-items-baseline">
  
 
@@ -10,10 +10,10 @@ const Footer = () => {
             <p>&copy; 2024 Arzan Al. All rights reserved.</p>
           </div>
 
-          <div className="flex justify-center space-x-4">
-            <a href="https://www.facebook.com" className="hover:text-gray-500" target="_blank" rel="noopener noreferrer">
+          <div className="flex justify-center space-x-4 ">
+            {/* <a href="https://www.facebook.com" className="hover:text-gray-500" target="_blank" rel="noopener noreferrer">
               <i className="fab fa-facebook-f"></i> Facebook
-            </a>
+            </a> */}
             <a href="https://www.instagram.com/arzanal.kemins" className="hover:text-gray-500" target="_blank" rel="noopener noreferrer">
               <i className="fab fa-instagram"></i> Instagram
             </a>

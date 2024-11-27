@@ -56,6 +56,7 @@ const Header: React.FC<HeaderProps> = ({ userRole, setUserRole }) => {
             <li onClick={() => { handleLogout(); handleMenuClick(); }} className="text-black cursor-pointer hover:text-amber-500 border-b md:border-none py-2 px-3 text-xl font-bold">Выход</li>
           </ul>
         </div>
+        
 
         {/* Hamburger Icon */}
         <div className="cursor-pointer md:hidden">

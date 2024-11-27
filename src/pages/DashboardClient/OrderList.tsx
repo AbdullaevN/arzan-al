@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { API } from "../../constants/api";
-import { EditOrderModal } from "./EditItemModal";
-
+import EditOrderModal from "./EditItemModal";
+ 
 interface Order {
   id: string;
   name: string;
@@ -54,10 +54,7 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder, onU
     }
   };
 
-  const handleEdit = (order: Order) => {
-    setSelectedOrder(order);
-    setIsModalOpen(true);
-  };
+ 
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -68,18 +65,17 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder, onU
     <div className="order-list p-4 w-full">
       <h2 className="text-2xl font-bold mb-4">Ваши заказы</h2>
 
-      <div className="mt-4 mb-4 flex justify-between items-center gap-4">
+      <div className="flex gap-4 mb-4">
         <input
+           value={searchTerm}
+           onChange={(e) => setSearchTerm(e.target.value)}
           type="text"
-          placeholder="Поиск по коду заказа"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+          className="w-full text-sm text-gray-900 border border-gray-300 rounded-lg p-2"
+          placeholder="Поиск"
         />
-        <button
-          onClick={handleSearch}
-          className="w-1/5 px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-        >
+        <button 
+         onClick={handleSearch}
+        className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
           Поиск
         </button>
       </div>
@@ -95,13 +91,13 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder, onU
           <h3 className="text-lg font-semibold">Заказ № {order.trackCode}</h3>
           <h3 className="text-lg font-semibold">Имя: {order.name}</h3>
           <div className="flex space-x-2">
-            <button
+            {/* <button
               onClick={() => handleEdit(order)}
               className="text-blue-500 hover:text-blue-700"
               title="Редактировать заказ"
             >
               ✏️
-            </button>
+            </button> */}
             <button
   onClick={() => {
     if (!order.trackCode || !order.clientId) {

@@ -1,7 +1,27 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { API } from "../../constants/api";
+import { useClientStore } from "../../store/useClient";
  
+interface OrderDetails {
+  id: string;
+  name: string;
+  createdDate: string;
+  price: number;
+  weight: number;
+  amount: number;
+  dateOfPayment: number;
+  deliveredDate: number;
+  deliverTo: string;
+  trackCode: string;
+  issued: boolean;
+  paid: boolean;
+  receiventInChina: boolean;
+  description?: string;
+  warehouseChina: boolean;
+  warehouseTokmok: boolean;
+  deliveredToClient: boolean;
+}
 
 type Order = {
   trackCode: string;
@@ -9,19 +29,37 @@ type Order = {
   quantity: number;
   paid: boolean;
 };
+
+
+interface AddItemModalProps {
+  isOpen: boolean;
+  closeModal: () => void;
+  addNewOrder: (newOrder: OrderDetails) => void;
+}
  
-const PaymentsPage = () => {
+const PaymentsPage: React.FC<AddItemModalProps> = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [isPaid, setIsPaid] = useState(false);
 
-
+ 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
 
+
+  const [trackCode, setTrackCode] = useState("");
+  const [weight, setWeight] = useState("");
+
+
+  
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>(orders);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  const { clientId } = useClientStore();
+  console.log(clientId, '12');
+  
 
 
   const navigate = useNavigate();
@@ -31,7 +69,9 @@ const PaymentsPage = () => {
     setSelectedOrder(order);
     setIsModalOpen(!isModalOpen);
   };
-  
+  useEffect(() => {
+    setFilteredOrders(orders);
+  }, [orders]);
 
  
    // Загрузка заказов с сервера
@@ -51,52 +91,32 @@ const PaymentsPage = () => {
       setLoading(false);
     }
   };
-
-
  
-  // Функция обработки оплаты
-  const handlePayOrder = async () => {
-    if (selectedOrder && isPaid) { // Проверяем, что галочка установлена
+ 
+  
+  
+  const handleSearch = async () => {
+    if (searchTerm) {
       try {
-        // Создаем обновленный объект заказа, включая вес
-        const updatedOrder = { ...selectedOrder, paid: true };
-  
-        // Отправляем PUT-запрос на сервер
-        const response = await API.put(
-          `/api/orders/edit/${selectedOrder.trackCode}`, // URL с trackCode
-          updatedOrder // Отправляем данные с обновленным полем paid
-        );
-  
-        // Обработка ответа от сервера
-        if (response.status === 200) {
-          console.log('Заказ успешно обновлен:', response.data);
-          
-          // Закрытие модального окна
-          toggleModal(null);
-  
-          // Обновляем список заказов (если нужно)
-          setOrders((prevOrders) =>
-            prevOrders.map(order =>
-              order._id === updatedOrder._id ? updatedOrder : order
-            )
-          );
+        const response = await API.get(`/api/orders/search/${searchTerm}`);
+        console.log("API Response:", response.data);
+
+        if (response.data && typeof response.data === 'object') {
+          setFilteredOrders([response.data]); // Single result wrapped in an array
+        } else if (Array.isArray(response.data)) {
+          setFilteredOrders(response.data); // Multiple results
         } else {
-          console.error('Ошибка при обновлении заказа');
+          setFilteredOrders([]);
         }
       } catch (error) {
-        console.error('Ошибка запроса:', error);
+        console.error("Ошибка при поиске:", error);
+        setFilteredOrders([]);
       }
     } else {
-      console.log('Необходимо подтвердить оплату');
+      setFilteredOrders(orders);
     }
   };
   
-  
-  
-  
-  
-
-
     // Загрузка заказов при изменении поискового термина
     useEffect(() => {
       fetchOrders();
@@ -111,15 +131,139 @@ const PaymentsPage = () => {
         console.error('Ошибка при удалении заказа:', err);
       }
     };
-    
-
-    console.log(selectedOrder, 'list');
-    
-
-
+ 
     const handleBack = () => {
       navigate(-1); // Go back to the previous page
     };
+
+
+    const handlePaid = async () => {
+      console.log(selectedOrder,'SSSSSSSS');
+      if (!selectedOrder ) {
+
+        setError("Client ID is missing or no order selected.");
+        return;
+      }
+  
+      const { trackCode } = selectedOrder;
+  
+      try {
+        // const updatedOrder = { ...selectedOrder, clientId };
+         // Add clientId to the order
+  
+         console.log(selectedOrder,'SSSSSSSS');
+         
+        const response = await API.put(`/api/orders/edit/${trackCode}`, {...selectedOrder, paid:true},  {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+  
+        if (response.status === 200) {
+          setOrders((prevOrders) =>
+            prevOrders.map((order) =>
+              order.trackCode === trackCode ? { ...order, ...selectedOrder } : order
+            )
+          );
+          // closeModal();
+        } else {
+          setError("Failed to update order.");
+        }
+      } catch (err: any) {
+        setError("Error updating order: " + (err.message || "Unknown error"));
+        console.error("Update order error:", err);
+      }
+    };
+
+
+
+
+
+
+
+
+
+
+    const handleTrackCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setTrackCode(e.target.value);
+    };
+
+    // const handleWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //   setWeight(e.target.value);
+    // };
+
+
+
+    const price = parseFloat(localStorage.getItem("price") || "0");
+  
+    const handleWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const inputWeight = parseFloat(e.target.value) || 0;
+      setWeight(inputWeight); // Update weight state
+    };
+  
+    const totalSum = weight * price; // Calculate the total sum dynamically
+  
+
+
+
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+const handleAdd = async () => {
+  // closeModal();
+  try {
+    const res = await API.post("/api/orders/create", {
+      issued: false,
+      price: 0,
+      name: name,
+      createdDate: Date.now(),
+      paid: false,
+      weight: 0,
+      amount: 1,
+      dateOfPayment: 0,
+      deliveredDate: 0,
+      deliverTo: "Tokmok",
+      receiventInChina: false,
+      trackCode: trackCode,
+      clientId: clientId,
+       warehouseTokmok: false,
+      deliveredToClient: false,
+    });
+
+    addNewOrder({
+      id: res.data.id, // assuming server returns id
+      name: name,
+      createdDate: new Date().toString(),
+      price: 0,
+      weight: 0,
+      amount: 1,
+      dateOfPayment: 0,
+      deliveredDate: 0,
+      deliverTo: "Tokmok",
+      trackCode: trackCode,
+      clientId:clientId,
+      issued: false,
+      paid: false,
+      receiventInChina: false,
+       warehouseTokmok: false,
+      deliveredToClient: false,
+    });
+  } catch (e) {
+    console.error(e);
+    alert("Ошибка при добавлении заказа. Попробуйте снова позже.");
+  }
+};
+
+
+
+
+
+
 
   return (
   <div className="bg-image min-h-screen">
@@ -168,13 +312,17 @@ const PaymentsPage = () => {
       {/* Search */}
       <div className="flex gap-4 mb-4">
         <input
+           value={searchTerm}
+           onChange={(e) => setSearchTerm(e.target.value)}
           type="text"
           className="w-full text-sm text-gray-900 border border-gray-300 rounded-lg p-2"
           placeholder="Поиск"
         />
-        <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
+        {/* <button 
+         onClick={handleSearch}
+        className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
           Поиск
-        </button>
+        </button> */}
       </div>
 
       {/* Recent Dates - Scrollable */}
@@ -198,9 +346,9 @@ const PaymentsPage = () => {
         <button className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg">
           --
         </button>
-        {/* <button onClick={toggleModal} className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
+        <button onClick={toggleModal} className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
           + Добавить
-        </button> */}
+        </button>
        </div>
 
 
@@ -212,24 +360,18 @@ const PaymentsPage = () => {
       {/* Форма */}
       <form>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Код товара</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Код клиента</label>
           <input
             type="text"
-            className="w-full p-2 border border-gray-300 rounded-lg"
-            value={selectedOrder.trackCode}
-            readOnly
+            id="trackCode"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+            placeholder="Введите трек код"
+            value={trackCode}
+            onChange={handleTrackCodeChange}
           />
         </div>
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Доставить в</label>
-          <input
-            type="text"
-            className="w-full p-2 border border-gray-300 rounded-lg"
-            value={selectedOrder.deliverTo}
-            readOnly
-          />
-        </div>
+      
 
         {/* Редактируемое поле для веса */}
         <div className="mb-4">
@@ -237,24 +379,17 @@ const PaymentsPage = () => {
           <input
             type="number"
             className="w-full p-2 border border-gray-300 rounded-lg"
-            value={selectedOrder.weight}
-            onChange={(e) => {
-              const updatedOrder = { ...selectedOrder, weight: e.target.value };
-              setSelectedOrder(updatedOrder); // Обновляем состояние выбранного заказа
-            }}
+            value={weight}
+            onChange={handleWeightChange}
+            // value={selectedOrder.weight}
+            // onChange={(e) => {
+            //   const updatedOrder = { ...selectedOrder, weight: e.target.value };
+            //   setSelectedOrder(updatedOrder);  
+            // }}
           />
         </div>
 
-        {/* Цена (из localStorage) */}
-        {/* <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Цена</label>
-          <input
-            type="number"
-            className="w-full p-2 border border-gray-300 rounded-lg"
-            value={selectedOrder.price}
-            readOnly
-          />
-        </div> */}
+       
 
         {/* Вычисление итоговой суммы */}
         <div className="mb-4">
@@ -262,23 +397,15 @@ const PaymentsPage = () => {
           <input
             type="number"
             className="w-full p-2 border border-gray-300 rounded-lg"
-            value={selectedOrder.weight * (parseFloat(localStorage.getItem("price")) || selectedOrder.price)}
+            // value={selectedOrder.weight * (parseFloat(localStorage.getItem("price")) || selectedOrder.price)}
+            // readOnly
+            value={totalSum.toFixed(2)} // Display total sum with 2 decimal points
             readOnly
           />
         </div>
 
         {/* Добавление чекбокса для подтверждения оплаты */}
-        <div className="mb-4">
-          <label className="flex items-center">
-            <input
-              type="checkbox"
-              className="mr-2"
-              checked={isPaid} // Статус чекбокса зависит от состояния
-              onChange={() => setIsPaid(!isPaid)} // Изменение состояния чекбокса
-            />
-            Подтверждаю оплату
-          </label>
-        </div>
+      
 
         {/* Кнопки */}
         <div className="flex justify-end gap-4">
@@ -292,10 +419,10 @@ const PaymentsPage = () => {
           <button
             type="button"
             className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg"
-            onClick={handlePayOrder}
-            disabled={!isPaid} // Отключаем кнопку, если галочка не установлена
+            onClick={handleAdd}
+            // disabled={!isPaid}  
           >
-            Оплатить
+            Сохранить
           </button>
         </div>
       </form>
@@ -346,7 +473,8 @@ const PaymentsPage = () => {
         <td className="py-3 px-4 border-b text-gray-700">
   <button
     className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg"
-    onClick={() => toggleModal(order)}
+    onClick={handlePaid}
+  
   >
     Оплатить
   </button>

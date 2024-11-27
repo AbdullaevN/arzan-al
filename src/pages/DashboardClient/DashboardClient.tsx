@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import AddItemModal from '../../components/ClientComponents/AddItemModal';
 import InformationModal from '../../components/ClientComponents/InformationModal';
 import { API } from '../../constants/api';
+import { useClientStore } from '../../store/useClient';
 
 interface Order {
   id: string;
@@ -32,6 +33,9 @@ const DashboardClient: React.FC = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
 
+  const { setClientId } = useClientStore();  
+
+
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -45,13 +49,16 @@ const DashboardClient: React.FC = () => {
         }));
         setOrders(ordersWithDefaults);
         console.log(ordersWithDefaults,'7');
+        if (ordersWithDefaults.length > 0) {
+          setClientId(ordersWithDefaults[0].clientId);
+        }
         
       } catch (e) {
         console.error('Error fetching orders:', e);
       }
     };
     fetchOrders();
-  }, []);
+  }, [setClientId]);
 
   const openAddModal = () => setIsAddModalOpen(true);
   const closeAddModal = () => setIsAddModalOpen(false);
@@ -105,8 +112,8 @@ const DashboardClient: React.FC = () => {
   
 
   return (
-    <div className='bg-image'>
-      <div className="container px-4 flex flex-col items-start">
+    <div className='bg-image  min-h-screen'>
+      <div className="container  px-4 flex flex-col items-start">
         <h1 className="py-8 text-2xl font-bold">Добро пожаловать в Личный Кабинет</h1>
          {/* {getNotificationData().totalOrders > 0 && (
           <Notification {...getNotificationData()} />

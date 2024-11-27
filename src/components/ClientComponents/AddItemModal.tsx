@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { API } from "../../constants/api";
-import useClient from "../../store/useClient";
- 
+import   { useClientStore } from "../../store/useClient";
+
 interface OrderDetails {
   id: string;
   name: string;
@@ -29,14 +29,15 @@ interface AddItemModalProps {
 }
 
 const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal, addNewOrder }) => {
-  const [description, setDescription] = useState('');
-  const [trackCode, setTrackCode] = useState('');
-  const { clientId } = useClient();  
-  console.log(clientId,'ii');
-  // useEffect(() => {
-  //   const id = getClientIdFromSomewhere();  
-  //   useClient.getState().setClientId(id);
-  // }, []);
+  const [description, setDescription] = useState("");
+  const [trackCode, setTrackCode] = useState("");
+  const [warehouseChina, setWarehouseChina] = useState(false); // Новое состояние
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const { clientId } = useClientStore();
+
+  console.log(clientId,'ll');
+
   
 
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,12 +48,14 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal, addNewO
     setTrackCode(e.target.value);
   };
 
-  const handleAdd = async () => {
-    console.log('Description:', description);
-    closeModal();
+  const handleWarehouseChinaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setWarehouseChina(e.target.checked);
+  };
 
+  const handleAdd = async () => {
+    closeModal();
     try {
-      const res = await API.post('/api/orders/create', {
+      const res = await API.post("/api/orders/create", {
         issued: false,
         price: 0,
         name: description,
@@ -65,10 +68,11 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal, addNewO
         deliverTo: "Tokmok",
         receiventInChina: false,
         trackCode: trackCode,
-        clientId: clientId, 
+        clientId: clientId,
+        warehouseChina: warehouseChina, // Передаём новое поле
+        warehouseTokmok: false,
+        deliveredToClient: false,
       });
-
-      console.log(111, res);
 
       addNewOrder({
         id: res.data.id, // assuming server returns id
@@ -81,19 +85,22 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal, addNewO
         deliveredDate: 0,
         deliverTo: "Tokmok",
         trackCode: trackCode,
+        clientId:clientId,
         issued: false,
         paid: false,
         receiventInChina: false,
-        warehouseChina: false,
+        warehouseChina: warehouseChina, // Устанавливаем новое состояние
         warehouseTokmok: false,
         deliveredToClient: false,
       });
-
     } catch (e) {
       console.error(e);
-      alert('Ошибка при добавлении заказа. Попробуйте снова позже.');
+      alert("Ошибка при добавлении заказа. Попробуйте снова позже.");
     }
   };
+
+
+ 
 
   if (!isOpen) return null;
 
@@ -102,7 +109,9 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal, addNewO
       <div className="bg-white p-8 rounded-lg max-w-lg w-full shadow-xl">
         <h2 className="text-xl font-semibold mb-6 text-gray-800">Добавить товар</h2>
         <div className="mb-6">
-          <label htmlFor="trackCode" className="block text-sm font-medium text-gray-700 mb-2">Трек код</label>
+          <label htmlFor="trackCode" className="block text-sm font-medium text-gray-700 mb-2">
+            Трек код
+          </label>
           <input
             type="text"
             id="trackCode"
@@ -113,7 +122,9 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal, addNewO
           />
         </div>
         <div className="mb-6">
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">Описание</label>
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+            Описание
+          </label>
           <input
             type="text"
             id="description"
@@ -122,6 +133,18 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal, addNewO
             value={description}
             onChange={handleDescriptionChange}
           />
+        </div>
+        <div className="mb-6 flex items-center">
+          <input
+            type="checkbox"
+            id="warehouseChina"
+            checked={warehouseChina}
+            onChange={handleWarehouseChinaChange}
+            className="mr-2"
+          />
+          <label htmlFor="warehouseChina" className="text-sm font-medium text-gray-700">
+            Склад в Китае
+          </label>
         </div>
         <div className="flex gap-4">
           <button

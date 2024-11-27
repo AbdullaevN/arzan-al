@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { API } from "../../constants/api";
+import { useNavigate } from "react-router-dom";
 
 const Paid: React.FC = () => {
   const [orders, setOrders] = useState<any[]>([]); // State for unpaid orders
   const [loading, setLoading] = useState<boolean>(true); // State for loading indicator
   const [error, setError] = useState<string | null>(null); // State for error messages
+  const navigate = useNavigate();
+  const handleBack = () => {
+    navigate(-1); // Go back to the previous page
+  };
 
 
   // Function to fetch unpaid orders
@@ -48,6 +53,9 @@ const fetchUnpaidOrders = async () => {
     fetchUnpaidOrders();
   }, []);
 
+
+  
+
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       {/* Breadcrumbs */}
@@ -70,6 +78,13 @@ const fetchUnpaidOrders = async () => {
           <li>Оплаченные</li>
         </ol>
       </nav>
+
+      <button
+        onClick={handleBack}
+        className="px-4 py-2 bg-blue-500 text-white rounded-md mb-4"
+      >
+        Назад
+      </button>
 
       {/* Feedback Section */}
       {loading && (

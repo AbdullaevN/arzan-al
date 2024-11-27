@@ -1,10 +1,17 @@
 import { useEffect, useState } from "react";
 import { API } from "../../constants/api";
+import { useNavigate } from "react-router-dom";
+import { useClientStore } from "../../store/useClient";
 
 const Unpaid: React.FC = () => {
     const [orders, setOrders] = useState<any[]>([]); // State for unpaid orders
     const [loading, setLoading] = useState<boolean>(true); // State for loading indicator
     const [error, setError] = useState<string | null>(null); // State for error messages
+
+    const navigate = useNavigate();
+
+    const { clientId } = useClientStore();
+    console.log(clientId, '12');
   
     // Function to fetch unpaid orders
     const fetchUnpaidOrders = async () => {
@@ -29,24 +36,32 @@ const Unpaid: React.FC = () => {
   
     const markAsPaid = async (order: any) => {
       try {
+        // Confirmation dialog
+        const confirmPayment = window.confirm(
+          `Вы действительно хотите отметить заказ с трек-кодом "${order.trackCode}" на сумму ${order.price} сом как оплаченный?`
+        );
+    
+        if (!confirmPayment) {
+          return; // Exit if the user cancels the action
+        }
+    
         setError(null); // Clear previous errors
         setLoading(true); // Set loading state
     
-        console.log(`Sending request for trackCode: ${order.trackCode}`);
-    
-        // Update the order data
+        // Include clientId in the updated order data
         const updatedOrder = {
           ...order,
-          paid: true,  
+          paid: true,
+          clientId: clientId, // Add clientId to the body
         };
-        console.log(updatedOrder,'11');
-        
     
-        // Send the updated data to the backend
+        console.log(`Отправка запроса на сервер для трек-кода: ${order.trackCode}`);
+        
+        // Make the PUT request to update the order
         const response = await API.put(`/api/orders/edit/${order.trackCode}`, updatedOrder);
     
         if (response.status === 200) {
-          console.log(`Server response:`, response.data);
+          console.log(`Ответ сервера:`, response.data);
     
           // Remove the paid order from the list of unpaid orders
           setOrders((prevOrders) =>
@@ -56,7 +71,7 @@ const Unpaid: React.FC = () => {
           throw new Error(`Unexpected response status: ${response.status}`);
         }
       } catch (err: any) {
-        console.error("Error updating order status:", err);
+        console.error("Ошибка при обновлении статуса заказа:", err);
         setError("Не удалось обновить статус заказа. Попробуйте позже.");
       } finally {
         setLoading(false); // Reset loading state
@@ -66,11 +81,20 @@ const Unpaid: React.FC = () => {
     
     
     
+    
 
   
     useEffect(() => {
       fetchUnpaidOrders();
     }, []);
+
+
+
+
+     
+    const handleBack = () => {
+      navigate(-1); // Go back to the previous page
+    };
   
     return (
       <div className="min-h-screen bg-gray-100 p-8">
@@ -94,6 +118,12 @@ const Unpaid: React.FC = () => {
             <li>Неоплаченные</li>
           </ol>
         </nav>
+        <button
+        onClick={handleBack}
+        className="px-4 py-2 bg-blue-500 text-white rounded-md mb-4"
+      >
+        Назад
+      </button>
   
         {/* Feedback Section */}
         {loading && (
