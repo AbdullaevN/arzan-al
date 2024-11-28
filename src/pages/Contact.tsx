@@ -31,7 +31,7 @@ const ContactPage = () => {
           <li>Телефон: +996500735000   W/B, Telegram
           </li>
           <li>Email: arzanalcargo@gmail.com </li>
-          <li>Адрес: ул. Примерная, 123, Город, Страна</li>
+          {/* <li>Адрес: ул. Примерная, 123, Город, Страна</li> */}
         </ul>
       </div>
 

@@ -20,6 +20,8 @@ const ClientsPage: React.FC = () => {
 
   const [clients, setClients] = useState<Client[]>([]); // Список клиентов
   const navigate = useNavigate();
+  console.log(clients);
+  
 
   const handleNavigateToHistory = (id: string) => {
     setClientId(id); // Сохранить clientId в Zustand
@@ -38,10 +40,10 @@ const ClientsPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+    <div className="min-h-screen  p-8 container md:mx-auto ">
       {/* Хлебные крошки */}
       <nav className="text-sm mb-4">
-        <ol className="list-reset flex text-gray-500">
+        <ol className="list-reset flex text-gray-500 text-lg">
           <li>
             <a href="/dashboard" className="text-blue-500 hover:underline">
               Главная
@@ -80,6 +82,7 @@ const ClientsPage: React.FC = () => {
                 <td className="px-4 py-2 border-b text-center">{index + 1}</td>
                 <td className="px-4 py-2 border-b text-center">{client.clientId}</td>
                 <td className="px-4 py-2 border-b text-center">{client.phone}</td>
+                <td className="px-4 py-2 border-b text-center">{client.password}</td>
                 <td className="px-4 py-2 border-b text-center">
                   {client.city}
                 </td>

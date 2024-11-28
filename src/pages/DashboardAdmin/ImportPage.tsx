@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
 import * as XLSX from "xlsx";
 
 const ImportPage = () => {
@@ -6,11 +7,14 @@ const ImportPage = () => {
   const [extractedData, setExtractedData] = useState<{ weight: string; volume: string; cost: string }[]>([]); // Holds extracted data with cost
   const [file, setFile] = useState<File | null>(null); // Holds the file selected for upload
   const [pricePerKg, setPricePerKg] = useState<number>(); // Default price per kilogram in som
+  const navigate = useNavigate();
 
   useEffect(() => {
     const storedExtractedData = localStorage.getItem("trackData");
     const storedTableData = localStorage.getItem("tableData");
     const storedPrice = localStorage.getItem("price");
+
+
     console.log(storedPrice);
     
   
@@ -90,9 +94,59 @@ const ImportPage = () => {
     reader.readAsArrayBuffer(file);
   };
 
+
+  const handleBack = () => {
+    navigate(-1); 
+  };
+
   return (
     <div className="bg-image min-h-screen">
-      <div className="p-6 container flex flex-col items-start justify-start">
+
+
+
+
+
+
+
+
+
+
+
+
+
+      <div className="p-6 container md:mx-auto  flex flex-col items-start justify-start">
+
+
+
+
+      <nav className="text-sm mb-4">
+        <ol className="list-reset flex text-gray-500 text-lg" >
+          <li>
+            <a href="/dashboard" className="text-blue-500 hover:underline">
+              Главная
+            </a>
+          </li>
+          <li>
+            <span className="mx-2">/</span>
+          </li>
+          <li>Клиенты</li>
+        </ol>
+      </nav>
+
+      {/* Кнопка "Назад" */}
+      <button
+        onClick={handleBack}
+        className="px-4 py-2 bg-blue-500 text-white rounded-md mb-4"
+      >
+        Назад
+      </button>
+
+
+
+
+
+
+
         <div className="border border-gray-300 rounded-lg p-6 bg-white shadow-md md:w-3/5">
           <h2 className="text-lg font-semibold mb-4">Импорт трек-кодов</h2>
           <div className="mb-4">

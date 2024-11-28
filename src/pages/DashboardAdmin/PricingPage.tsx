@@ -18,9 +18,9 @@ const PricingPage: React.FC = () => {
   };
 
   return (
-    <div className="  min-h-screen bg-gray-100 p-8 w-full">
+    <div className="  min-h-screen   p-8 w-full container md:mx-auto">
       <nav className="text-sm mb-6 ">
-        <ol className="list-reset flex text-gray-500">
+        <ol className="list-reset flex text-gray-500 text-lg">
           <li>
             <a href="/dashboard" className="text-blue-500 hover:underline">
               Главная

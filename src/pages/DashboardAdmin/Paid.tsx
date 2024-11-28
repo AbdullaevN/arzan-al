@@ -57,10 +57,10 @@ const fetchUnpaidOrders = async () => {
   
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+    <div className="min-h-screen  p-8  container md:mx-auto">
       {/* Breadcrumbs */}
       <nav className="text-sm mb-4">
-      <ol className="list-reset flex text-gray-500">
+      <ol className="list-reset flex text-gray-500 text-lg">
           <li>
             <a href="/dashboard" className="text-blue-500 hover:underline">
               Главная
@@ -95,7 +95,7 @@ const fetchUnpaidOrders = async () => {
       )}
 
       {!loading && !error && (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto flex text-center">
           <table className="min-w-full bg-white rounded-lg shadow-lg">
             <thead>
               <tr>
@@ -105,7 +105,7 @@ const fetchUnpaidOrders = async () => {
                 <th className="px-4 py-2 border-b">Цена</th>
                 <th className="px-4 py-2 border-b">Дата создания</th>
                 <th className="px-4 py-2 border-b">Трек-код</th>
-                <th className="px-4 py-2 border-b">Действия</th>
+                {/* <th className="px-4 py-2 border-b">Действия</th> */}
               </tr>
             </thead>
             <tbody>
@@ -120,7 +120,7 @@ const fetchUnpaidOrders = async () => {
                       {new Date(order.createdDate * 1000).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-2 border-b">{order.trackCode}</td>
-                    <td className="px-4 py-2 border-b">
+                    {/* <td className="px-4 py-2 border-b">
                       <button
                     className="px-3 py-1 mr-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
                     onClick={() => markAsPaid(order._id)}
@@ -133,7 +133,7 @@ const fetchUnpaidOrders = async () => {
                       >
                         Удалить
                       </button>
-                    </td>
+                    </td> */}
                   </tr>
                 ))
               ) : (

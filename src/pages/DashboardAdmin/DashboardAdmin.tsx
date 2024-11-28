@@ -23,8 +23,8 @@ const DashboardAdmin: React.FC = () => {
   ];
 
   return (
-    <div className="bg-image min-h-svh">
-      <div className="p-8 container flex flex-col items-start w-full">
+    <div className="bg-image min-h-svh ">
+      <div className="p-8 container flex flex-col items-start w-full container md:mx-auto ">
         <h1 className="text-3xl font-bold text-start mb-8">Панель Администратора</h1>
         <div className="p-6 my-10 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer">
           <span>

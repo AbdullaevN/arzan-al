@@ -8,6 +8,9 @@ const Unpaid: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true); // State for loading indicator
     const [error, setError] = useState<string | null>(null); // State for error messages
 
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+
     const navigate = useNavigate();
 
     const { clientId } = useClientStore();
@@ -34,47 +37,48 @@ const Unpaid: React.FC = () => {
       }
     };
   
-    const markAsPaid = async (order: any) => {
+    const handlePaid = async (selectedOrder: Order) => {
+      if (!selectedOrder) {
+        setError("Client ID is missing or no order selected.");
+        return;
+      }
+    
+      const { trackCode } = selectedOrder;
+      const isConfirmed = window.confirm(
+        `Вы действительно хотите отметить заказ с трек-кодом "${trackCode}" как оплаченный?`
+      );
+    
+      if (!isConfirmed) {
+        return; // Exit if user cancels
+      }
+    
       try {
-        // Confirmation dialog
-        const confirmPayment = window.confirm(
-          `Вы действительно хотите отметить заказ с трек-кодом "${order.trackCode}" на сумму ${order.price} сом как оплаченный?`
+        // Send the request to update the order as paid
+        const response = await API.put(
+          `/api/orders/edit/${trackCode}`,
+          { ...selectedOrder, paid: true, dateOfPayment: Date.now() }, // Add dateOfPayment
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
         );
     
-        if (!confirmPayment) {
-          return; // Exit if the user cancels the action
-        }
-    
-        setError(null); // Clear previous errors
-        setLoading(true); // Set loading state
-    
-        // Include clientId in the updated order data
-        const updatedOrder = {
-          ...order,
-          paid: true,
-          clientId: clientId, // Add clientId to the body
-        };
-    
-        console.log(`Отправка запроса на сервер для трек-кода: ${order.trackCode}`);
-        
-        // Make the PUT request to update the order
-        const response = await API.put(`/api/orders/edit/${order.trackCode}`, updatedOrder);
-    
         if (response.status === 200) {
-          console.log(`Ответ сервера:`, response.data);
-    
-          // Remove the paid order from the list of unpaid orders
+          // Update the order in the local state
           setOrders((prevOrders) =>
-            prevOrders.filter((o) => o.trackCode !== order.trackCode)
+            prevOrders.map((order) =>
+              order.trackCode === trackCode
+                ? { ...order, paid: true, dateOfPayment: Date.now() }
+                : order
+            )
           );
         } else {
-          throw new Error(`Unexpected response status: ${response.status}`);
+          setError("Failed to update order.");
         }
       } catch (err: any) {
-        console.error("Ошибка при обновлении статуса заказа:", err);
-        setError("Не удалось обновить статус заказа. Попробуйте позже.");
-      } finally {
-        setLoading(false); // Reset loading state
+        setError("Error updating order: " + (err.message || "Unknown error"));
+        console.error("Update order error:", err);
       }
     };
     
@@ -97,10 +101,10 @@ const Unpaid: React.FC = () => {
     };
   
     return (
-      <div className="min-h-screen bg-gray-100 p-8">
+      <div className="min-h-screen   p-8  container md:mx-auto">
         {/* Breadcrumbs */}
         <nav className="text-sm mb-4">
-          <ol className="list-reset flex text-gray-500">
+          <ol className="list-reset flex text-gray-500 text-lg">
             <li>
               <a href="/dashboard" className="text-blue-500 hover:underline">
                 Главная
@@ -145,7 +149,7 @@ const Unpaid: React.FC = () => {
                   <th className="px-4 py-2 border-b">Дата создания</th>
                   <th className="px-4 py-2 border-b">Трек-код</th>
                   <th className="px-4 py-2 border-b">Оплачен</th>
-                  <th className="px-4 py-2 border-b">Действия</th>
+                  {/* <th className="px-4 py-2 border-b">Действия</th> */}
                 </tr>
               </thead>
               <tbody className="">
@@ -165,18 +169,18 @@ const Unpaid: React.FC = () => {
                       </td>
                       <td className="px-4 py-2 border-b">
                       <button
-  className="px-3 py-1 mr-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
-  onClick={() => markAsPaid(order)}
->
-  Оплачено
-</button>
+                      className={`font-semibold py-2 px-4 rounded-lg ${
+                        order.paid
+                          ? "bg-green-500 text-white cursor-not-allowed"
+                          : "bg-blue-500 hover:bg-blue-600 text-white"
+                      }`}
+                      disabled={order.paid}
+                      onClick={() => handlePaid(order)}
+                    >
+                      {order.paid ? "Оплачено" : "Оплатить"}
+                    </button>
 
-                        {/* <button
-                          className="px-3 py-1 mr-2 text-sm bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none"
-                          onClick={() => console.log("Delete order:", order.trackCode)}
-                        >
-                          Удалить
-                        </button> */}
+                      
                       </td>
                     </tr>
                   ))

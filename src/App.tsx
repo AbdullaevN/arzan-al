@@ -12,14 +12,11 @@ import ClientsPage from "./pages/DashboardAdmin/ClientsPage";
 import HistoryPage from "./pages/DashboardAdmin/HistoryPage";
 import OrderDetailsPage from "./pages/DashboardAdmin/OrderDetailsPage"; // Import for individual order details
 import ImportPage from "./pages/DashboardAdmin/ImportPage";
-import ImportIssuedProductsPage from "./pages/DashboardAdmin/ImportIssuedProductsPage";
-import IssueProductsPage from "./pages/DashboardAdmin/IssueProductsPage";
+ 
 import PaymentsPage from "./pages/DashboardAdmin/PaymentsPage";
 import ContactPage from "./pages/Contact";
 import AddOrder from "./pages/DashboardAdmin/AddOrder";
- import EditOrderPage from "./pages/DashboardAdmin/EditOrderPage";
-import OrderManagement from "./pages/DashboardAdmin/OrderManagement";
-import Unpaid from "./pages/DashboardAdmin/Unpaid";
+  import Unpaid from "./pages/DashboardAdmin/Unpaid";
 import Paid from "./pages/DashboardAdmin/Paid";
 import { PriceProvider } from "./context/PriceProvider";
 
@@ -60,22 +57,19 @@ function App() {
         <Route path="/unpaid" element={<Unpaid />} />
         <Route path="/paid" element={<Paid />} />
 
-        <Route path="/issued-imports" element={<ImportIssuedProductsPage />} />
-        <Route path="/issue-product" element={<IssueProductsPage />} />
+ 
 
         <Route path="/contact" element={<ContactPage />} />
-        <Route path="/management" element={<OrderManagement />} />
-
+ 
         
 
         
         
         
         {/* Define the route for order details page with /history/:id path */}
-        <Route path="/history/:id" element={<OrderDetailsPage />} />
+        <Route path="/details/:trackCode" element={<OrderDetailsPage />} />
 
-         <Route path="/edit/:trackCode" element={<EditOrderPage />} />
-
+ 
 
 
         <Route

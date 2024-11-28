@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { API } from "../../constants/api";
 import { useClientStore } from "../../store/useClient"; // For getting clientId from Zustand store
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -18,6 +19,8 @@ const HistoryPage: React.FC<OrderListProps> = ({onDeleteOrder}) => {
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const navigate = useNavigate();
+
   const clientId = useClientStore();
   console.log(clientId, );
   
@@ -124,11 +127,19 @@ const HistoryPage: React.FC<OrderListProps> = ({onDeleteOrder}) => {
       console.error('Ошибка при удалении заказа:', err);
     }
   };
+  const handleOrderDetails = (trackCode: string) => {
+    navigate(`/details/${trackCode}`);
+  };
+
+
+  const handleBack = () => {
+    navigate(-1); // Go back to the previous page
+  };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <nav className="text-sm mb-4">
-        <ol className="list-reset flex text-gray-500">
+    <div className="min-h-screen  p-8 container md:mx-auto ">
+      <nav className="text-sm mb-4 ">
+        <ol className="list-reset flex text-gray-500 text-lg">
           <li>
             <a href="/dashboard" className="text-blue-500 hover:underline">
               Главная
@@ -140,6 +151,15 @@ const HistoryPage: React.FC<OrderListProps> = ({onDeleteOrder}) => {
           <li>Заказы</li>
         </ol>
       </nav>
+
+
+           {/* Кнопка "Назад" */}
+           <button
+        onClick={handleBack}
+        className="px-4 py-2 bg-blue-500 text-white rounded-md mb-4"
+      >
+        Назад
+      </button>
 
       <input
         type="text"
@@ -159,47 +179,69 @@ const HistoryPage: React.FC<OrderListProps> = ({onDeleteOrder}) => {
               <tr>
                 <th className="px-4 py-2 border-b">№</th>
                 <th className="px-4 py-2 border-b">Название</th>
-                <th className="px-4 py-2 border-b">Количество</th>
-                <th className="px-4 py-2 border-b">Цена</th>
-                <th className="px-4 py-2 border-b">Дата создания</th>
                 <th className="px-4 py-2 border-b">Трек-код</th>
-                <th className="px-4 py-2 border-b">Оплачено</th>
+                {/* <th className="px-4 py-2 border-b">Количество</th> */}
+                {/* <th className="px-4 py-2 border-b">Цена</th> */}
+                <th className="px-4 py-2 border-b">Дата создания</th>
+                {/* <th className="px-4 py-2 border-b">Оплачено</th> */}
                 <th className="px-4 py-2 border-b">Действия</th>
+              
+                
               </tr>
             </thead>
             <tbody>
               {orders.map((order, index) => (
                 <tr key={order.trackCode}>
-                  <td className="px-4 py-2 border-b text-center">{index + 1}</td>
-                  <td className="px-4 py-2 border-b text-center">{order.name}</td>
-                  <td className="px-4 py-2 border-b text-center">{order.amount}</td>
-                  <td className="px-4 py-2 border-b text-center">{order.price}</td>
+                  <td className="px-4 py-2 border-b text-center">
+                    {index + 1}
+                  </td>
+                  <td className="px-4 py-2 border-b text-center">
+                    {order.name}
+                  </td>
+                  <td className="px-4 py-2 border-b text-center">
+                    {order.trackCode}
+                  </td>
+
                   <td className="px-4 py-2 border-b text-center">
                     {new Date(order.createdDate).toLocaleDateString()}
                   </td>
-                  <td className="px-4 py-2 border-b text-center">{order.trackCode}</td>
-                  <td className="px-4 py-2 border-b text-center">{order.paid ? "Да" : "Нет"}</td>
-                  <td className="px-4 py-2 border-b text-center">
+                  <td className="px-1 py-2 border-b text-center justify-center gap-5 flex">
                     <button
-                      className="px-3 py-1 mr-2 bg-blue-500 text-white rounded-md"
+                      className="   text-white rounded-md"
                       onClick={() => openModal(order)}
                     >
-                      Редактировать
+                      ✏️
                     </button>
+
+
                     <button
-  onClick={() => {
-    if (!order.trackCode || !order.clientId) {
-      console.error('trackCode или clientId не найдены для заказа:', order);
-      return;
-    }
-    deleteOrder(order.trackCode, order.clientId);  // Pass clientId here
-  }}
+                      onClick={() => {
+                        if (!order.trackCode || !order.clientId) {
+                          console.error(
+                            "trackCode или clientId не найдены для заказа:",
+                            order
+                          );
+                          return;
+                        }
+                        deleteOrder(order.trackCode, order.clientId); // Pass clientId here
+                      }}
+                      className="text-red-500 hover:text-red-700"
+                      title="Удалить заказ"
+                    >
+                      🗑️
+                    </button>
+
+
+
+                    <button
+  onClick={() => navigate(`/details/${order.trackCode}`)} // Перенаправление на страницу деталей
   className="text-red-500 hover:text-red-700"
-  title="Удалить заказ"
->
-  🗑️
-</button>
+                      title="Подробнее"
+                    >
+                      📜
+                    </button>
                   </td>
+                 
                 </tr>
               ))}
             </tbody>
@@ -212,7 +254,9 @@ const HistoryPage: React.FC<OrderListProps> = ({onDeleteOrder}) => {
           <div className="bg-white p-6 rounded-lg w-96">
             <h2 className="text-xl font-semibold mb-4">Редактировать заказ</h2>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Название</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Название
+              </label>
               <input
                 type="text"
                 value={selectedOrder.name}
@@ -221,7 +265,9 @@ const HistoryPage: React.FC<OrderListProps> = ({onDeleteOrder}) => {
               />
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Цена</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Цена
+              </label>
               <input
                 type="number"
                 value={selectedOrder.price}
