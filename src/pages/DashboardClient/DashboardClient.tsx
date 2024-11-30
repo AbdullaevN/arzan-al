@@ -5,8 +5,13 @@ import { Link } from 'react-router-dom';
 import AddItemModal from '../../components/ClientComponents/AddItemModal';
 import InformationModal from '../../components/ClientComponents/InformationModal';
 import { API } from '../../constants/api';
-import { useClientStore } from '../../store/useClient';
+ 
 
+interface AccountDetails {
+  email: string;
+  name: string;
+  role: string;
+}
 interface Order {
   id: string;
   name: string;
@@ -28,14 +33,25 @@ interface Order {
   deliveredToClient: boolean;
 }
 
+
+
+
+
 const DashboardClient: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+  
 
-  const { setClientId } = useClientStore();  
+  const [accountDetails, setAccountDetails] = useState<AccountDetails | null>(null);
+
+ 
+  const [clientId, setClientId] = useState(localStorage.getItem('clientId') || '');
 
 
+ console.log(clientId);
+
+  
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -108,16 +124,66 @@ const DashboardClient: React.FC = () => {
       console.error('Ошибка при удалении заказа:', err);
     }
   };
+
+
+
+
+
+
+
+  // useEffect(() => {
+  //   const fetchAccountDetails = async () => {
+  //     if (!setClientId) {
+  //       setError('ID клиента не найден. Пожалуйста, обновите страницу.');
+  //       return;
+  //     }
+
+  //     try {
+  //       const res = await API.get(`/api/orders/allClients/${setClientId}`);
+  //       setAccountDetails(res.data);
+  //       console.log(res, 'RES');
+        
+  //     } catch (e) {
+  //       console.error('Error fetching account details:', e);
+  //       setError('Ошибка при получении данных аккаунта.');
+  //     }
+  //   };
+
+  //   fetchAccountDetails();
+  // }, [setClientId]);
   
   
 
   return (
     <div className='bg-image  min-h-screen'>
-      <div className="container  px-4 flex flex-col items-start">
+      <div className="container md:mx-auto  px-4 flex flex-col items-start">
         <h1 className="py-8 text-2xl font-bold">Добро пожаловать в Личный Кабинет</h1>
          {/* {getNotificationData().totalOrders > 0 && (
           <Notification {...getNotificationData()} />
         )} */}
+
+
+
+
+
+
+{/* <div className="p-6">
+      {error && <p className="text-red-600 font-bold">{error}</p>}
+
+      {accountDetails ? (
+        <div className="mb-6">
+          <h2 className="text-xl font-bold">Данные аккаунта</h2>
+          <p><strong>Имя:</strong> {accountDetails.name}</p>
+          <p><strong>Email:</strong> {accountDetails.email}</p>
+          <p><strong>Роль:</strong> {accountDetails.role}</p>
+        </div>
+      ) : (
+        <p>Загрузка данных аккаунта...</p>
+      )}
+    </div> */}
+
+
+
         <div className="flex flex-col md:flex-row items-start gap-4 p-4">
           <button
             className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700"

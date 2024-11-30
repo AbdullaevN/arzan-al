@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { API } from "../../constants/api";
-import { useClientStore } from "../../store/useClient";
+import usePriceStore from "../../store/useClient";
 
 import * as XLSX from "xlsx"; // Подключение библиотеки для работы с Excel
 
@@ -35,14 +35,13 @@ type Order = {
 
 
 interface AddItemModalProps {
-  isOpen: boolean;
-  closeModal: () => void;
+ 
   addNewOrder: (newOrder: OrderDetails) => void;
 }
 
 
  
-const PaymentsPage: React.FC<AddItemModalProps> = () => {
+const PaymentsPage: React.FC<AddItemModalProps> = ({addNewOrder}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [isPaid, setIsPaid] = useState(false);
@@ -55,7 +54,10 @@ const PaymentsPage: React.FC<AddItemModalProps> = () => {
 
 
   const [trackCode, setTrackCode] = useState("");
+  const [code, setCode] = useState("");
+
   const [weight, setWeight] = useState("");
+  const [amount, setAmount] = useState("");
 
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
@@ -65,8 +67,10 @@ const PaymentsPage: React.FC<AddItemModalProps> = () => {
   const [filteredOrders, setFilteredOrders] = useState<Order[]>(orders);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  const { clientId } = useClientStore();
-  console.log(clientId, '12');
+ 
+
+  const { price, fetchPrice } = usePriceStore();
+
   
 
 
@@ -297,13 +301,21 @@ const PaymentsPage: React.FC<AddItemModalProps> = () => {
       setTrackCode(e.target.value);
     };
 
-    // const handleWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //   setWeight(e.target.value);
-    // };
+
+    const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setCode(e.target.value);
+    };
+   
+
+    const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setAmount(e.target.value);
+    };
 
 
 
-    const price = parseFloat(localStorage.getItem("price") || "0");
+
+
+    // const price = parseFloat(localStorage.getItem("price") || "0");
   
     const handleWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const inputWeight = parseFloat(e.target.value) || 0;
@@ -357,49 +369,38 @@ const PaymentsPage: React.FC<AddItemModalProps> = () => {
 // 
 // 
 const handleAdd = async () => {
-  // closeModal();
   try {
+    const totalSum = Number(weight) * Number(amount);  // Расчет итоговой суммы
+
     const res = await API.post("/api/orders/create", {
       issued: false,
-      price: 0,
-      name: name,
+      price: totalSum,  // Передаем итоговую сумму
+      name: 'name',
       createdDate: Date.now(),
       paid: false,
-      weight: 0,
-      amount: 1,
+      weight: weight,
+      amount: amount,
       dateOfPayment: 0,
       deliveredDate: 0,
       deliverTo: "Tokmok",
       receiventInChina: false,
       trackCode: trackCode,
-      clientId: clientId,
-       warehouseTokmok: false,
+      clientId: code, 
+      warehouseTokmok: false,
       deliveredToClient: false,
     });
 
-    addNewOrder({
-      id: res.data.id, // assuming server returns id
-      name: name,
-      createdDate: new Date().toString(),
-      price: 0,
-      weight: 0,
-      amount: 1,
-      dateOfPayment: 0,
-      deliveredDate: 0,
-      deliverTo: "Tokmok",
-      trackCode: trackCode,
-      clientId:clientId,
-      issued: false,
-      paid: false,
-      receiventInChina: false,
-       warehouseTokmok: false,
-      deliveredToClient: false,
-    });
+    console.log('before');
+  
+
+    console.log('after');
+    setIsModalOpen(!isModalOpen);
+    fetchOrders();
   } catch (e) {
     console.error(e);
-    alert("Ошибка при добавлении заказа. Попробуйте снова позже.");
   }
 };
+
 
 
 
@@ -419,6 +420,11 @@ useEffect(() => {
    useEffect(() => {
     fetchOrders();
   }, [searchTerm]);
+
+
+  useEffect(() => {
+    fetchPrice(); // Загружаем актуальную цену при монтировании компонента
+  }, [fetchPrice]);
 
 
  console.log(orders);
@@ -517,87 +523,76 @@ useEffect(() => {
        </div>
 
 
-       {isModalOpen && selectedOrder && (
+       {isModalOpen && (
   <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
     <div className="bg-white rounded-lg shadow-lg w-96 p-6">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Оплата заказа</h2>
+      <h2 className="text-xl font-semibold text-gray-800 mb-4">Добавление заказа</h2>
 
-      {/* Форма */}
       <form>
+        {/* Поля формы */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Трек код</label>
+          <input
+            type="text"
+            value={trackCode}
+            onChange={(e) => setTrackCode(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            placeholder="Введите трек код"
+          />
+        </div>
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">Код клиента</label>
           <input
             type="text"
-            id="trackCode"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-            placeholder="Введите трек код"
-            value={trackCode}
-            onChange={handleTrackCodeChange}
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            placeholder="Введите код клиента"
           />
         </div>
-
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">Количество</label>
           <input
             type="text"
-            id="trackCode"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
             placeholder="Введите количество"
-            // value={trackCode}
-            // onChange={handleTrackCodeChange}
           />
         </div>
-
-      
-
-        {/* Редактируемое поле для веса */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">Вес (кг)</label>
           <input
             type="number"
-            className="w-full p-2 border border-gray-300 rounded-lg"
             value={weight}
-            onChange={handleWeightChange}
-            // value={selectedOrder.weight}
-            // onChange={(e) => {
-            //   const updatedOrder = { ...selectedOrder, weight: e.target.value };
-            //   setSelectedOrder(updatedOrder);  
-            // }}
+            onChange={(e) => setWeight(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            placeholder="Введите вес"
           />
         </div>
-
-       
-
-        {/* Вычисление итоговой суммы */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">Итоговая сумма</label>
           <input
             type="number"
-            className="w-full p-2 border border-gray-300 rounded-lg"
-            // value={selectedOrder.weight * (parseFloat(localStorage.getItem("price")) || selectedOrder.price)}
-            // readOnly
-            value={totalSum.toFixed(2)} // Display total sum with 2 decimal points
+            value={totalSum.toFixed(2)}
             readOnly
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
           />
         </div>
-
-        {/* Добавление чекбокса для подтверждения оплаты */}
-      
 
         {/* Кнопки */}
         <div className="flex justify-end gap-4">
           <button
             type="button"
-            className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-2 px-4 rounded-lg"
+            className="bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded-lg"
             onClick={() => toggleModal(null)}
           >
             Отмена
           </button>
           <button
             type="button"
-            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg"
+            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg"
             onClick={handleAdd}
-            // disabled={!isPaid}  
           >
             Сохранить
           </button>
@@ -611,12 +606,13 @@ useEffect(() => {
 
 
 
+
       {/* Payment Table */}
       <div className="border border-gray-300 rounded-lg bg-white shadow-md mb-6 overflow-x-auto flex text-center">
         <table className="min-w-full bg-white">
         <thead>
     <tr >
-      {["№", "Дата оплаты", "Код", "Имя", "Сумма", "Вес", "Кол-во", "Действие"].map((header) => (
+      {["№", "Дата оплаты", "Код",   "Сумма", "Вес", "Кол-во", "Действие"].map((header) => (
         <th key={header} className="py-3 px-4 border-b text-center text-sm font-semibold text-gray-700  ">
           {header}
         </th>
@@ -638,9 +634,9 @@ useEffect(() => {
                   <td className="py-3 px-4 border-b text-gray-700">
                     {order.trackCode}
                   </td>
-                  <td className="py-3 px-4 border-b text-gray-700">
+                  {/* <td className="py-3 px-4 border-b text-gray-700">
                     {order.name}
-                  </td>
+                  </td> */}
                   <td className="py-3 px-4 border-b text-gray-700">
                     {order.price}
                   </td>
@@ -676,35 +672,46 @@ useEffect(() => {
               </tr>
             )}
           </tbody>
-
-
-
-
         </table>
       </div>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{/* STATISTIC */}
       {/* Summary Blocks */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-bold text-xl">
         {/* Clients Count */}
-        <div className="p-4 bg-blue-100 rounded-lg">
+        <div className="p-4 bg-blue-300 rounded-lg">
           <div className="text-sm text-gray-700">Кол-во клиентов: {stats.clientsCount} шт</div>
           <div className="text-sm text-gray-700">Оплатил: {stats.paidClients} шт</div>
           <div className="text-sm text-gray-700">Осталось: {stats.remainingClients} шт</div>
         </div>
         {/* Total Amount */}
-        <div className="p-4 bg-green-100 rounded-lg">
+        <div className="p-4 bg-green-300 rounded-lg">
           <div className="text-sm text-gray-700">Общая сумма: {stats.totalAmount} сом</div>
           <div className="text-sm text-gray-700">Оплатил: {stats.paidAmount} сом</div>
           <div className="text-sm text-gray-700">Осталось: {stats.remainingAmount} сом</div>
         </div>
         {/* Total Weight */}
-        <div className="p-4 bg-yellow-100 rounded-lg">
+        <div className="p-4 bg-yellow-300 rounded-lg">
           <div className="text-sm text-gray-700">Общий вес: {stats.totalWeight.toFixed(2)} кг</div>
           <div className="text-sm text-gray-700">Оплатил за: {stats.paidWeight.toFixed(2)} кг</div>
           <div className="text-sm text-gray-700">Осталось: {stats.remainingWeight.toFixed(2)} кг</div>
         </div>
         {/* Product Count */}
-        <div className="p-4 bg-red-100 rounded-lg">
+        <div className="p-4 bg-red-300 rounded-lg">
           <div className="text-sm text-gray-700">Кол-во товаров: {stats.productCount} шт</div>
           <div className="text-sm text-gray-700">Оплачено за: {stats.paidProducts} шт</div>
           <div className="text-sm text-gray-700">Осталось: {stats.remainingProducts} шт</div>

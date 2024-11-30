@@ -23,10 +23,7 @@ const ClientsPage: React.FC = () => {
   console.log(clients);
   
 
-  const handleNavigateToHistory = (id: string) => {
-    setClientId(id); // Сохранить clientId в Zustand
-    navigate(`/history`);
-  };
+ 
 
   useEffect(() => {
     API
@@ -38,6 +35,7 @@ const ClientsPage: React.FC = () => {
   const handleBack = () => {
     navigate(-1); // Go back to the previous page
   };
+  
 
   return (
     <div className="min-h-screen  p-8 container md:mx-auto ">
@@ -82,18 +80,11 @@ const ClientsPage: React.FC = () => {
                 <td className="px-4 py-2 border-b text-center">{index + 1}</td>
                 <td className="px-4 py-2 border-b text-center">{client.clientId}</td>
                 <td className="px-4 py-2 border-b text-center">{client.phone}</td>
-                <td className="px-4 py-2 border-b text-center">{client.password}</td>
-                <td className="px-4 py-2 border-b text-center">
-                  {client.city}
-                </td>
-                {/* <td className="px-4 py-2 border-b text-center">
-                  <button
-                    className="px-3 py-1 text-sm bg-blue-500 text-white rounded-md"
-                    onClick={() => handleNavigateToHistory(client.clientId)}
-                  >
-                    История заказов
-                  </button>
-                </td> */}
+                <td className="px-4 py-2 border-b text-center">{client.city}</td>
+                {/* <td className="px-4 py-2 border-b text-center">{client.password}</td> */}
+
+               
+               
               </tr>
             ))}
           </tbody>

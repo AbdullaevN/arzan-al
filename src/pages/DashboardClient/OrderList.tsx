@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { API } from "../../constants/api";
-import EditOrderModal from "./EditItemModal";
- 
+  
 interface Order {
   id: string;
   name: string;
@@ -91,13 +90,7 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder, onU
           <h3 className="text-lg font-semibold">Заказ № {order.trackCode}</h3>
           <h3 className="text-lg font-semibold">Имя: {order.name}</h3>
           <div className="flex space-x-2">
-            {/* <button
-              onClick={() => handleEdit(order)}
-              className="text-blue-500 hover:text-blue-700"
-              title="Редактировать заказ"
-            >
-              ✏️
-            </button> */}
+          
             <button
   onClick={() => {
     if (!order.trackCode || !order.clientId) {
@@ -170,14 +163,7 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder, onU
   )}
 </div>
 
-
-      {isModalOpen && selectedOrder && (
-        <EditOrderModal
-          order={selectedOrder}
-          onClose={closeModal}
-          onSave={onUpdateOrder} // Передаем функцию для обновления
-        />
-      )}
+ 
     </div>
   );
 };

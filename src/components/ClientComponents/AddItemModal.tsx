@@ -34,10 +34,10 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal, addNewO
   const [warehouseChina, setWarehouseChina] = useState(false); // Новое состояние
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const { clientId } = useClientStore();
+ 
 
-  console.log(clientId,'ll');
-
+  const clientId = localStorage.getItem('clientId');
+  console.log(clientId, 'addItem');
   
 
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,25 +74,25 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal, addNewO
         deliveredToClient: false,
       });
 
-      addNewOrder({
-        id: res.data.id, // assuming server returns id
-        name: description,
-        createdDate: new Date().toString(),
-        price: 0,
-        weight: 0,
-        amount: 1,
-        dateOfPayment: 0,
-        deliveredDate: 0,
-        deliverTo: "Tokmok",
-        trackCode: trackCode,
-        clientId:clientId,
-        issued: false,
-        paid: false,
-        receiventInChina: false,
-        warehouseChina: warehouseChina, // Устанавливаем новое состояние
-        warehouseTokmok: false,
-        deliveredToClient: false,
-      });
+      // addNewOrder({
+      //   id: res.data.id, // assuming server returns id
+      //   name: description,
+      //   createdDate: new Date().toString(),
+      //   price: 0,
+      //   weight: 0,
+      //   amount: 1,
+      //   dateOfPayment: 0,
+      //   deliveredDate: 0,
+      //   deliverTo: "Tokmok",
+      //   trackCode: trackCode,
+      //   clientId:clientId,
+      //   issued: false,
+      //   paid: false,
+      //   receiventInChina: true,
+      //   warehouseChina: warehouseChina, // Устанавливаем новое состояние
+      //   warehouseTokmok: false,
+      //   deliveredToClient: false,
+      // });
     } catch (e) {
       console.error(e);
       alert("Ошибка при добавлении заказа. Попробуйте снова позже.");

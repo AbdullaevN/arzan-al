@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { API } from "../../constants/api";
-import { useClientStore } from "../../store/useClient"; // For getting clientId from Zustand store
-import { useNavigate } from "react-router-dom";
+ import { useNavigate } from "react-router-dom";
 
 
 
@@ -21,8 +20,7 @@ const HistoryPage: React.FC<OrderListProps> = ({onDeleteOrder}) => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const navigate = useNavigate();
 
-  const clientId = useClientStore();
-  console.log(clientId, );
+ 
   
 
 

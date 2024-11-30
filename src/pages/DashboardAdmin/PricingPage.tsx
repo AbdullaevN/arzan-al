@@ -1,16 +1,42 @@
-// src/pages/PricingPage.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import usePriceStore from '../../store/useClient';
- 
+import { API } from '../../constants/api';
+
 const PricingPage: React.FC = () => {
   const navigate = useNavigate();
-  const { price, setPrice } = usePriceStore(); // Получаем состояние и функцию обновления из Zustand
+  const { price, setPrice } = usePriceStore();
   const [inputPrice, setInputPrice] = useState(price);
+  const [loading, setLoading] = useState(false);
 
-  const handleSave = () => {
-    setPrice(inputPrice); // Сохраняем цену через Zustand
-    navigate('/dashboard');
+  useEffect(() => {
+     const fetchPrice = async () => {
+      try {
+        setLoading(true);
+        const response = await API.get('/api/orders/get-price');
+        setInputPrice(response.data.price);
+      } catch (error) {
+        console.error('Error fetching price:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPrice();
+  }, []);
+
+  const handleSave = async () => {
+    try {
+      setLoading(true);
+      await API.put('/api/orders/set-price', { price: Number(inputPrice) });
+      setPrice(inputPrice); 
+      // navigate('/dashboard');
+    } catch (error) {
+      console.error('Error saving price:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {
@@ -18,8 +44,8 @@ const PricingPage: React.FC = () => {
   };
 
   return (
-    <div className="  min-h-screen   p-8 w-full container md:mx-auto">
-      <nav className="text-sm mb-6 ">
+    <div className="min-h-screen p-8 w-full container md:mx-auto">
+      <nav className="text-sm mb-6">
         <ol className="list-reset flex text-gray-500 text-lg">
           <li>
             <a href="/dashboard" className="text-blue-500 hover:underline">
@@ -33,7 +59,7 @@ const PricingPage: React.FC = () => {
         </ol>
       </nav>
 
-      <div className="bg-white p-6 rounded-lg shadow-lg w-4/6 ">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-4/6">
         <label htmlFor="price" className="block text-lg font-semibold text-gray-700 mb-4">
           Введите цену
         </label>
@@ -44,6 +70,7 @@ const PricingPage: React.FC = () => {
           onChange={(e) => setInputPrice(e.target.value)}
           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Введите цену"
+          disabled={loading} // Disable input during loading
         />
       </div>
 
@@ -57,8 +84,9 @@ const PricingPage: React.FC = () => {
         <button
           onClick={handleSave}
           className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
+          disabled={loading} // Disable button during loading
         >
-          Сохранить
+          {loading ? 'Сохранение...' : 'Сохранить'}
         </button>
       </div>
     </div>

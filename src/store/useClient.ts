@@ -1,37 +1,23 @@
-// src/store/usePriceStore.ts
-import { create } from 'zustand';
-
-interface PriceStore {
-  price: string;
-  setPrice: (price: string) => void;
-
+import {create} from 'zustand';
+import { API } from '../constants/api';
  
+interface PriceState {
+  price: number;
+  setPrice: (price: number) => void;
+  fetchPrice: () => Promise<void>;
 }
-interface ClientStore {
-  clientId: string | null;
-  setClientId: (id: string) => void;
-}
 
-const usePriceStore = create<PriceStore>((set) => ({
-
-
-  price: localStorage.getItem('price') || '0', // Загружаем цену из localStorage
-  setPrice: (price: string) => {
-    set({ price });
-    localStorage.setItem('price', price); // Сохраняем цену в localStorage
+const usePriceStore = create<PriceState>((set) => ({
+  price: 0, // Начальное значение
+  setPrice: (price) => set({ price }),
+  fetchPrice: async () => {
+    try {
+      const response = await API.get('/api/orders/get-price');
+      set({ price: response.data.price });
+    } catch (error) {
+      console.error('Error fetching price:', error);
+    }
   },
 }));
 
-
-
-
-export const useClientStore = create<ClientStore>((set) => ({
-  clientId: localStorage.getItem('clientId'), // Load from localStorage
-  setClientId: (id: string) => {
-    set({ clientId: id });
-    localStorage.setItem('clientId', id); // Save to localStorage
-  },
-}));
-
-
-export default usePriceStore ;
+export default usePriceStore;

@@ -7,7 +7,7 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ setUserRole }) => {
-  const [email, setEmail] = useState('');
+  const [clientId, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);  // Add loading state
@@ -19,7 +19,7 @@ const Login: React.FC<LoginProps> = ({ setUserRole }) => {
     setLoading(true); // Set loading to true when the request starts
 
     // Проверка на админские креды
-    if (email === 'admin' && password === 'admin') {
+    if (clientId === 'admin' && password === 'admin') {
       localStorage.setItem('userRole', 'admin');
       localStorage.setItem('token', 'admin');
       setUserRole('admin');
@@ -27,20 +27,25 @@ const Login: React.FC<LoginProps> = ({ setUserRole }) => {
     } else {
       try {
         const res = await API.post('/api/auth/login', {
-          clientId: email,
+          clientId: clientId,
           password: password,
         });
 
-        console.log('API Response:', res.data.id); // Лог ответа от API
+        console.log('API Response:', res); // Лог ответа от API
 
         if (res.data && res.data.token) {
           localStorage.setItem('token', res.data.token);
           localStorage.setItem('userRole', 'client');
-          localStorage.setItem('clientId', res.clientId);
+          localStorage.setItem('clientId', clientId);
+          setUserRole('client');
 
-          console.log('LocalStorage after saving:', localStorage.getItem('token'), localStorage.getItem('userRole'));
+          // console.log(  setUserRole('client'););
+          
+// console.log(clientId);
 
-          if (email === 'admin') {
+          // console.log('LocalStorage after saving:', localStorage.getItem('token'), localStorage.getItem('userRole'));
+
+          if (clientId === 'admin') {
             localStorage.setItem('userRole', 'admin');
             setUserRole('admin');
             navigate('/dashboard'); // Перенаправление на админскую панель
@@ -64,14 +69,14 @@ const Login: React.FC<LoginProps> = ({ setUserRole }) => {
     <div className='bg-image'>
       <div className="flex items-center justify-center min-h-screen py-10">
         <div className="w-full max-w-md p-8 bg-white shadow-lg rounded-lg">
-          <h2 className="text-2xl font-semibold text-center mb-6">Войти</h2>
+          <h2 className="text-2xl font-semibold text-center mb-6">Вход</h2>
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">Код</label>
+              <label htmlFor="clientId" className="block text-sm font-medium text-gray-700">Код</label>
               <input
-                id="email"
-                name="email"
-                value={email}
+                id="clientId"
+                name="clientId"
+                value={clientId}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full mt-2 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-300"

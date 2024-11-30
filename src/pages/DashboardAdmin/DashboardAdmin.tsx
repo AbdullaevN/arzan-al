@@ -2,16 +2,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePrice } from '../../context/PriceProvider';
-import usePriceStore, { useClientStore } from '../../store/useClient';
+import usePriceStore from '../../store/useClient';
  
 const DashboardAdmin: React.FC = () => {
   const navigate = useNavigate();
   // const { price } = usePrice();
-  const { price } = usePriceStore(); // Получаем цену из Zustand
-
-  const { clientId } = useClientStore();
-
-  console.log(clientId,'ll');
+  const { price } = usePriceStore();  
+ 
 
 
   const sections = [

@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { API } from "../../constants/api";
 import { useNavigate } from "react-router-dom";
-import { useClientStore } from "../../store/useClient";
-
+ 
 const Unpaid: React.FC = () => {
     const [orders, setOrders] = useState<any[]>([]); // State for unpaid orders
     const [loading, setLoading] = useState<boolean>(true); // State for loading indicator
@@ -13,8 +12,7 @@ const Unpaid: React.FC = () => {
 
     const navigate = useNavigate();
 
-    const { clientId } = useClientStore();
-    console.log(clientId, '12');
+ 
   
     // Function to fetch unpaid orders
     const fetchUnpaidOrders = async () => {
@@ -167,7 +165,7 @@ const Unpaid: React.FC = () => {
                       <td className="px-4 py-2 border-b">
                         {order.paid ? "Да" : "Нет"}
                       </td>
-                      <td className="px-4 py-2 border-b">
+                      {/* <td className="px-4 py-2 border-b">
                       <button
                       className={`font-semibold py-2 px-4 rounded-lg ${
                         order.paid
@@ -181,7 +179,7 @@ const Unpaid: React.FC = () => {
                     </button>
 
                       
-                      </td>
+                      </td> */}
                     </tr>
                   ))
                 ) : (
