@@ -1,17 +1,12 @@
 import { useEffect, useState } from 'react';
 import { OrderList } from './OrderList';
-import Notification from './Notification';
-import { Link } from 'react-router-dom';
+ import { Link } from 'react-router-dom';
 import AddItemModal from '../../components/ClientComponents/AddItemModal';
 import InformationModal from '../../components/ClientComponents/InformationModal';
 import { API } from '../../constants/api';
  
 
-interface AccountDetails {
-  email: string;
-  name: string;
-  role: string;
-}
+ 
 interface Order {
   id: string;
   name: string;
@@ -41,17 +36,8 @@ const DashboardClient: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
-  
-
-  const [accountDetails, setAccountDetails] = useState<AccountDetails | null>(null);
-
  
   const [clientId, setClientId] = useState(localStorage.getItem('clientId') || '');
-
-
- console.log(clientId);
-
-  
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -84,14 +70,14 @@ const DashboardClient: React.FC = () => {
 
 
 
-  const getNotificationData = () => {
-    const unpaidOrders = orders.filter((order) => !order.paid);  // Фильтруем неоплаченные заказы
-    const totalOrders = unpaidOrders.length;
-    const totalWeight = unpaidOrders.reduce((acc, order) => acc + order.weight, 0);
-    const totalAmount = unpaidOrders.reduce((acc, order) => acc + order.amount, 0);
+  // const getNotificationData = () => {
+  //   const unpaidOrders = orders.filter((order) => !order.paid);  // Фильтруем неоплаченные заказы
+  //   const totalOrders = unpaidOrders.length;
+  //   const totalWeight = unpaidOrders.reduce((acc, order) => acc + order.weight, 0);
+  //   const totalAmount = unpaidOrders.reduce((acc, order) => acc + order.amount, 0);
 
-    return { totalOrders, totalWeight, totalAmount };
-  };
+  //   return { totalOrders, totalWeight, totalAmount };
+  // };
 
   const addNewOrder = (newOrder: Order) => {
     setOrders((prevOrders) => [...prevOrders, newOrder]);
@@ -128,60 +114,14 @@ const DashboardClient: React.FC = () => {
 
 
 
-
-
-
-  // useEffect(() => {
-  //   const fetchAccountDetails = async () => {
-  //     if (!setClientId) {
-  //       setError('ID клиента не найден. Пожалуйста, обновите страницу.');
-  //       return;
-  //     }
-
-  //     try {
-  //       const res = await API.get(`/api/orders/allClients/${setClientId}`);
-  //       setAccountDetails(res.data);
-  //       console.log(res, 'RES');
-        
-  //     } catch (e) {
-  //       console.error('Error fetching account details:', e);
-  //       setError('Ошибка при получении данных аккаунта.');
-  //     }
-  //   };
-
-  //   fetchAccountDetails();
-  // }, [setClientId]);
-  
+ 
   
 
   return (
     <div className='bg-image  min-h-screen'>
       <div className="container md:mx-auto  px-4 flex flex-col items-start">
         <h1 className="py-8 text-2xl font-bold">Добро пожаловать в Личный Кабинет</h1>
-         {/* {getNotificationData().totalOrders > 0 && (
-          <Notification {...getNotificationData()} />
-        )} */}
-
-
-
-
-
-
-{/* <div className="p-6">
-      {error && <p className="text-red-600 font-bold">{error}</p>}
-
-      {accountDetails ? (
-        <div className="mb-6">
-          <h2 className="text-xl font-bold">Данные аккаунта</h2>
-          <p><strong>Имя:</strong> {accountDetails.name}</p>
-          <p><strong>Email:</strong> {accountDetails.email}</p>
-          <p><strong>Роль:</strong> {accountDetails.role}</p>
-        </div>
-      ) : (
-        <p>Загрузка данных аккаунта...</p>
-      )}
-    </div> */}
-
+  
 
 
         <div className="flex flex-col md:flex-row items-start gap-4 p-4">
@@ -203,7 +143,7 @@ const DashboardClient: React.FC = () => {
             </button>
           </Link>
         </div>
-        <OrderList orders={orders} onDeleteOrder={deleteOrder} />
+         <OrderList orders={orders}  onDeleteOrder={(trackCode) => deleteOrder(trackCode, clientId)} />
         <AddItemModal isOpen={isAddModalOpen} closeModal={closeAddModal} addNewOrder={addNewOrder} />
         <InformationModal isOpen={isInfoModalOpen} closeModal={closeInfoModal} />
       </div>

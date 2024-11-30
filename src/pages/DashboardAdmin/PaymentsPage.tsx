@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { API } from "../../constants/api";
 import usePriceStore from "../../store/useClient";
 
-import * as XLSX from "xlsx"; // Подключение библиотеки для работы с Excel
+import * as XLSX from "xlsx"; 
 
  
 interface OrderDetails {
@@ -31,6 +31,10 @@ type Order = {
   clientCode: string;
   quantity: number;
   paid: boolean;
+  dateOfPayment?:any
+  price:number;
+  weight:number;
+  amount:number
 };
 
 
@@ -59,31 +63,11 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({addNewOrder}) => {
   const [weight, setWeight] = useState("");
   const [amount, setAmount] = useState("");
 
-    const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-
-
-  
   const [filteredOrders, setFilteredOrders] = useState<Order[]>(orders);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-
- 
-
   const { price, fetchPrice } = usePriceStore();
-
-  
-
-
-
-
-
-
-
-  // 
-  // 
-  // 
-  // 
-  // 
 
   const [stats, setStats] = useState({
     clientsCount: 0,
@@ -157,27 +141,17 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({addNewOrder}) => {
   };
 
 
-
-
-
-
-
-
-  // 
-  // 
-  // 
-  // 
-  // 
+ 
 
   const uniquePaymentDates = Array.from(
     new Set(
       orders
-        .filter((order) => order.dateOfPayment) // Только заказы с dateOfPayment
+        .filter((order) => order.dateOfPayment)  
         .map((order) =>
-          new Date(order.dateOfPayment).toLocaleDateString("en-GB") // Преобразуем timestamp в дату
+          new Date(order.dateOfPayment).toLocaleDateString("en-GB")  
         )
     )
-  ).sort((a, b) => new Date(a).getTime() - new Date(b).getTime()); // Сортируем по дате
+  ).sort((a, b) => new Date(a).getTime() - new Date(b).getTime()); 
   
 
 
@@ -188,25 +162,14 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({addNewOrder}) => {
           new Date(order.dateOfPayment).toLocaleDateString("en-GB") ===
             selectedDate
       )
-    : orders; // Если дата не выбрана, отображаем все заказы
+    : orders;  
+ 
+   const navigate = useNavigate();
 
 
-
-
-
-
-
-
-
-  //////////////////////
-  const navigate = useNavigate();
-
-
-  const toggleModal = (order: Order | null) => {
-    console.log(111);
-    
+   const toggleModal = (order: Order | null) => {
     setSelectedOrder(order);
-    setIsModalOpen(!isModalOpen);
+    setIsModalOpen(prevState => !prevState);
   };
 
  
@@ -227,13 +190,6 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({addNewOrder}) => {
       setLoading(false);
     }
   };
- 
- 
-   
-  
-  
- 
-
  
     const handleBack = () => {
       navigate(-1); // Go back to the previous page
@@ -284,53 +240,9 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({addNewOrder}) => {
         console.error("Update order error:", err);
       }
     };
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-    const handleTrackCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setTrackCode(e.target.value);
-    };
-
-
-    const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setCode(e.target.value);
-    };
-   
-
-    const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setAmount(e.target.value);
-    };
-
-
-
-
-
-    // const price = parseFloat(localStorage.getItem("price") || "0");
-  
-    const handleWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const inputWeight = parseFloat(e.target.value) || 0;
-      setWeight(inputWeight); // Update weight state
-    };
   
     const totalSum = weight * price; // Calculate the total sum dynamically
-  
-
-
-
-// 
-// 
-// 
-
+   
 
   // Функция для скачивания данных в Excel
   const handleDownload = () => {
@@ -390,11 +302,7 @@ const handleAdd = async () => {
       deliveredToClient: false,
     });
 
-    console.log('before');
-  
-
-    console.log('after');
-    setIsModalOpen(!isModalOpen);
+   setIsModalOpen(!isModalOpen);
     fetchOrders();
   } catch (e) {
     console.error(e);
@@ -413,6 +321,7 @@ useEffect(() => {
  useEffect(() => {
   if (filterOrders.length > 0) {
     calculateStatistics(filterOrders);
+    
   }
 }, [filterOrders]); // Только когда filterOrders изменяется
 
@@ -423,12 +332,8 @@ useEffect(() => {
 
 
   useEffect(() => {
-    fetchPrice(); // Загружаем актуальную цену при монтировании компонента
-  }, [fetchPrice]);
-
-
- console.log(orders);
- 
+    fetchPrice();  
+  }, [fetchPrice]); 
   return (
   <div className="bg-image min-h-screen">
       <div className="p-6 container md:mx-auto">
@@ -482,12 +387,7 @@ useEffect(() => {
     className="w-full text-sm text-gray-900 border border-gray-300 rounded-lg p-2"
     placeholder="Поиск"
   />
-  {/* <button 
-    onClick={handleSearch} // Поиск только по клику на кнопку
-    className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg"
-  >
-    Поиск
-  </button> */}
+ 
 </div>
 
    

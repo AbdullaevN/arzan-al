@@ -1,15 +1,28 @@
-// src/pages/DashboardAdmin.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { usePrice } from '../../context/PriceProvider';
-import usePriceStore from '../../store/useClient';
- 
+import { API } from '../../constants/api';
+
 const DashboardAdmin: React.FC = () => {
   const navigate = useNavigate();
-  // const { price } = usePrice();
-  const { price } = usePriceStore();  
- 
+  const [inputPrice, setInputPrice] = useState('');
+  const [loading, setLoading] = useState(false);
 
+ 
+  useEffect(() => {
+    const fetchPrice = async () => {
+      try {
+        setLoading(true);
+        const response = await API.get('/api/orders/get-price');
+        setInputPrice(response.data.price);
+      } catch (error) {
+        console.error('Error fetching price:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPrice();
+  }, []);
 
   const sections = [
     { name: 'История заказов', path: '/history' },
@@ -20,14 +33,22 @@ const DashboardAdmin: React.FC = () => {
   ];
 
   return (
-    <div className="bg-image min-h-svh ">
-      <div className="p-8 container flex flex-col items-start w-full container md:mx-auto ">
+    <div className="bg-image min-h-svh">
+      <div className="p-8 container flex flex-col items-start w-full md:mx-auto">
         <h1 className="text-3xl font-bold text-start mb-8">Панель Администратора</h1>
-        <div className="p-6 my-10 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer">
-          <span>
-            Вы являетесь администратором склада, цена за кг: {price} сом.
-          </span>
-        </div>
+
+        {loading ? ( // Показываем индикатор загрузки
+          <div className="flex justify-center items-center h-16">
+            <div className="loader"></div>
+          </div>
+        ) : (
+          <div className="p-6 my-10 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200 cursor-pointer">
+            <span className="flex gap-3">
+              Вы являетесь администратором склада, цена за кг: <h1 className="flex">{inputPrice}</h1> сом.
+            </span>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sections.map((section, index) => (
             <div

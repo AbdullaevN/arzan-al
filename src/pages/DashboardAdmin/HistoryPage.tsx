@@ -1,30 +1,36 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { API } from "../../constants/api";
- import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-
-
+interface Order {
+  trackCode: string;
+  name: string;
+  price: number;
+  deliverTo: string;
+  clientId: string;
+  createdDate: string;
+}
 
 interface OrderListProps {
   orders: Order[];
   onDeleteOrder: (trackCode: string) => Promise<void>;
-  onUpdateOrder: (updatedOrder: Order) => void; // Добавляем функцию для обновления заказа
+  onUpdateOrder: (updatedOrder: Order) => void;
 }
 
-const HistoryPage: React.FC<OrderListProps> = ({onDeleteOrder}) => {
+const HistoryPage: React.FC<OrderListProps> = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [modalState, setModalState] = useState<{ open: boolean; order: Order | null; mode: 'view' | 'edit' }>({
+    open: false,
+    order: null,
+    mode: 'edit',  // Default to edit mode
+  });
+  const [clientId] = useState(localStorage.getItem("clientId") || "");
   const navigate = useNavigate();
 
- 
-  
-
-
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -39,43 +45,34 @@ const HistoryPage: React.FC<OrderListProps> = ({onDeleteOrder}) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchTerm]);
 
   useEffect(() => {
     fetchOrders();
-  }, [searchTerm]);
+  }, [fetchOrders]);
 
-  const openModal = (order: Order) => {
-    setSelectedOrder(order);
-    setModalOpen(true);
-  };
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value);
 
-  const closeModal = () => {
-    setModalOpen(false);
-    setSelectedOrder(null);
+  const openModal = (order: Order, mode: 'view' | 'edit') => {
+    setModalState({ open: true, order, mode });
   };
+  const closeModal = () => setModalState({ open: false, order: null });
 
   const handleOrderChange = (field: keyof Order, value: any) => {
-    if (selectedOrder) {
-      setSelectedOrder({ ...selectedOrder, [field]: value });
+    if (modalState.order) {
+      setModalState({ ...modalState, order: { ...modalState.order, [field]: value } });
     }
   };
 
   const updateOrder = async () => {
-    if (!selectedOrder || !clientId) {
+    if (!modalState.order || !clientId) {
       setError("Client ID is missing or no order selected.");
       return;
     }
 
-    const { trackCode } = selectedOrder;
-
     try {
-      // const updatedOrder = { ...selectedOrder, clientId };
-       // Add clientId to the order
-
-       console.log(selectedOrder,'SSSSSSSS');
-       
-      const response = await API.put(`/api/orders/edit/${trackCode}`, selectedOrder, {
+      const { trackCode } = modalState.order;
+      const response = await API.put(`/api/orders/edit/${trackCode}`, modalState.order, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -84,7 +81,7 @@ const HistoryPage: React.FC<OrderListProps> = ({onDeleteOrder}) => {
       if (response.status === 200) {
         setOrders((prevOrders) =>
           prevOrders.map((order) =>
-            order.trackCode === trackCode ? { ...order, ...selectedOrder } : order
+            order.trackCode === trackCode ? { ...order, ...modalState.order } : order
           )
         );
         closeModal();
@@ -97,46 +94,34 @@ const HistoryPage: React.FC<OrderListProps> = ({onDeleteOrder}) => {
     }
   };
 
-
-
-
-  const deleteOrder = async (trackCode: string, clientId: string) => {
-
-   
+  const deleteOrder = async (trackCode: string) => {
     if (!clientId || !trackCode) {
-      setError('Отсутствует идентификатор клиента');
-      console.error('Не указан clientId для заказа:', trackCode, clientId);
+      setError("Отсутствует идентификатор клиента");
+      console.error("Не указан clientId для заказа:", trackCode, clientId);
       return;
     }
-  
+
     try {
-      if (!window.confirm('Вы уверены, что хотите удалить этот заказ?')) return;
-  
-      console.log('Попытка удалить заказ:', trackCode, 'для клиента:', clientId);
+      if (!window.confirm("Вы уверены, что хотите удалить этот заказ?")) return;
+
       await API.delete(`/api/orders/delete/${trackCode}/${clientId}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-  
-      setOrders(orders.filter(order => order.trackCode !== trackCode));
+
+      setOrders(orders.filter((order) => order.trackCode !== trackCode));
     } catch (err: any) {
-      setError(err.message || 'Ошибка при удалении заказа');
-      console.error('Ошибка при удалении заказа:', err);
+      setError(err.message || "Ошибка при удалении заказа");
+      console.error("Ошибка при удалении заказа:", err);
     }
   };
-  const handleOrderDetails = (trackCode: string) => {
-    navigate(`/details/${trackCode}`);
-  };
 
-
-  const handleBack = () => {
-    navigate(-1); // Go back to the previous page
-  };
+  const handleBack = () => navigate(-1); // Go back to the previous page
 
   return (
-    <div className="min-h-screen  p-8 container md:mx-auto ">
-      <nav className="text-sm mb-4 ">
+    <div className="min-h-screen p-8 container md:mx-auto">
+      <nav className="text-sm mb-4">
         <ol className="list-reset flex text-gray-500 text-lg">
           <li>
             <a href="/dashboard" className="text-blue-500 hover:underline">
@@ -150,19 +135,14 @@ const HistoryPage: React.FC<OrderListProps> = ({onDeleteOrder}) => {
         </ol>
       </nav>
 
-
-           {/* Кнопка "Назад" */}
-           <button
-        onClick={handleBack}
-        className="px-4 py-2 bg-blue-500 text-white rounded-md mb-4"
-      >
+      <button onClick={handleBack} className="px-4 py-2 bg-blue-500 text-white rounded-md mb-4">
         Назад
       </button>
 
       <input
         type="text"
         value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
+        onChange={handleSearchChange}
         placeholder="Поиск по трек-коду"
         className="px-4 py-2 border rounded w-full mb-4"
       />
@@ -178,68 +158,32 @@ const HistoryPage: React.FC<OrderListProps> = ({onDeleteOrder}) => {
                 <th className="px-4 py-2 border-b">№</th>
                 <th className="px-4 py-2 border-b">Название</th>
                 <th className="px-4 py-2 border-b">Трек-код</th>
-                {/* <th className="px-4 py-2 border-b">Количество</th> */}
-                {/* <th className="px-4 py-2 border-b">Цена</th> */}
+                <th className="px-4 py-2 border-b">Город</th>
                 <th className="px-4 py-2 border-b">Дата создания</th>
-                {/* <th className="px-4 py-2 border-b">Оплачено</th> */}
                 <th className="px-4 py-2 border-b">Действия</th>
-              
-                
               </tr>
             </thead>
             <tbody>
               {orders.map((order, index) => (
-                <tr key={order.trackCode}>
-                  <td className="px-4 py-2 border-b text-center">
-                    {index + 1}
-                  </td>
-                  <td className="px-4 py-2 border-b text-center">
-                    {order.name}
-                  </td>
-                  <td className="px-4 py-2 border-b text-center">
-                    {order.trackCode}
-                  </td>
-
-                  <td className="px-4 py-2 border-b text-center">
-                    {new Date(order.createdDate).toLocaleDateString()}
-                  </td>
+               <tr key={`${order.trackCode}-${index}`}>
+                  <td className="px-4 py-2 border-b text-center">{index + 1}</td>
+                  <td className="px-4 py-2 border-b text-center">{order.name}</td>
+                  <td className="px-4 py-2 border-b text-center">{order.trackCode}</td>
+                  <td className="px-4 py-2 border-b text-center">{order.deliverTo}</td>
+                  <td className="px-4 py-2 border-b text-center">{new Date(order.createdDate).toLocaleDateString()}</td>
                   <td className="px-1 py-2 border-b text-center justify-center gap-5 flex">
-                    <button
-                      className="   text-white rounded-md"
-                      onClick={() => openModal(order)}
-                    >
-                      ✏️
-                    </button>
+                  <button onClick={() => openModal(order, 'edit')} className="text-white rounded-md">
+  ✏️
+</button>
 
-
-                    <button
-                      onClick={() => {
-                        if (!order.trackCode || !order.clientId) {
-                          console.error(
-                            "trackCode или clientId не найдены для заказа:",
-                            order
-                          );
-                          return;
-                        }
-                        deleteOrder(order.trackCode, order.clientId); // Pass clientId here
-                      }}
-                      className="text-red-500 hover:text-red-700"
-                      title="Удалить заказ"
-                    >
+                    <button onClick={() => deleteOrder(order.trackCode)} className="text-red-500 hover:text-red-700" title="Удалить заказ">
                       🗑️
                     </button>
 
-
-
-                    <button
-  onClick={() => navigate(`/details/${order.trackCode}`)} // Перенаправление на страницу деталей
-  className="text-red-500 hover:text-red-700"
-                      title="Подробнее"
-                    >
-                      📜
-                    </button>
+                    <button onClick={() => openModal(order, 'view')} className="text-red-500 hover:text-red-700" title="Подробнее">
+  📜
+</button>
                   </td>
-                 
                 </tr>
               ))}
             </tbody>
@@ -247,49 +191,77 @@ const HistoryPage: React.FC<OrderListProps> = ({onDeleteOrder}) => {
         </div>
       )}
 
-      {modalOpen && selectedOrder && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg w-96">
-            <h2 className="text-xl font-semibold mb-4">Редактировать заказ</h2>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">
-                Название
-              </label>
-              <input
-                type="text"
-                value={selectedOrder.name}
-                onChange={(e) => handleOrderChange("name", e.target.value)}
-                className="w-full px-4 py-2 border rounded"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">
-                Цена
-              </label>
-              <input
-                type="number"
-                value={selectedOrder.price}
-                onChange={(e) => handleOrderChange("price", e.target.value)}
-                className="w-full px-4 py-2 border rounded"
-              />
-            </div>
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={closeModal}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded"
-              >
-                Отмена
-              </button>
-              <button
-                onClick={updateOrder}
-                className="px-4 py-2 bg-blue-500 text-white rounded"
-              >
-                Сохранить
-              </button>
-            </div>
-          </div>
+{modalState.open && modalState.order && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center" onClick={closeModal}>
+    <div className="bg-white p-6 rounded-lg w-96" onClick={(e) => e.stopPropagation()}>
+      <h2 className="text-xl font-semibold mb-4">{modalState.mode === 'edit' ? 'Редактировать заказ' : 'Подробнее'}</h2>
+      <div className="space-y-4">
+        <div>
+          <label>Название</label>
+          <input
+            type="text"
+            value={modalState.order.name}
+            onChange={(e) => handleOrderChange("name", e.target.value)}
+            className="w-full px-4 py-2 border rounded-md"
+            readOnly={modalState.mode === 'view'}
+          />
         </div>
-      )}
+
+        <div>
+          <label>Трек-код</label>
+          <input
+            type="text"
+            value={modalState.order.trackCode}
+            onChange={(e) => handleOrderChange("trackCode", e.target.value)}
+            className="w-full px-4 py-2 border rounded-md"
+            readOnly={modalState.mode === 'view'}
+          />
+        </div>
+
+        <div>
+          <label>Цена</label>
+          <input
+            type="number"
+            value={modalState.order.price}
+            onChange={(e) => handleOrderChange("price", e.target.value)}
+            className="w-full px-4 py-2 border rounded-md"
+            readOnly={modalState.mode === 'view'}
+          />
+        </div>
+
+        <div>
+          <label>Город</label>
+          <input
+            type="text"
+            value={modalState.order.deliverTo}
+            onChange={(e) => handleOrderChange("deliverTo", e.target.value)}
+            className="w-full px-4 py-2 border rounded-md"
+            readOnly={modalState.mode === 'view'}
+          />
+        </div>
+
+        <div>
+          <label>Дата создания</label>
+          <input
+            type="text"
+            value={new Date(modalState.order.createdDate).toLocaleDateString()}
+            readOnly
+            className="w-full px-4 py-2 border rounded-md"
+          />
+        </div>
+      </div>
+
+      <div className="flex justify-end mt-4">
+        {modalState.mode === 'edit' && (
+          <button onClick={updateOrder} className="bg-blue-500 text-white px-4 py-2 rounded-md">
+            Сохранить изменения
+          </button>
+        )}
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };

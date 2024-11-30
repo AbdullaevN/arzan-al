@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { API } from "../../constants/api";
-import   { useClientStore } from "../../store/useClient";
 
 interface OrderDetails {
   id: string;
@@ -28,17 +27,13 @@ interface AddItemModalProps {
   addNewOrder: (newOrder: OrderDetails) => void;
 }
 
-const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal, addNewOrder }) => {
+const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal }) => {
   const [description, setDescription] = useState("");
   const [trackCode, setTrackCode] = useState("");
   const [warehouseChina, setWarehouseChina] = useState(false); // Новое состояние
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
- 
-
-  const clientId = localStorage.getItem('clientId');
-  console.log(clientId, 'addItem');
   
+  const clientId = localStorage.getItem('clientId');
+   
 
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDescription(e.target.value);
@@ -53,7 +48,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal, addNewO
   };
 
   const handleAdd = async () => {
-    closeModal();
+    closeModal(); // Закрытие модального окна после добавления
     try {
       const res = await API.post("/api/orders/create", {
         issued: false,
@@ -73,34 +68,21 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal, addNewO
         warehouseTokmok: false,
         deliveredToClient: false,
       });
+      console.log(res, 'res');
+      
+      // Очистка полей после добавления
+      setDescription("");
+      setTrackCode("");
+      setWarehouseChina(false);
+      
+      // Вызываем addNewOrder с добавленными данными (если нужно)
+      // addNewOrder(res.data);
 
-      // addNewOrder({
-      //   id: res.data.id, // assuming server returns id
-      //   name: description,
-      //   createdDate: new Date().toString(),
-      //   price: 0,
-      //   weight: 0,
-      //   amount: 1,
-      //   dateOfPayment: 0,
-      //   deliveredDate: 0,
-      //   deliverTo: "Tokmok",
-      //   trackCode: trackCode,
-      //   clientId:clientId,
-      //   issued: false,
-      //   paid: false,
-      //   receiventInChina: true,
-      //   warehouseChina: warehouseChina, // Устанавливаем новое состояние
-      //   warehouseTokmok: false,
-      //   deliveredToClient: false,
-      // });
     } catch (e) {
       console.error(e);
       alert("Ошибка при добавлении заказа. Попробуйте снова позже.");
     }
   };
-
-
- 
 
   if (!isOpen) return null;
 

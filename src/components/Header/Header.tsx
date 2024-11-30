@@ -25,8 +25,7 @@ const Header: React.FC<HeaderProps> = ({ userRole, setUserRole }) => {
     navigate('/login');
   };
 
-  // Close the menu when a link is clicked
-  const handleMenuClick = () => {
+   const handleMenuClick = () => {
     setToggleMenu(false);
   };
 
@@ -47,8 +46,7 @@ const Header: React.FC<HeaderProps> = ({ userRole, setUserRole }) => {
         <div className={`menu ${toggleMenu ? 'active' : ''}`}>
           <ul className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6">
 
-            {/* <li onClick={handleMenuClick} className="text-white cursor-pointer hover:text-amber-500 border-b md:border-none py-2 px-3 text-xl font-bold">Токмок</li> */}
-
+ 
             {userRole && (
               <li onClick={handleMenuClick} className="text-black cursor-pointer hover:text-amber-500 border-b md:border-none py-2 px-3 text-xl font-bold">{userRole}</li>
             )}

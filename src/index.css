@@ -20,7 +20,7 @@ html, body {
  
 }
 .bg-image {
-    background-image: url('../public/fon.png');
+    background-image: url('./src/assets/img/fon.png');
     background-repeat: no-repeat;
     background-size: cover; /* Чтобы фон масштабировался */
     background-clip: content-box;
@@ -111,7 +111,26 @@ h1, h2, h3, h4, h5, h6 {
 /* Add in your CSS */
 .loading-text {
     font-size: 16px;
-    color: #fbbf24; /* Color for the loading text (you can change it) */
+    color: #fbbf24;  
     font-weight: bold;
+  }
+  
+
+  .loader {
+    border: 4px solid #f3f3f3;  
+    border-top: 4px solid #3498db;  
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
   

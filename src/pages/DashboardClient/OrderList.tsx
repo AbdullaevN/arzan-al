@@ -12,20 +12,19 @@ interface Order {
   weight?: number;
   amount?: number;
   trackCode: string;
-}
+  clientId: string;  
 
+}
 interface OrderListProps {
   orders: Order[];
-  onDeleteOrder: (trackCode: string) => Promise<void>;
-  onUpdateOrder: (updatedOrder: Order) => void; // Добавляем функцию для обновления заказа
+  onDeleteOrder: (trackCode: string, clientId: string) => Promise<void>;
 }
 
-export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder, onUpdateOrder }) => {
+
+export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder }) => {
   const [filteredOrders, setFilteredOrders] = useState<Order[]>(orders);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-
+  
   // Reset filtered orders when the `orders` prop changes
   useEffect(() => {
     setFilteredOrders(orders);
@@ -55,11 +54,6 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder, onU
 
  
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedOrder(null);
-  };
-
   return (
     <div className="order-list p-4 w-full">
       <h2 className="text-2xl font-bold mb-4">Ваши заказы</h2>
@@ -86,19 +80,22 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder, onU
         key={order.trackCode}  
         className="bg-white shadow-md rounded-lg border border-gray-200 relative max-w-sm overflow-hidden"
       >
-        <div className="flex justify-between bg-orange-400 py-2 px-4 rounded-t-lg">
+        <div className="flex justify-between bg-orange-400 py-2 px-4 rounded-t-lg flex-col">
           <h3 className="text-lg font-semibold">Заказ № {order.trackCode}</h3>
-          <h3 className="text-lg font-semibold">Имя: {order.name}</h3>
           <div className="flex space-x-2">
+          <h3 className="text-lg font-semibold">Описание: {order.name}</h3>
           
             <button
-  onClick={() => {
-    if (!order.trackCode || !order.clientId) {
-      console.error('trackCode или clientId не найдены для заказа:', order);
-      return;
-    }
-    onDeleteOrder(order.trackCode, order.clientId);  // Pass clientId here
-  }}
+  // onClick={() => {
+  //   if (!order.trackCode || !order.clientId) {
+  //     console.error('trackCode или clientId не найдены для заказа:', order);
+  //     return;
+  //   }
+  //   onDeleteOrder(order.trackCode, order.clientId);  // Pass clientId here
+  // }}
+
+  onClick={() => onDeleteOrder(order.trackCode, order.clientId)} 
+
   className="text-red-500 hover:text-red-700"
   title="Удалить заказ"
 >

@@ -19,10 +19,8 @@ header {
 .navicon {
   width: 2rem;
   height: 0.200rem;
-  /* background-color: blue; */
-  background-color: white;
-  /* background-color: #87cdff; */
-
+   background-color: white;
+ 
 
   position: relative;
   transition: 0.3s;
@@ -79,11 +77,9 @@ header {
     top: 0;
     left: 0;
     width: 100%;
-    /* background-color: #d5dcd5; */
-  background-color: #87cdff;
+   background-color: #87cdff;
 
-    /* padding-top: 60px; */
-    display: none;
+     display: none;
     flex-direction: column;
   }
 
@@ -106,12 +102,4 @@ header {
     width: 100%;
   }
 }
-
-/* .container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-} */
+ 

@@ -16,7 +16,7 @@ const Login: React.FC<LoginProps> = ({ setUserRole }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(''); // Очистить предыдущие сообщения об ошибках
-    setLoading(true); // Set loading to true when the request starts
+    setLoading(true);  
 
     // Проверка на админские креды
     if (clientId === 'admin' && password === 'admin') {
@@ -31,7 +31,7 @@ const Login: React.FC<LoginProps> = ({ setUserRole }) => {
           password: password,
         });
 
-        console.log('API Response:', res); // Лог ответа от API
+        console.log('API Response:', res); 
 
         if (res.data && res.data.token) {
           localStorage.setItem('token', res.data.token);
@@ -39,19 +39,14 @@ const Login: React.FC<LoginProps> = ({ setUserRole }) => {
           localStorage.setItem('clientId', clientId);
           setUserRole('client');
 
-          // console.log(  setUserRole('client'););
-          
-// console.log(clientId);
-
-          // console.log('LocalStorage after saving:', localStorage.getItem('token'), localStorage.getItem('userRole'));
-
+     
           if (clientId === 'admin') {
             localStorage.setItem('userRole', 'admin');
             setUserRole('admin');
-            navigate('/dashboard'); // Перенаправление на админскую панель
+            navigate('/dashboard');  
           } else {
             setUserRole('client');
-            navigate('/clientdash'); // Перенаправление на клиентскую панель
+            navigate('/clientdash');  
           }
         } else {
           setErrorMessage('Invalid login credentials. Please try again.');
