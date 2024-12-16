@@ -19,17 +19,23 @@ interface Order {
 interface OrderListProps {
   orders: Order[];
   onDeleteOrder: (trackCode: string, clientId: string) => Promise<void>;
+  clientData?: any; // или конкретный интерфейс клиента
+
 }
 
-export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder }) => {
+export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder, clientData }) => {
   const [filteredOrders, setFilteredOrders] = useState<Order[]>(orders);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  // Reset filtered orders when the `orders` prop changes
-  useEffect(() => {
-    setFilteredOrders(orders);
-  }, [orders]);
 
+
+  // console.log(fetchClient,'OOO');
+  
+  // Reset filtered orders when the `orders` prop changes
+
+
+
+ 
   const handleSearch = async () => {
     if (searchTerm) {
       try {
@@ -51,6 +57,12 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder }) =
       setFilteredOrders(orders);
     }
   };
+  // console.log(filteredOrders);
+  
+
+  useEffect(() => {
+    setFilteredOrders(orders);
+   }, [orders]);
 
   return (
     <div className="order-list p-4 w-full">
@@ -90,7 +102,7 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder }) =
                       <span className="mr-2">Склад в Китае</span>
                       <input
                         type="checkbox"
-                        checked={order.receiventInChina}
+                        checked={true}
                         readOnly
                         className="opacity-0 absolute"
                       />
@@ -99,15 +111,19 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder }) =
                   </div>
 
                   <div className="flex items-center">
-                    <label className="checkbox-container flex items-center text-lg cursor-pointer">
-                      <span className="mr-2">Склад в Кемине / Токмоке</span>
+                    <label className="checkbox-container flex items-center text-lg cursor-pointer flex-col">
+                      <span className="mr-2 flex gap-3 w-full">Склад в<h3>{clientData.city}</h3> </span>
                       <input
                         type="checkbox"
                         readOnly
                         checked={order.deliveredToClient === true}
                         className="opacity-0 absolute"
                       />
-                      <span className="checkmark"></span>
+                      <span className="checkmark"> <br />
+                      </span> 
+                      <span> {new Date(order.createdDate).toLocaleString()}</span>
+
+                      {/* <p>Текущее время: {new Date(Date.now()).toLocaleString()}</p> */}
                     </label>
                   </div>
 

@@ -105,11 +105,10 @@ const ImportPage = () => {
     try {
       // Отправка данных на сервер через PUT или POST
       const res = await API.put("/api/orders/import", {
-        file: requestData, // Преобразуем массив в строку JSON
+        file: requestData, 
       });
   
-      // Проверка на успешный ответ от сервера
-      if (!res.ok) {
+       if (!res.ok) {
         throw new Error("Ошибка при отправке данных.");
       }
   

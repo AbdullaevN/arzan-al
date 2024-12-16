@@ -32,21 +32,36 @@ interface Order {
 
 
 
-const DashboardClient: React.FC = () => {
+const DashboardClient: React.FC = ({}) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
- 
+  const [client, setClient] = useState();
+
   const [clientId, setClientId] = useState(localStorage.getItem('clientId') || '');
+  // console.log(clientId);
+  
   const [error, setError] = useState('')
 
   const navigate = useNavigate(); // хук для перенаправления
 
+// console.log(client,'-------------');
 
 
 
-
-
+   const fetchClient = async () => {
+    if (!clientId) {
+      console.error('Client ID не установлен');
+      return;
+    }
+    try {
+      const res = await API.get(`/api/orders/client/${clientId}`);
+      setClient(res.data);
+      console.log('Client data:', res.data);
+    } catch (e) {
+      console.error('Error fetching client:', e);
+    }
+  };
 
 
   useEffect(() => {
@@ -73,7 +88,7 @@ const DashboardClient: React.FC = () => {
           amount: order.amount || 0,
         }));
         setOrders(ordersWithDefaults);
-        console.log(ordersWithDefaults,'7');
+        // console.log(ordersWithDefaults,'7');
         if (ordersWithDefaults.length > 0) {
           setClientId(ordersWithDefaults[0].clientId);
         }
@@ -86,8 +101,12 @@ const DashboardClient: React.FC = () => {
   // }, [setClientId]);
 
   useEffect(() => {
+    // console.log('Client ID:', clientId);
+
     fetchOrders();
-  }, []);
+    fetchClient()
+
+   }, []);
 
   const openAddModal = () => setIsAddModalOpen(true);
   const closeAddModal = () => setIsAddModalOpen(false);
@@ -173,7 +192,7 @@ const DashboardClient: React.FC = () => {
             </button>
           </Link>
         </div>
-         <OrderList orders={orders}  onDeleteOrder={(trackCode) => deleteOrder(trackCode, clientId)} />
+         <OrderList orders={orders}  onDeleteOrder={(trackCode) => deleteOrder(trackCode, clientId)}    clientData={client} />
         {/* <AddItemModal isOpen={isAddModalOpen} closeModal={closeAddModal} addNewOrder={addNewOrder} /> */}
         <AddItemModal
  isOpen={isAddModalOpen}

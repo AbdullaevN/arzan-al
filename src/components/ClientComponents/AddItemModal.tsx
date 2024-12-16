@@ -60,7 +60,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal }) => {
         amount: 1,
         dateOfPayment: 0,
         deliveredDate: 0,
-        deliverTo: "Tokmok",
+        // deliverTo: "Tokmok",
         receiventInChina: true,
         trackCode: trackCode,
         clientId: clientId,
