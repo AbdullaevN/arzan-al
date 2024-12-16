@@ -68,7 +68,8 @@ const ClientsPage: React.FC = () => {
           <thead>
             <tr>
               <th className="px-4 py-2 border-b">№</th>
-              <th className="px-4 py-2 border-b">Имя пользователя</th>
+              <th className="px-4 py-2 border-b">Код</th>
+              <th className="px-4 py-2 border-b">ФИО</th>
               <th className="px-4 py-2 border-b">Телефон</th>
               <th className="px-4 py-2 border-b">Город</th>
               {/* <th className="px-4 py-2 border-b">Действия</th> */}
@@ -79,6 +80,7 @@ const ClientsPage: React.FC = () => {
               <tr key={client._id} className="hover:bg-gray-100">
                 <td className="px-4 py-2 border-b text-center">{index + 1}</td>
                 <td className="px-4 py-2 border-b text-center">{client.clientId}</td>
+                <td className="px-4 py-2 border-b text-center">{client.name}</td>
                 <td className="px-4 py-2 border-b text-center">{client.phone}</td>
                 <td className="px-4 py-2 border-b text-center">{client.city}</td>
                 {/* <td className="px-4 py-2 border-b text-center">{client.password}</td> */}

@@ -147,14 +147,14 @@ export const Archive = () => {
       <div className="mt-2 text-sm text-gray-500">
         <p><span className="font-semibold">Дата создания:</span> {new Date(order.createdDate).toLocaleDateString()}</p>
         <p><span className="font-semibold">Дата оплаты:</span> {order.dateOfPayment ? new Date(order.dateOfPayment).toLocaleDateString() : "Нет данных"}</p>
-        <p>
+        {/* <p>
           <span className="font-semibold">Выдано клиенту:</span>{" "}
           {order.issued ? "Да" : "Нет"}
         </p>
         <p>
           <span className="font-semibold">Получено в Китае:</span>{" "}
           {order.receiventInChina ? "Да" : "Нет"}
-        </p>
+        </p> */}
       </div>
     </div>
   ))}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { OrderList } from './OrderList';
- import { Link } from 'react-router-dom';
+ import { Link, useNavigate } from 'react-router-dom';
 import AddItemModal from '../../components/ClientComponents/AddItemModal';
 import InformationModal from '../../components/ClientComponents/InformationModal';
 import { API } from '../../constants/api';
@@ -40,7 +40,30 @@ const DashboardClient: React.FC = () => {
   const [clientId, setClientId] = useState(localStorage.getItem('clientId') || '');
   const [error, setError] = useState('')
 
+  const navigate = useNavigate(); // хук для перенаправления
+
+
+
+
+
+
+
+
   useEffect(() => {
+    // Проверяем, есть ли токен и clientId в localStorage
+    const token = localStorage.getItem('token');
+    const clientIdFromStorage = localStorage.getItem('clientId');
+
+    if (!token || !clientIdFromStorage) {
+      // Если нет токена или clientId, перенаправляем на страницу логина
+      navigate('/login'); // путь на страницу логина
+    } else {
+      setClientId(clientIdFromStorage);
+      fetchOrders();
+    }
+  }, [navigate]); // Следим за изменениями navigate
+
+  // useEffect(() => {
     const fetchOrders = async () => {
       try {
         const res = await API.get('/api/orders/history');
@@ -59,8 +82,12 @@ const DashboardClient: React.FC = () => {
         console.error('Error fetching orders:', e);
       }
     };
+    // fetchOrders();
+  // }, [setClientId]);
+
+  useEffect(() => {
     fetchOrders();
-  }, [setClientId]);
+  }, []);
 
   const openAddModal = () => setIsAddModalOpen(true);
   const closeAddModal = () => setIsAddModalOpen(false);
@@ -79,11 +106,14 @@ const DashboardClient: React.FC = () => {
   //   return { totalOrders, totalWeight, totalAmount };
   // };
 
+  // const addNewOrder = (newOrder: Order) => {
+  //   setOrders((prevOrders) => [...prevOrders, newOrder]);
+  // };
+
   const addNewOrder = (newOrder: Order) => {
     setOrders((prevOrders) => [...prevOrders, newOrder]);
   };
-
-
+  
 
   const deleteOrder = async (trackCode: string, clientId: string) => {
 
@@ -144,7 +174,15 @@ const DashboardClient: React.FC = () => {
           </Link>
         </div>
          <OrderList orders={orders}  onDeleteOrder={(trackCode) => deleteOrder(trackCode, clientId)} />
-        <AddItemModal isOpen={isAddModalOpen} closeModal={closeAddModal} addNewOrder={addNewOrder} />
+        {/* <AddItemModal isOpen={isAddModalOpen} closeModal={closeAddModal} addNewOrder={addNewOrder} /> */}
+        <AddItemModal
+ isOpen={isAddModalOpen}
+ closeModal={() => {
+   closeAddModal();
+   fetchOrders(); // Обновляем заказы после добавления
+ }}
+/>
+
         <InformationModal isOpen={isInfoModalOpen} closeModal={closeInfoModal} />
       </div>
     </div>

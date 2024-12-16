@@ -48,7 +48,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal }) => {
   };
 
   const handleAdd = async () => {
-    closeModal(); // Закрытие модального окна после добавления
+    // closeModal(); // Закрытие модального окна после добавления
     try {
       const res = await API.post("/api/orders/create", {
         issued: false,
@@ -61,27 +61,30 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal }) => {
         dateOfPayment: 0,
         deliveredDate: 0,
         deliverTo: "Tokmok",
-        receiventInChina: false,
+        receiventInChina: true,
         trackCode: trackCode,
         clientId: clientId,
-        warehouseChina: warehouseChina, // Передаём новое поле
+        warehouseChina: true,  
         warehouseTokmok: false,
         deliveredToClient: false,
       });
       console.log(res, 'res');
       
-      // Очистка полей после добавления
-      setDescription("");
-      setTrackCode("");
-      setWarehouseChina(false);
+    
       
-      // Вызываем addNewOrder с добавленными данными (если нужно)
-      // addNewOrder(res.data);
+      //  addNewOrder(res.data);
+      closeModal();
 
     } catch (e) {
       console.error(e);
       alert("Ошибка при добавлении заказа. Попробуйте снова позже.");
     }
+
+
+      // Очистка полей после добавления
+      setDescription("");
+      setTrackCode("");
+      setWarehouseChina(false);
   };
 
   if (!isOpen) return null;
@@ -116,7 +119,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal }) => {
             onChange={handleDescriptionChange}
           />
         </div>
-        <div className="mb-6 flex items-center">
+        {/* <div className="mb-6 flex items-center">
           <input
             type="checkbox"
             id="warehouseChina"
@@ -127,7 +130,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal }) => {
           <label htmlFor="warehouseChina" className="text-sm font-medium text-gray-700">
             Склад в Китае
           </label>
-        </div>
+        </div> */}
         <div className="flex gap-4">
           <button
             className="bg-red-500 text-white px-6 py-3 rounded-md hover:bg-red-600"

@@ -1,44 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
 import * as XLSX from "xlsx";
+import { API } from "../../constants/api";
 
 const ImportPage = () => {
-  const [tableData, setTableData] = useState<string[][]>([]); // Holds the full table data from file
-  const [extractedData, setExtractedData] = useState<{ weight: string; volume: string; cost: string }[]>([]); // Holds extracted data with cost
-  const [file, setFile] = useState<File | null>(null); // Holds the file selected for upload
-  const [pricePerKg, setPricePerKg] = useState<number>(); // Default price per kilogram in som
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const storedExtractedData = localStorage.getItem("trackData");
-    const storedTableData = localStorage.getItem("tableData");
-    const storedPrice = localStorage.getItem("price");
-
-
-    console.log(storedPrice);
-    
-  
-    console.log("Stored Price from localStorage:", storedPrice); // Debugging line
-  
-    if (storedExtractedData) {
-      setExtractedData(JSON.parse(storedExtractedData));
-    }
-    
-    if (storedTableData) {
-      setTableData(JSON.parse(storedTableData));
-    }
-  
-    // If price is stored in localStorage, use it
-    if (storedPrice) {
-      setPricePerKg(parseFloat(storedPrice));
-    }
-  }, []);
-  
+  const [tableData, setTableData] = useState<
+    { clientId: string; trackCodes: string[]; weight: number; price: number }[]
+  >([]);
+  const [file, setFile] = useState<File | null>(null);
+  const [isFileLoaded, setIsFileLoaded] = useState(false);
 
   const handleFileSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
+      setIsFileLoaded(false); // Сброс флага перед загрузкой нового файла
     }
   };
 
@@ -47,147 +22,168 @@ const ImportPage = () => {
       alert("Пожалуйста, выберите файл для загрузки.");
       return;
     }
-
+  
     const fileType = file.name.split(".").pop()?.toLowerCase();
     if (!["xlsx", "xls", "txt"].includes(fileType || "")) {
       alert("Поддерживаются только файлы с расширением .xlsx, .xls или .txt.");
       return;
     }
-
+  
     const reader = new FileReader();
     reader.onload = (e) => {
       const data = new Uint8Array(e.target?.result as ArrayBuffer);
       const workbook = XLSX.read(data, { type: "array" });
       const firstSheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[firstSheetName];
-      const jsonData = XLSX.utils.sheet_to_json<string[]>(worksheet, { header: 1 });
-
-      const weightIndex = jsonData[0].indexOf("Вес");
-      const volumeIndex = jsonData[0].indexOf("Объем");
-
-      if (weightIndex === -1 || volumeIndex === -1) {
-        alert("Не удалось найти столбцы 'Вес' или 'Объем'.");
-        return;
-      }
-
-      const filteredData = jsonData.slice(1).filter(row => row[weightIndex] && row[volumeIndex]);
-
-      const extractedData = filteredData.map((row) => {
-        const weight = parseFloat(row[weightIndex]);
-        const volume = row[volumeIndex];
-        const cost = weight * pricePerKg; // Use pricePerKg from localStorage or default
-
-        return {
-          weight: row[weightIndex],
-          volume: row[volumeIndex],
-          cost: cost.toFixed(2),
-        };
+      const jsonData = XLSX.utils.sheet_to_json<any[]>(worksheet, { header: 1 });
+  
+      const clientData = [];
+      let currentClientId = "";
+      let currentTrackCodes: string[] = [];
+      let currentWeight = 0;
+      let currentPrice = 0;
+  
+      jsonData.forEach((row) => {
+        if (row[0]) {
+          // Если новый Client ID
+          if (currentClientId) {
+            // Добавляем текущего клиента в массив
+            clientData.push({
+              clientId: currentClientId,
+              trackCodes: currentTrackCodes,
+              weight: currentWeight,
+              price: currentPrice,
+            });
+          }
+          // Обновляем текущие данные для нового клиента
+          currentClientId = row[0].toString();
+          currentTrackCodes = [];
+          currentWeight = parseFloat(row[2]) || 0;
+          currentPrice = parseFloat(row[3]) || 0;
+        }
+  
+        // Добавляем трек-коды в массив для текущего клиента
+        if (row[1]) {
+          currentTrackCodes.push(row[1].toString());
+        }
       });
-
-      setExtractedData(extractedData);
-      localStorage.setItem("trackData", JSON.stringify(extractedData));
-
-      setTableData(jsonData);
-      localStorage.setItem("tableData", JSON.stringify(jsonData));
+  
+      // Добавляем последний клиент
+      if (currentClientId) {
+        clientData.push({
+          clientId: currentClientId,
+          trackCodes: currentTrackCodes,
+          weight: currentWeight,
+          price: currentPrice,
+        });
+      }
+  
+      // Выводим данные в консоль
+      console.log("Обработанные данные клиентов:", clientData);
+  
+      // Сохраняем данные в стейте
+      setTableData(clientData);
+      setIsFileLoaded(true); // Отмечаем, что файл загружен
     };
-
+  
     reader.readAsArrayBuffer(file);
   };
 
+  // console.log("Обработанные данные клиентов:", clientData);
 
-  const handleBack = () => {
-    navigate(-1); 
+  
+
+  const handleSubmit = async () => {
+    if (!isFileLoaded) {
+      alert("Пожалуйста, загрузите файл перед отправкой.");
+      return;
+    }
+  
+    // Создаем объект с данными для отправки
+    const requestData = tableData; // tableData — это ваш массив клиентов, который вы уже загрузили
+  
+    try {
+      // Отправка данных на сервер через PUT или POST
+      const res = await API.put("/api/orders/import", {
+        file: requestData, // Преобразуем массив в строку JSON
+      });
+  
+      // Проверка на успешный ответ от сервера
+      if (!res.ok) {
+        throw new Error("Ошибка при отправке данных.");
+      }
+  
+      const result = await res.json();
+      console.log("Данные успешно отправлены на сервер:", result);
+  
+      // После успешной отправки очищаем файл и данные
+      setFile(null);
+      setTableData([]);
+      setIsFileLoaded(false);
+      alert("Данные успешно отправлены!");
+    } catch (error) {
+      console.error("Ошибка:", error);
+      alert("Произошла ошибка при отправке данных.");
+    }
   };
+  
+  
 
   return (
     <div className="bg-image min-h-screen">
-
-
-
-
-
-
-
-
-
-
-
-
-
-      <div className="p-6 container md:mx-auto  flex flex-col items-start justify-start">
-
-
-
-
-      <nav className="text-sm mb-4">
-        <ol className="list-reset flex text-gray-500 text-lg" >
-          <li>
-            <a href="/dashboard" className="text-blue-500 hover:underline">
-              Главная
-            </a>
-          </li>
-          <li>
-            <span className="mx-2">/</span>
-          </li>
-          <li>Клиенты</li>
-        </ol>
-      </nav>
-
-      {/* Кнопка "Назад" */}
-      <button
-        onClick={handleBack}
-        className="px-4 py-2 bg-blue-500 text-white rounded-md mb-4"
-      >
-        Назад
-      </button>
-
-
-
-
-
-
-
-        <div className="border border-gray-300 rounded-lg p-6 bg-white shadow-md md:w-3/5">
-          <h2 className="text-lg font-semibold mb-4">Импорт трек-кодов</h2>
-          <div className="mb-4">
-            <label htmlFor="file-upload" className="block mb-2 text-sm font-medium text-gray-700">
-              Загрузите файл с трек-кодами
-            </label>
-            <input
-              type="file"
-              id="file-upload"
-              accept=".xlsx, .xls, .txt"
-              className="w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer focus:outline-none"
-              onChange={handleFileSelection}
-            />
-          </div>
-          <button
-            onClick={handleFileUpload}
-            className="w-auto px-5 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-lg"
+      <div className="p-6 container md:mx-auto flex flex-col items-start justify-start">
+        <h2 className="text-lg font-semibold mb-4">Импорт трек-кодов</h2>
+        <div className="mb-4">
+          <label
+            htmlFor="file-upload"
+            className="block mb-2 text-sm font-medium text-gray-700"
           >
-            Загрузить
-          </button>
+            Загрузите файл
+          </label>
+          <input
+            type="file"
+            id="file-upload"
+            accept=".xlsx, .xls, .txt"
+            className="w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer focus:outline-none"
+            onChange={handleFileSelection}
+          />
         </div>
+        <button
+          onClick={isFileLoaded ? handleSubmit : handleFileUpload}
+          className="w-auto px-5 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-lg"
+        >
+          {isFileLoaded ? "Отправить" : "Загрузить"}
+        </button>
 
-        {extractedData.length > 0 && (
-          <div className="mt-6">
+        {tableData.length > 0 && (
+          <div className="mt-6 bg-slate-200">
             <h3 className="text-lg font-semibold mb-4">Данные из файла:</h3>
             <table className="table-auto w-full border-collapse border border-gray-300">
               <thead>
                 <tr>
-                  <th className="border border-gray-400 px-4 py-2 bg-gray-100 text-left rounded-sm">Вес</th>
-                  <th className="border border-gray-400 px-4 py-2 bg-gray-100 text-left rounded-sm">Объем</th>
-                  <th className="border border-gray-400 px-4 py-2 bg-gray-100 text-left rounded-sm">Стоимость (сом)</th>
+                  <th className="border border-gray-400 px-4 py-2">Client ID</th>
+                  <th className="border border-gray-400 px-4 py-2">Track Codes</th>
+                  <th className="border border-gray-400 px-4 py-2">Weight</th>
+                  <th className="border border-gray-400 px-4 py-2">Price</th>
                 </tr>
               </thead>
               <tbody>
-                {extractedData.map((row, index) => (
-                  <tr key={index}>
-                    <td className="border border-gray-400 px-4 py-2">{row.weight}</td>
-                    <td className="border border-gray-400 px-4 py-2">{row.volume}</td>
-                    <td className="border border-gray-400 px-4 py-2">{row.cost}</td>
-                  </tr>
-                ))}
+                {tableData.map((row, index) =>
+                  row.trackCodes.map((trackCode, subIndex) => (
+                    <tr key={`${index}-${subIndex}`}>
+                      <td className="border border-gray-400 px-4 py-2">
+                        {subIndex === 0 ? row.clientId : ""}
+                      </td>
+                      <td className="border border-gray-400 px-4 py-2">{trackCode}</td>
+                      <td className="border border-gray-400 px-4 py-2">
+                        {subIndex === 0 ? row.weight.toFixed(2) : ""}
+                      </td>
+                      <td className="border border-gray-400 px-4 py-2">
+                        {subIndex === 0 ? row.price.toFixed(2) : ""}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
