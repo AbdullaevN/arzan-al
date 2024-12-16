@@ -512,7 +512,7 @@ useEffect(() => {
         <table className="min-w-full bg-white">
         <thead>
     <tr >
-      {["№", "Дата оплаты", "Код",   "Сумма", "Вес", "Кол-во", "Действие"].map((header) => (
+      {["№", "Дата оплаты", "Имя пользователя", "Код",   "Сумма", "Вес", "Кол-во", "Действие"].map((header) => (
         <th key={header} className="py-3 px-4 border-b text-center text-sm font-semibold text-gray-700  ">
           {header}
         </th>
@@ -534,9 +534,9 @@ useEffect(() => {
                   <td className="py-3 px-4 border-b text-gray-700">
                     {order.trackCode}
                   </td>
-                  {/* <td className="py-3 px-4 border-b text-gray-700">
+                  <td className="py-3 px-4 border-b text-gray-700">
                     {order.name}
-                  </td> */}
+                  </td>
                   <td className="py-3 px-4 border-b text-gray-700">
                     {order.price}
                   </td>
