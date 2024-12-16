@@ -26,16 +26,17 @@ interface OrderDetails {
   deliveredToClient: boolean;
 }
 
-type Order = {
+interface Order {
+  id: string;
   trackCode: string;
-  clientCode: string;
-  quantity: number;
+  name: string;
+  price: number;
+  weight: number;
+  amount: number;
   paid: boolean;
-  dateOfPayment?:any
-  price:number;
-  weight:number;
-  amount:number
-};
+  dateOfPayment?: number; // Поле может быть необязательным
+}
+
 
 
 interface AddItemModalProps {
@@ -178,11 +179,13 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({addNewOrder}) => {
     setLoading(true);
     setError(null);
     try {
-        const response = await API.get('/api/orders/allOrders');
-      const filteredOrders = response.data.filter((order: Order) =>
-        order.trackCode.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setOrders(filteredOrders);
+        const response = await API.get('/api/orders/allClients');
+      // const filteredOrders = response.data.filter((order: Order) =>
+      //   order.trackCode.toLowerCase().includes(searchTerm.toLowerCase())
+      // );
+      setOrders(response.data);
+      console.log(response.data, 'yyyyyyyyyyyyyy');
+      
     } catch (err: any) {
       setError(err.message || 'Не удалось загрузить заказы');
       console.error('Ошибка загрузки заказов:', err);
@@ -190,6 +193,9 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({addNewOrder}) => {
       setLoading(false);
     }
   };
+
+  console.log(filterOrders,'sdf');
+  
  
     const handleBack = () => {
       navigate(-1); // Go back to the previous page
@@ -203,45 +209,61 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({addNewOrder}) => {
       }
     
       const { trackCode } = selectedOrder;
+    
+      // Подтверждение действия
       const isConfirmed = window.confirm(
         `Вы действительно хотите отметить заказ с трек-кодом "${trackCode}" как оплаченный?`
       );
     
       if (!isConfirmed) {
-        return; // Exit if user cancels
+        return; // Прекращаем выполнение, если пользователь отменил действие
       }
     
       try {
-        // Send the request to update the order as paid
+        // Отправляем PUT-запрос для обновления заказа
         const response = await API.put(
-          `/api/orders/edit/${trackCode}`,
-          { ...selectedOrder, paid: true, dateOfPayment: Date.now() }, // Add dateOfPayment
+          `/api/orders/edit-client`,
+          {
+            ...selectedOrder,
+            paid: true,
+            dateOfPayment: Date.now(), // Добавляем дату оплаты
+          },
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Authorization: `Bearer ${localStorage.getItem("token")}`, // Авторизация через токен
             },
           }
         );
     
         if (response.status === 200) {
-          // Update the order in the local state
+          // Если успешно, обновляем локальное состояние заказов
           setOrders((prevOrders) =>
             prevOrders.map((order) =>
               order.trackCode === trackCode
-                ? { ...order, paid: true, dateOfPayment: Date.now() }
+                ? { ...order, paid: true, dateOfPayment: Date.now() } // Обновляем заказ
                 : order
             )
           );
         } else {
-          setError("Failed to update order.");
+          setError("Не удалось обновить заказ.");
         }
       } catch (err: any) {
-        setError("Error updating order: " + (err.message || "Unknown error"));
-        console.error("Update order error:", err);
+        // Ловим и обрабатываем ошибки
+        setError("Ошибка при обновлении заказа: " + (err.message || "Неизвестная ошибка"));
+        console.error("Ошибка обновления заказа:", err);
       }
     };
+    
+
+ const handleDelete = {
   
-    const totalSum = weight * price; // Calculate the total sum dynamically
+ }
+
+
+    
+ 
+  
+    const totalSum = weight * price;  
    
 
   // Функция для скачивания данных в Excel
@@ -282,26 +304,32 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({addNewOrder}) => {
 // 
 const handleAdd = async () => {
   try {
-    const totalSum = Number(weight) * Number(amount);  // Расчет итоговой суммы
+    const totalSum = Number(weight) * Number(price);  
 
-    const res = await API.post("/api/orders/create", {
-      issued: false,
-      price: totalSum,  // Передаем итоговую сумму
-      name: 'name',
-      createdDate: Date.now(),
-      paid: false,
+console.log(totalSum,'TOTALSUM');
+
+    const res = await API.put("/api/orders/edit-client", {
+      price: totalSum,  
+      
       weight: weight,
       amount: amount,
-      dateOfPayment: 0,
-      deliveredDate: 0,
-      deliverTo: "Tokmok",
-      receiventInChina: false,
-      // trackCode: trackCode,
       clientId: code, 
-      warehouseTokmok: false,
-      deliveredToClient: false,
+      
+      // issued: false,
+
+      // name: 'name',
+      // createdDate: Date.now(),
+      // paid: false,
+      // dateOfPayment: 0,
+      // deliveredDate: 0,
+      // deliverTo: "Tokmok",
+      // receiventInChina: false,
+      // // trackCode: trackCode,
+      // warehouseTokmok: false,
+      // deliveredToClient: false,
     });
 
+    
    setIsModalOpen(!isModalOpen);
     fetchOrders();
   } catch (e) {
@@ -328,6 +356,8 @@ useEffect(() => {
    // Загрузка заказов при изменении поискового термина
    useEffect(() => {
     fetchOrders();
+    console.log(filteredOrders,fetchOrders );
+    
   }, [searchTerm]);
 
 
@@ -532,10 +562,11 @@ useEffect(() => {
                       : "—"}
                   </td>
                   <td className="py-3 px-4 border-b text-gray-700">
-                    {order.trackCode}
+                    {order.name}
                   </td>
                   <td className="py-3 px-4 border-b text-gray-700">
-                    {order.name}
+                    {order.clientId
+                    }
                   </td>
                   <td className="py-3 px-4 border-b text-gray-700">
                     {order.price}
@@ -547,18 +578,28 @@ useEffect(() => {
                     {order.amount}
                   </td>
                   <td className="py-3 px-4 border-b text-gray-700">
-                    <button
-                      className={`font-semibold py-2 px-4 rounded-lg ${
-                        order.paid
-                          ? "bg-green-500 text-white cursor-not-allowed"
-                          : "bg-blue-500 hover:bg-blue-600 text-white"
-                      }`}
-                      disabled={order.paid}
-                      onClick={() => handlePaid(order)}
-                    >
-                      {order.paid ? "Оплачено" : "Оплатить"}
-                    </button>
-                  </td>
+  <button
+    className={`font-semibold py-2 px-4 rounded-lg ${
+      order.paid
+        ? "bg-green-500 text-white cursor-not-allowed"
+        : "bg-blue-500 hover:bg-blue-600 text-white"
+    }`}
+    disabled={order.paid} // Кнопка отключается, если заказ уже оплачен
+    onClick={() => handlePaid(order)} // Вызывается функция handlePaid
+  >
+    {order.paid ? "Оплачено" : "Оплатить"} {/* Динамическая метка */}
+  </button>
+
+  <button
+    className={`font-semibold py-2 px-4 rounded-lg   bg-red-500 hover:bg-blue-600 text-white"
+    }`}
+    // disabled={order.paid} // Кнопка отключается, если заказ уже оплачен
+    onClick={() => handleDelete(order)} // Вызывается функция handlePaid
+  >
+   Удалить
+  </button>
+</td>
+
                 </tr>
               ))
             ) : (
