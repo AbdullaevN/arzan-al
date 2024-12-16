@@ -296,7 +296,7 @@ const handleAdd = async () => {
       deliveredDate: 0,
       deliverTo: "Tokmok",
       receiventInChina: false,
-      trackCode: trackCode,
+      // trackCode: trackCode,
       clientId: code, 
       warehouseTokmok: false,
       deliveredToClient: false,
@@ -430,7 +430,7 @@ useEffect(() => {
 
       <form>
         {/* Поля формы */}
-        <div className="mb-4">
+        {/* <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">Трек код</label>
           <input
             type="text"
@@ -439,7 +439,7 @@ useEffect(() => {
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
             placeholder="Введите трек код"
           />
-        </div>
+        </div> */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">Код клиента</label>
           <input
