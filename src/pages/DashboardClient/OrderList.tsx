@@ -19,7 +19,7 @@ interface Order {
 interface OrderListProps {
   orders: Order[];
   onDeleteOrder: (trackCode: string, clientId: string) => Promise<void>;
-  clientData?: any; // или конкретный интерфейс клиента
+  // clientData?: any;  
 
 }
 
@@ -29,7 +29,7 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder, cli
 
 
 
-  // console.log(fetchClient,'OOO');
+  console.log(clientData,'OOO');
   
   // Reset filtered orders when the `orders` prop changes
 
@@ -64,6 +64,9 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder, cli
     setFilteredOrders(orders);
    }, [orders]);
 
+   console.log(filteredOrders);
+   
+
   return (
     <div className="order-list p-4 w-full">
       <h2 className="text-2xl font-bold mb-4">Ваши заказы</h2>
@@ -90,9 +93,9 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder, cli
               </div>
 
               <div className="p-6">
-                <p className="text-sm text-gray-600 mb-2 py-5">
+                {/* <p className="text-sm text-gray-600 mb-2 py-5">
                   Дата: {new Date(order.createdDate).toLocaleDateString('ru-RU')}
-                </p>
+                </p> */}
 
                 <h4>{order.description}</h4>
 
@@ -116,7 +119,7 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder, cli
                       <input
                         type="checkbox"
                         readOnly
-                        checked={order.deliveredToClient === true}
+                        checked={!!clientData.deliveredDate} // Проверяем, есть ли deliveredDate
                         className="opacity-0 absolute"
                       />
                       <span className="checkmark"> <br />
@@ -132,7 +135,7 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder, cli
                       <span className="mr-2">Выдан клиенту</span>
                       <input
                         type="checkbox"
-                        checked={order.issued === true }
+                        checked={clientData.paid === true }
                         readOnly
                         className="opacity-0 absolute"
                       />

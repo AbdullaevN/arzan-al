@@ -255,9 +255,22 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({addNewOrder}) => {
     };
     
 
- const handleDelete = {
-  
- }
+    const handleDelete = async (order: any) => {
+      const confirmDelete = window.confirm("Вы уверены, что хотите удалить заказ?");
+      if (!confirmDelete) return;
+    
+      try {
+        // Запрос на удаление заказа
+        await API.delete(`/api/orders/delete-orders/${order.clientId}`);
+        alert("Заказ успешно удален!");
+        
+        // Дополнительно можно обновить список заказов на фронтенде
+        // Например, вызвать функцию обновления данных или удалить заказ из локального состояния
+      } catch (error) {
+        console.error("Ошибка при удалении заказа:", error);
+        alert("Не удалось удалить заказ. Пожалуйста, попробуйте еще раз.");
+      }
+    };
 
 
     
@@ -364,6 +377,12 @@ useEffect(() => {
   useEffect(() => {
     fetchPrice();  
   }, [fetchPrice]); 
+
+
+  console.log();
+  
+ 
+  
   return (
   <div className="bg-image min-h-screen">
       <div className="p-6 container md:mx-auto">
@@ -565,8 +584,7 @@ useEffect(() => {
                     {order.name}
                   </td>
                   <td className="py-3 px-4 border-b text-gray-700">
-                    {order.clientId
-                    }
+                    {order.clientId}
                   </td>
                   <td className="py-3 px-4 border-b text-gray-700">
                     {order.price}
@@ -577,7 +595,7 @@ useEffect(() => {
                   <td className="py-3 px-4 border-b text-gray-700">
                     {order.amount}
                   </td>
-                  <td className="py-3 px-4 border-b text-gray-700">
+                  <td className="py-3 px-4 border-b text-gray-700 gap-4 flex flex-row justify-between items-center">
   <button
     className={`font-semibold py-2 px-4 rounded-lg ${
       order.paid
@@ -591,7 +609,7 @@ useEffect(() => {
   </button>
 
   <button
-    className={`font-semibold py-2 px-4 rounded-lg   bg-red-500 hover:bg-blue-600 text-white"
+    className={`font-semibold py-2 px-4 rounded-lg text-white   bg-red-500 hover:bg-red-600 text-white"
     }`}
     // disabled={order.paid} // Кнопка отключается, если заказ уже оплачен
     onClick={() => handleDelete(order)} // Вызывается функция handlePaid
