@@ -37,15 +37,10 @@ interface Order {
   dateOfPayment?: number; // Поле может быть необязательным
 }
 
-
-
 interface AddItemModalProps {
- 
   addNewOrder: (newOrder: OrderDetails) => void;
 }
 
-
- 
 const PaymentsPage: React.FC<AddItemModalProps> = ({addNewOrder}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -157,13 +152,11 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({addNewOrder}) => {
 
 
   const filterOrders = selectedDate
-    ? orders.filter(
-        (order) =>
-          order.dateOfPayment &&
-          new Date(order.dateOfPayment).toLocaleDateString("en-GB") ===
-            selectedDate
-      )
-    : orders;  
+  ? orders.filter((order) =>
+      new Date(order.dateOfPayment).toLocaleDateString("en-GB") === selectedDate
+    )
+  : orders;
+
  
    const navigate = useNavigate();
 
@@ -649,33 +642,57 @@ useEffect(() => {
 
 
 {/* STATISTIC */}
-      {/* Summary Blocks */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-bold text-xl">
-        {/* Clients Count */}
-        <div className="p-4 bg-blue-300 rounded-lg">
-          <div className="text-sm text-gray-700">Кол-во клиентов: {stats.clientsCount} шт</div>
-          <div className="text-sm text-gray-700">Оплатил: {stats.paidClients} шт</div>
-          <div className="text-sm text-gray-700">Осталось: {stats.remainingClients} шт</div>
-        </div>
-        {/* Total Amount */}
-        <div className="p-4 bg-green-300 rounded-lg">
-          <div className="text-sm text-gray-700">Общая сумма: {stats.totalAmount} сом</div>
-          <div className="text-sm text-gray-700">Оплатил: {stats.paidAmount} сом</div>
-          <div className="text-sm text-gray-700">Осталось: {stats.remainingAmount} сом</div>
-        </div>
-        {/* Total Weight */}
-        <div className="p-4 bg-yellow-300 rounded-lg">
-          <div className="text-sm text-gray-700">Общий вес: {stats.totalWeight.toFixed(2)} кг</div>
-          <div className="text-sm text-gray-700">Оплатил за: {stats.paidWeight.toFixed(2)} кг</div>
-          <div className="text-sm text-gray-700">Осталось: {stats.remainingWeight.toFixed(2)} кг</div>
-        </div>
-        {/* Product Count */}
-        <div className="p-4 bg-red-300 rounded-lg">
-          <div className="text-sm text-gray-700">Кол-во товаров: {stats.productCount} шт</div>
-          <div className="text-sm text-gray-700">Оплачено за: {stats.paidProducts} шт</div>
-          <div className="text-sm text-gray-700">Осталось: {stats.remainingProducts} шт</div>
-        </div>
-      </div>
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-bold text-xl">
+  {/* Clients Count */}
+  <div className="p-4 bg-blue-300 rounded-lg">
+    <div className="text-sm text-gray-700">
+      Кол-во клиентов: {stats.clientsCount || 0} шт
+    </div>
+    <div className="text-sm text-gray-700">
+      Оплатил: {stats.paidClients || 0} шт
+    </div>
+    <div className="text-sm text-gray-700">
+      Осталось: {stats.remainingClients || 0} шт
+    </div>
+  </div>
+  {/* Total Amount */}
+  <div className="p-4 bg-green-300 rounded-lg">
+    <div className="text-sm text-gray-700">
+      Общая сумма: {stats.totalAmount || 0} сом
+    </div>
+    <div className="text-sm text-gray-700">
+      Оплатил: {stats.paidAmount || 0} сом
+    </div>
+    <div className="text-sm text-gray-700">
+      Осталось: {stats.remainingAmount || 0} сом
+    </div>
+  </div>
+  {/* Total Weight */}
+  <div className="p-4 bg-yellow-300 rounded-lg">
+    <div className="text-sm text-gray-700">
+      Общий вес: {(stats.totalWeight || 0).toFixed(2)} кг
+    </div>
+    <div className="text-sm text-gray-700">
+      Оплатил за: {(stats.paidWeight || 0).toFixed(2)} кг
+    </div>
+    <div className="text-sm text-gray-700">
+      Осталось: {(stats.remainingWeight || 0).toFixed(2)} кг
+    </div>
+  </div>
+  {/* Product Count */}
+  <div className="p-4 bg-red-300 rounded-lg">
+    <div className="text-sm text-gray-700">
+      Кол-во товаров: {stats.productCount || 0} шт
+    </div>
+    <div className="text-sm text-gray-700">
+      Оплачено за: {stats.paidProducts || 0} шт
+    </div>
+    <div className="text-sm text-gray-700">
+      Осталось: {stats.remainingProducts || 0} шт
+    </div>
+  </div>
+</div>
+
     </div>
 
   </div>

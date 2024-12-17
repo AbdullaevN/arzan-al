@@ -29,7 +29,7 @@ const HistoryPage: React.FC = () => {
     setError(null);
     try {
       const response = await API.get("/api/orders/allClients");
-      console.log(response.data);
+      console.log(response.data,'9');
 
       if (Array.isArray(response.data)) {
         setClients(response.data); // Устанавливаем всех клиентов с заказами
@@ -59,6 +59,9 @@ const HistoryPage: React.FC = () => {
         order.name.toLowerCase().includes(searchTerm.toLowerCase())
       ).map(order => ({ ...order, clientName: client.name, clientCity: client.city }))
     );
+
+    console.log(filteredOrders,'0');
+    
 
   return (
     <div className="min-h-screen p-8 container md:mx-auto">
@@ -98,7 +101,7 @@ const HistoryPage: React.FC = () => {
               <tr>
                 <th className="px-4 py-2 border-b">№</th>
                 <th className="px-4 py-2 border-b">Название</th>
-                <th className="px-4 py-2 border-b">Цена</th>
+                {/* <th className="px-4 py-2 border-b">Цена</th> */}
                 <th className="px-4 py-2 border-b">Город</th>
                 <th className="px-4 py-2 border-b">Дата создания</th>
                 <th className="px-4 py-2 border-b">Статус</th>
@@ -109,7 +112,7 @@ const HistoryPage: React.FC = () => {
                 <tr key={index}>
                   <td className="px-4 py-2 border-b text-center">{index + 1}</td>
                   <td className="px-4 py-2 border-b text-center">{order.name}</td>
-                  <td className="px-4 py-2 border-b text-center">{order.price} сом</td>
+                  {/* <td className="px-4 py-2 border-b text-center">{order.price} сом</td> */}
                   <td className="px-4 py-2 border-b text-center">{order.clientCity}</td>
                   <td className="px-4 py-2 border-b text-center">{new Date(order.createdDate).toLocaleDateString()}</td>
                   <td className="px-4 py-2 border-b text-center">

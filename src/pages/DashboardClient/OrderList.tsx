@@ -19,7 +19,7 @@ interface Order {
 interface OrderListProps {
   orders: Order[];
   onDeleteOrder: (trackCode: string, clientId: string) => Promise<void>;
-  // clientData?: any;  
+  clientData?: any;  
 
 }
 
@@ -29,7 +29,7 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder, cli
 
 
 
-  console.log(clientData,'OOO');
+  // console.log(clientData,'OOO');
   
   // Reset filtered orders when the `orders` prop changes
 
@@ -64,7 +64,7 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder, cli
     setFilteredOrders(orders);
    }, [orders]);
 
-   console.log(filteredOrders);
+  //  console.log(filteredOrders,clientData);
    
 
   return (
@@ -111,10 +111,13 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder, cli
                       />
                       <span className="checkmark"></span>
                     </label>
+                    <span className="text-sm text-gray-500">
+    {new Date(order.createdDate).toLocaleDateString("ru-RU")}
+  </span>
                   </div>
 
                   <div className="flex items-center">
-                    <label className="checkbox-container flex items-center text-lg cursor-pointer flex-col">
+                    <label className="checkbox-container flex items-center text-lg cursor-pointer ">
                       <span className="mr-2 flex gap-3 w-full">Склад в<h3>{clientData.city}</h3> </span>
                       <input
                         type="checkbox"
@@ -124,24 +127,34 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder, cli
                       />
                       <span className="checkmark"> <br />
                       </span> 
-                      <span> {new Date(order.createdDate).toLocaleString()}</span>
+                      {/* <span> {new Date(clientData.deliveredDate).toLocaleString()}</span> */}
+                      <span className="text-sm text-gray-500">
+    {new Date(clientData.deliveredDate).toLocaleDateString("ru-RU")}
+  </span>
 
                       {/* <p>Текущее время: {new Date(Date.now()).toLocaleString()}</p> */}
                     </label>
                   </div>
 
                   <div className="flex items-center">
-                    <label className="checkbox-container flex items-center text-lg cursor-pointer">
-                      <span className="mr-2">Выдан клиенту</span>
-                      <input
-                        type="checkbox"
-                        checked={clientData.paid === true }
-                        readOnly
-                        className="opacity-0 absolute"
-                      />
-                      <span className="checkmark"></span>
-                    </label>
-                  </div>
+  <label className="checkbox-container flex items-center text-lg cursor-pointer">
+    <span className="mr-2">Выдан клиенту</span>
+    <input
+      type="checkbox"
+      checked={clientData.paid === true}
+      readOnly
+      className="opacity-0 absolute"
+    />
+    <span className="checkmark"></span>
+  </label>
+  {/* Проверка: выводим дату, только если чекбокс отмечен и дата существует */}
+  {clientData.paid && clientData.dateOfPayment && (
+    <span className="ml-4 text-sm text-gray-600">
+      {new Date(clientData.dateOfPayment).toLocaleDateString("ru-RU")}
+    </span>
+  )}
+</div>
+
 
                   {/* Добавляем проверку для isssurdm */}
                   {order.isssurdm && (

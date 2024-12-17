@@ -80,8 +80,8 @@ const Unpaid: React.FC = () => {
                   <th className="px-4 py-2 border-b">Название</th>
                   <th className="px-4 py-2 border-b">Количество</th>
                   <th className="px-4 py-2 border-b">Цена</th>
-                  <th className="px-4 py-2 border-b">Дата создания</th>
-                  <th className="px-4 py-2 border-b">Трек-код</th>
+                  {/* <th className="px-4 py-2 border-b">Дата создания...</th> */}
+                  {/* <th className="px-4 py-2 border-b">Трек-код</th> */}
                   <th className="px-4 py-2 border-b">Оплачен</th>
                  </tr>
               </thead>
@@ -93,10 +93,10 @@ const Unpaid: React.FC = () => {
                       <td className="px-4 py-2 border-b">{order.name}</td>
                       <td className="px-4 py-2 border-b">{order.amount}</td>
                       <td className="px-4 py-2 border-b">{order.price} сом</td>
-                      <td className="px-4 py-2 border-b">
+                      {/* <td className="px-4 py-2 border-b">
                         {new Date(order.createdDate * 1000).toLocaleDateString()}
                       </td>
-                      <td className="px-4 py-2 border-b">{order.trackCode}</td>
+                      <td className="px-4 py-2 border-b">{order.trackCode}</td> */}
                       <td className="px-4 py-2 border-b">
                         {order.paid ? "Да" : "Нет"}
                       </td>
