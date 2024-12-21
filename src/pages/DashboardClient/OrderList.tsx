@@ -76,7 +76,7 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder, cli
           filteredOrders.map((order) => (
             <div
               key={order.trackCode}  
-              className="bg-white shadow-md rounded-lg border border-gray-200 relative max-w-sm overflow-hidden"
+              className="bg-white shadow-md rounded-lg border border-gray-200 relative w-full  md:text-sm text-sm overflow-hidden"
             >
               <div className="flex justify-between bg-orange-400 py-2 px-4 rounded-t-lg flex-col">
                 <h3 className="text-lg font-semibold">Заказ № {order.trackCode}</h3>
@@ -92,64 +92,65 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder, cli
                 </div>
               </div>
 
-              <div className="p-6">
+              <div className="p-3 md:p-6 text-sm">
                 {/* <p className="text-sm text-gray-600 mb-2 py-5">
                   Дата: {new Date(order.createdDate).toLocaleDateString('ru-RU')}
                 </p> */}
 
                 <h4>{order.description}</h4>
 
-                <div className="space-y-2">
-                  <div className="flex items-center">
-                    <label className="checkbox-container flex items-center text-lg cursor-pointer">
-                      <span className="mr-2">Склад в Китае</span>
-                      <input
-                        type="checkbox"
-                        checked={true}
-                        readOnly
-                        className="opacity-0 absolute"
-                      />
-                      <span className="checkmark"></span>
-                    </label>
-                    <span className="text-sm text-gray-500">
-    {new Date(order.createdDate).toLocaleDateString("ru-RU")}
-  </span>
-                  </div>
+                <div className="space-y-2 ">
+                
 
-                  <div className="flex items-center">
-                    <label className="checkbox-container flex items-center text-lg cursor-pointer ">
-                      <span className="mr-2 flex gap-3 w-full">Склад в<h3>{clientData.city}</h3> </span>
-                      <input
-                        type="checkbox"
-                        readOnly
-                        checked={!!clientData.deliveredDate} // Проверяем, есть ли deliveredDate
-                        className="opacity-0 absolute"
-                      />
-                      <span className="checkmark"> <br />
-                      </span> 
-                      {/* <span> {new Date(clientData.deliveredDate).toLocaleString()}</span> */}
-                      <span className="text-sm text-gray-500">
-    {new Date(clientData.deliveredDate).toLocaleDateString("ru-RU")}
-  </span>
 
-                      {/* <p>Текущее время: {new Date(Date.now()).toLocaleString()}</p> */}
-                    </label>
-                  </div>
+                <div className="flex items-center">
+  <label className="checkbox-container flex items-center text-lg cursor-pointer md:flex-row flex-col ">
+    <span className="mr-2 flex flex-row gap-2 text-sm md:text-base">Дата регистрации </span>
+    <input
+      type="checkbox"
+      readOnly
+      checked={!!clientData?.deliveredDate} // Using optional chaining to safely access deliveredDate
+      className="opacity-0 absolute"
+    />
+    <span className="checkmark"> <br />
+    </span> 
+    <span className=" text-gray-500 flex text-xs md:text-sm"> 
+      {clientData?.deliveredDate ? new Date(clientData.deliveredDate).toLocaleString() : 'Дата не указана'}
+    </span>
+  </label>
+</div>
+
+<div className="flex items-center">
+  <label className="checkbox-container flex items-center text-lg cursor-pointer md:flex-row flex-col ">
+    <span className="mr-2 flex flex-row gap-2 text-sm md:text-base">Склад в <h3>{clientData?.city || 'Не указано'}</h3> </span>
+    <input
+      type="checkbox"
+      readOnly
+      checked={!!clientData?.deliveredDate} // Again using optional chaining
+      className="opacity-0 absolute"
+    />
+    <span className="checkmark"> <br />
+    </span> 
+    <span className=" text-gray-500 flex text-xs md:text-sm"> 
+      {clientData?.deliveredDate ? new Date(clientData.deliveredDate).toLocaleString() : 'Дата не указана'}
+    </span>
+  </label>
+</div>
+
 
                   <div className="flex items-center">
   <label className="checkbox-container flex items-center text-lg cursor-pointer">
-    <span className="mr-2">Выдан клиенту</span>
+    <span className="mr-2 text-sm md:text-base">Выдан клиенту</span>
     <input
       type="checkbox"
-      checked={clientData.paid === true}
+      checked={clientData?.paid === true}
       readOnly
       className="opacity-0 absolute"
     />
     <span className="checkmark"></span>
   </label>
-  {/* Проверка: выводим дату, только если чекбокс отмечен и дата существует */}
-  {clientData.paid && clientData.dateOfPayment && (
-    <span className="ml-4 text-sm text-gray-600">
+   {clientData?.paid && clientData?.dateOfPayment && (
+    <span className="ml-4 text-gray-600 text-xs md:text-sm"> 
       {new Date(clientData.dateOfPayment).toLocaleDateString("ru-RU")}
     </span>
   )}

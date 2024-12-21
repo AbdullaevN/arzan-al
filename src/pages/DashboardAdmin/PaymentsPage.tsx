@@ -173,22 +173,16 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({addNewOrder}) => {
     setError(null);
     try {
         const response = await API.get('/api/orders/allClients');
-      // const filteredOrders = response.data.filter((order: Order) =>
-      //   order.trackCode.toLowerCase().includes(searchTerm.toLowerCase())
-      // );
+     
       setOrders(response.data);
-      console.log(response.data, 'yyyyyyyyyyyyyy');
-      
+       
     } catch (err: any) {
       setError(err.message || 'Не удалось загрузить заказы');
       console.error('Ошибка загрузки заказов:', err);
     } finally {
       setLoading(false);
     }
-  };
-
-  console.log(filterOrders,'sdf');
-  
+  };  
  
     const handleBack = () => {
       navigate(-1); // Go back to the previous page
@@ -199,13 +193,10 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({addNewOrder}) => {
       if (!selectedOrder) {
         setError("Client ID is missing or no order selected.");
         return;
-      }
-    
-      const { trackCode } = selectedOrder;
-    
+      }    
       // Подтверждение действия
       const isConfirmed = window.confirm(
-        `Вы действительно хотите отметить заказ с трек-кодом "${trackCode}" как оплаченный?`
+        `Вы действительно хотите отметить заказ "${selectedOrder.clientId}" как оплаченный?`
       );
     
       if (!isConfirmed) {
@@ -256,7 +247,8 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({addNewOrder}) => {
         // Запрос на удаление заказа
         await API.delete(`/api/orders/delete-orders/${order.clientId}`);
         alert("Заказ успешно удален!");
-        
+        const response = await API.get('/api/orders/allClients');
+        setOrders(response.data); // Обновляем состояние клиентов
         // Дополнительно можно обновить список заказов на фронтенде
         // Например, вызвать функцию обновления данных или удалить заказ из локального состояния
       } catch (error) {
@@ -285,12 +277,12 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({addNewOrder}) => {
       "Дата оплаты": order.dateOfPayment
         ? new Date(order.dateOfPayment).toLocaleDateString()
         : "—",
+        "Имя": order.name,
       "Код": order.trackCode,
-      "Имя": order.name,
-      "Сумма": order.price,
-      "Вес": order.weight,
       "Кол-во": order.amount,
-      Действие: order.paid ? "Оплачено" : "Оплатить",
+      "Вес": order.weight,
+      "Сумма": order.price,
+      // Действие: order.paid ? "Оплачено" : "Оплатить",
     }));
 
     // Преобразуем таблицу в формат Excel
@@ -304,16 +296,12 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({addNewOrder}) => {
     XLSX.writeFile(wb, fileName);
   };
 // 
-// 
-// 
-// 
-// 
+  
 const handleAdd = async () => {
   try {
     const totalSum = Number(weight) * Number(price);  
 
-console.log(totalSum,'TOTALSUM');
-
+ 
     const res = await API.put("/api/orders/edit-client", {
       price: totalSum,  
       
@@ -321,19 +309,8 @@ console.log(totalSum,'TOTALSUM');
       amount: amount,
       clientId: code, 
       
-      // issued: false,
-
-      // name: 'name',
-      // createdDate: Date.now(),
-      // paid: false,
-      // dateOfPayment: 0,
-      // deliveredDate: 0,
-      // deliverTo: "Tokmok",
-      // receiventInChina: false,
-      // // trackCode: trackCode,
-      // warehouseTokmok: false,
-      // deliveredToClient: false,
     });
+    console.log(res);
 
     
    setIsModalOpen(!isModalOpen);
@@ -359,22 +336,20 @@ useEffect(() => {
   }
 }, [filterOrders]); // Только когда filterOrders изменяется
 
-   // Загрузка заказов при изменении поискового термина
-   useEffect(() => {
+    useEffect(() => {
     fetchOrders();
-    console.log(filteredOrders,fetchOrders );
-    
+     
   }, [searchTerm]);
 
 
   useEffect(() => {
     fetchPrice();  
-  }, [fetchPrice]); 
+    
+  }, [fetchPrice]);   
 
 
-  console.log();
-  
- 
+
+  const filterOrders2 = orders.filter(order => order.amount > 0 && order.weight > 0);
   
   return (
   <div className="bg-image min-h-screen">
@@ -554,7 +529,7 @@ useEffect(() => {
         <table className="min-w-full bg-white">
         <thead>
     <tr >
-      {["№", "Дата оплаты", "Имя пользователя", "Код",   "Сумма", "Вес", "Кол-во", "Действие"].map((header) => (
+      {["№", "Дата оплаты", "Имя пользователя", "Код", "Кол-во", "Вес",  "Сумма",  "Действие"].map((header) => (
         <th key={header} className="py-3 px-4 border-b text-center text-sm font-semibold text-gray-700  ">
           {header}
         </th>
@@ -562,8 +537,8 @@ useEffect(() => {
     </tr>
   </thead>
   <tbody>
-            {filterOrders.length > 0 ? (
-              filterOrders.map((order, idx) => (
+            {filterOrders2.length > 0 ? (
+              filterOrders2.map((order, idx) => (
                 <tr key={order.id}>
                   <td className="py-3 px-4 border-b text-gray-700">
                     {idx + 1}
@@ -580,15 +555,17 @@ useEffect(() => {
                     {order.clientId}
                   </td>
                   <td className="py-3 px-4 border-b text-gray-700">
-                    {order.price}
+                    {order.amount}
                   </td>
                   <td className="py-3 px-4 border-b text-gray-700">
                     {order.weight}
                   </td>
                   <td className="py-3 px-4 border-b text-gray-700">
-                    {order.amount}
+                    {order.price}
                   </td>
-                  <td className="py-3 px-4 border-b text-gray-700 gap-4 flex flex-row justify-between items-center">
+               
+                 
+                  <td className="py-3 px-4 border-b text-gray-700 gap-4 flex flex-row  items-end justify-end">
   <button
     className={`font-semibold py-2 px-4 rounded-lg ${
       order.paid

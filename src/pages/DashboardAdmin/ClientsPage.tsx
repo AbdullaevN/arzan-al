@@ -13,24 +13,35 @@ interface Client {
   code: string;
   password: string;
   isActive: boolean;
+  name:string;
+  clientId:string;
+  city:string;
+
+
 }
 
 const ClientsPage: React.FC = () => {
   const { setClientId } = useClient();
 
-  const [clients, setClients] = useState<Client[]>([]); // Список клиентов
+  const [clients, setClients] = useState<Client[]>([]) 
   const navigate = useNavigate();
-  console.log(clients);
-  
-
- 
 
   useEffect(() => {
     API
-      .get('/api/orders/allClients') 
-      .then((response) => setClients(response.data))
+      .get('/api/orders/allClients')
+      .then((response) => {
+        const filteredClients = response.data
+          .filter((client: Client) => client.clientId !== 'admin') 
+          .sort((a: Client, b: Client) => b.id - a.id); 
+        setClients(filteredClients.reverse());
+      })
       .catch((error) => console.error('Ошибка загрузки клиентов:', error));
   }, []);
+  
+  
+  
+  
+  
 
   const handleBack = () => {
     navigate(-1); // Go back to the previous page

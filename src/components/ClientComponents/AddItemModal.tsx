@@ -31,9 +31,9 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal }) => {
   const [description, setDescription] = useState("");
   const [trackCode, setTrackCode] = useState("");
   const [warehouseChina, setWarehouseChina] = useState(false); // Новое состояние
+  const [loading, setLoading] = useState(false); // Состояние для индикатора загрузки
   
   const clientId = localStorage.getItem('clientId');
-   
 
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDescription(e.target.value);
@@ -48,7 +48,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal }) => {
   };
 
   const handleAdd = async () => {
-    // closeModal(); // Закрытие модального окна после добавления
+    setLoading(true); // Включаем индикатор загрузки перед запросом
     try {
       const res = await API.post("/api/orders/create", {
         issued: false,
@@ -70,21 +70,19 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal }) => {
       });
       console.log(res, 'res');
       
-    
-      
       //  addNewOrder(res.data);
       closeModal();
-
     } catch (e) {
       console.error(e);
       alert("Ошибка при добавлении заказа. Попробуйте снова позже.");
+    } finally {
+      setLoading(false); // Выключаем индикатор загрузки, когда запрос завершён
     }
 
-
-      // Очистка полей после добавления
-      setDescription("");
-      setTrackCode("");
-      setWarehouseChina(false);
+    // Очистка полей после добавления
+    setDescription("");
+    setTrackCode("");
+    setWarehouseChina(false);
   };
 
   if (!isOpen) return null;
@@ -141,13 +139,18 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, closeModal }) => {
           <button
             className="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600"
             onClick={handleAdd}
+            disabled={loading} // Отключаем кнопку, пока идет загрузка
           >
-            Добавить
+            {loading ? "Загрузка..." : "Добавить"} {/* Отображаем "Загрузка..." при запросе */}
           </button>
         </div>
+        {loading && (
+          <p className="mt-4 text-center text-gray-600">Загружается...</p> // Текст с индикатором загрузки
+        )}
       </div>
     </div>
   );
 };
 
 export default AddItemModal;
+  
