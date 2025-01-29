@@ -1,3 +1,321 @@
+// import { useEffect, useState } from "react";
+// import { Link, useNavigate } from "react-router-dom";
+// import { API } from "../../constants/api";
+// import usePriceStore from "../../store/useClient";
+
+// import * as XLSX from "xlsx";
+// import Breadcrumbs from "../../components/AdminComponents/Breadcrumbs";
+// import ActionButtons from "../../components/AdminComponents/ActionButtons";
+// import SearchComponent from "../../components/AdminComponents/Search";
+// import DateFilters from "../../components/AdminComponents/DateFilters";
+// import OrderTable from "../../components/AdminComponents/OrderTable";
+// import OrderModal from "../../components/AdminComponents/OrderModal";
+// import Statistics from "../../components/AdminComponents/Statistics";
+
+// interface OrderDetails {
+//   id: string;
+//   name: string;
+//   createdDate: string;
+//   price: number;
+//   weight: number;
+//   amount: number;
+//   dateOfPayment: number;
+//   deliveredDate: number;
+//   deliverTo: string;
+//   trackCode: string;
+//   issued: boolean;
+//   paid: boolean;
+//   receiventInChina: boolean;
+//   description?: string;
+//   warehouseChina: boolean;
+//   warehouseTokmok: boolean;
+//   deliveredToClient: boolean;
+// }
+
+// interface Order {
+//   id: string;
+//   trackCode: string;
+//   name: string;
+//   price: number;
+//   weight: number;
+//   amount: number;
+//   paid: boolean;
+//   dateOfPayment?: number;
+// }
+
+// const PaymentsPage: React.FC = () => {
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+//   const [loading, setLoading] = useState<boolean>(false);
+//   const [error, setError] = useState<string | null>(null);
+//   const [addError, setAddError] = useState<string | null>(null);
+//   const [orders, setOrders] = useState<Order[]>([]);
+//   const [searchTerm, setSearchTerm] = useState<string>("");
+//   const [trackCode, setTrackCode] = useState("");
+//   const [code, setCode] = useState("");
+//   const [weight, setWeight] = useState("");
+//   const [amount, setAmount] = useState("");
+//   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+//   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
+//   const { price, fetchPrice } = usePriceStore();
+//   const [stats, setStats] = useState({
+//     clientsCount: 0, 
+//     paidClients: 0,
+//     remainingClients: 0,
+//     totalAmount: 0,
+//     paidAmount: 0,
+//     remainingAmount: 0,
+//     totalWeight: 0,
+//     paidWeight: 0,
+//     remainingWeight: 0,
+//     productCount: 0,
+//     paidProducts: 0,
+//     remainingProducts: 0,
+//   });
+//   const calculateStatistics = () => {
+//     const totalAmount = filterOrders.reduce((sum, order) => sum + order.price, 0);
+//     const paidAmount = filterOrders.filter((order) => order.paid).reduce((sum, order) => sum + order.price, 0);
+//     const remainingAmount = totalAmount - paidAmount;
+  
+//     const totalWeight = filterOrders.reduce((sum, order) => sum + order.weight, 0);
+//     const paidWeight = filterOrders.filter((order) => order.paid).reduce((sum, order) => sum + order.weight, 0);
+//     const remainingWeight = totalWeight - paidWeight;
+  
+//     const productCount = filterOrders.reduce((sum, order) => sum + order.amount, 0);
+//     const paidProducts = filterOrders.filter((order) => order.paid).reduce((sum, order) => sum + order.amount, 0);
+//     const remainingProducts = productCount - paidProducts;
+  
+//     const clientsCount = filterOrders.length;
+//     const paidClients = filterOrders.filter((order) => order.paid).length;
+//     const remainingClients = clientsCount - paidClients;
+  
+//     setStats({
+//       clientsCount,
+//       paidClients,
+//       remainingClients,
+//       totalAmount,
+//       paidAmount,
+//       remainingAmount,
+//       totalWeight,
+//       paidWeight,
+//       remainingWeight,
+//       productCount,
+//       paidProducts,
+//       remainingProducts,
+//     });
+//   };
+  
+
+//   const uniquePaymentDates = Array.from(
+//     new Set(
+//       orders
+//         .filter((order) => order.dateOfPayment)
+//         .map((order) =>
+//           new Date(order.dateOfPayment).toLocaleDateString("en-GB")
+//         )
+//     )
+//   ).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+
+//   const filterOrders = selectedDate
+//     ? orders.filter(
+//         (order) =>
+//           new Date(order.dateOfPayment).toLocaleDateString("en-GB") ===
+//           selectedDate
+//       )
+//     : orders;
+
+//   const navigate = useNavigate();
+
+//   const toggleModal = (order: Order | null) => {
+//     setSelectedOrder(order);
+//     setIsModalOpen((prevState) => !prevState);
+//   };
+
+//   // Загрузка заказов с сервера
+//   useEffect(() => {
+//     const fetchOrders = async () => {
+//       setLoading(true);
+//       try {
+//         const response = await API.get("/api/orders/allClients");
+//         setOrders(response.data);
+//       } catch (error) {
+//         console.error("Error fetching orders:", error);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+//     fetchOrders();
+//   }, []);
+
+//   const handleBack = () => {
+//     navigate(-1); // Go back to the previous page
+//   };
+
+//   const handlePaid = async (selectedOrder: Order) => {
+//     if (!selectedOrder) {
+//       setError("Client ID is missing or no order selected.");
+//       return;
+//     }
+//     const isConfirmed = window.confirm(
+//       `Вы действительно хотите отметить заказ "${selectedOrder.trackCode}" как оплаченный?`
+//     );
+
+//     if (!isConfirmed) {
+//       return;
+//     }
+
+//     try {
+//       const response = await API.put(
+//         `/api/orders/edit-client`,
+//         {
+//           ...selectedOrder,
+//           paid: true,
+//           dateOfPayment: Date.now(),
+//         },
+//         {
+//           headers: {
+//             Authorization: `Bearer ${localStorage.getItem("token")}`,
+//           },
+//         }
+//       );
+
+//       if (response.status === 200) {
+//         setOrders((prevOrders) =>
+//           prevOrders.map((order) =>
+//             order.trackCode === selectedOrder.trackCode
+//               ? { ...order, paid: true, dateOfPayment: Date.now() }
+//               : order
+//           )
+//         );
+//       } else {
+//         setError("Не удалось обновить заказ.");
+//       }
+//     } catch (err: any) {
+//       setError(
+//         "Ошибка при обновлении заказа: " + (err.message || "Неизвестная ошибка")
+//       );
+//       console.error("Ошибка обновления заказа:", err);
+//     }
+//   };
+
+//   const handleDelete = async (order: any) => {
+//     const confirmDelete = window.confirm("Вы уверены, что хотите удалить заказ?");
+//     if (!confirmDelete) return;
+
+//     try {
+//       await API.delete(`/api/orders/delete-orders/${order.clientId}`);
+//       alert("Заказ успешно удален!");
+//       const response = await API.get("/api/orders/allClients");
+//       setOrders(response.data);
+//     } catch (error) {
+//       console.error("Ошибка при удалении заказа:", error);
+//       alert("Не удалось удалить заказ. Пожалуйста, попробуйте еще раз.");
+//     }
+//   };
+
+//   const totalSum = weight ? Number(weight) * Number(price) : 0;
+
+//   // Функция для скачивания данных в Excel
+//   const handleDownload = () => {
+//     if (filterOrders.length === 0) {
+//       alert("Нет данных для скачивания!");
+//       return;
+//     }
+
+//     const formattedData = filterOrders.map((order, idx) => ({
+//       "№": idx + 1,
+//       "Дата оплаты": order.dateOfPayment
+//         ? new Date(order.dateOfPayment).toLocaleDateString()
+//         : "—",
+//       Имя: order.name,
+//       Код: order.trackCode,
+//       "Кол-во": order.amount,
+//       Вес: order.weight,
+//       Сумма: order.price,
+//     }));
+
+//     const ws = XLSX.utils.json_to_sheet(formattedData);
+//     const wb = XLSX.utils.book_new();
+//     XLSX.utils.book_append_sheet(wb, ws, "Заказы");
+
+//     const fileName = selectedDate
+//       ? `${selectedDate}.xlsx`
+//       : `orders_${new Date().toLocaleDateString()}.xlsx`;
+
+//     XLSX.writeFile(wb, fileName);
+//   };
+
+//   const handleAdd = async () => {
+//     try {
+//       const totalSum = Number(weight) * Number(price);
+//       await API.put("/api/orders/edit-client", {
+//         price: totalSum,
+//         weight: weight,
+//         amount: amount,
+//         clientId: code,
+//       });
+//       setIsModalOpen(!isModalOpen);
+//       setAddError(null);
+//     } catch (e: any) {
+//       console.error(e);
+//       setAddError(e.response?.data?.message || "Ошибка: Проверьте данные клиента.");
+//     }
+//   };
+
+//   useEffect(() => {
+//     setFilteredOrders(filterOrders); 
+//   }, [selectedDate, orders]); 
+
+//   useEffect(() => {
+//     if (filterOrders.length > 0) {
+//       calculateStatistics();
+//     }
+//   }, [filterOrders]);
+
+//   useEffect(() => {
+//     fetchPrice();
+//   }, [fetchPrice]);
+
+//   return (
+//     <div className="bg-image min-h-screen">
+//       <div className="p-6 container md:mx-auto">
+//         <Breadcrumbs />
+//         <button onClick={handleBack} className="px-4 py-2 bg-blue-500 text-white rounded-md mb-4">
+//           Назад
+//         </button>
+//         <ActionButtons />
+//         <SearchComponent searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+//         <DateFilters uniquePaymentDates={uniquePaymentDates} selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
+//         <div className="flex justify-between items-center mb-4">
+//           <button onClick={handleDownload} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg">
+//             Скачать
+//           </button>
+//           <button onClick={toggleModal} className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
+//             + Добавить
+//           </button>
+//         </div>
+//         <OrderModal
+//           isModalOpen={isModalOpen}
+//           toggleModal={toggleModal}
+//           code={code}
+//           setCode={setCode}
+//           amount={amount}
+//           setAmount={setAmount}
+//           weight={weight}
+//           setWeight={setWeight}
+//           totalSum={totalSum}
+//           handleAdd={handleAdd}
+//           addError={addError}
+//         />
+//         <OrderTable orders={filteredOrders} handlePaid={handlePaid} handleDelete={handleDelete} />
+//         <Statistics stats={stats} />
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default PaymentsPage;
+
+
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { API } from "../../constants/api";

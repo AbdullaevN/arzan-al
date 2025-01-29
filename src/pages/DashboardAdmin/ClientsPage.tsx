@@ -42,6 +42,8 @@ const ClientsPage: React.FC = () => {
   
   
   
+  console.log(clients);
+  
 
   const handleBack = () => {
     navigate(-1); // Go back to the previous page

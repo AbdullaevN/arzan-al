@@ -30,11 +30,6 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder, cli
 
 
   // console.log(clientData,'OOO');
-  
-  // Reset filtered orders when the `orders` prop changes
-
-
-
  
   const handleSearch = async () => {
     if (searchTerm) {
@@ -57,8 +52,7 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder, cli
       setFilteredOrders(orders);
     }
   };
-  // console.log(filteredOrders);
-  
+   
 
   useEffect(() => {
     setFilteredOrders(orders);
@@ -105,18 +99,18 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder, cli
 
                 <div className="flex items-center">
   <label className="checkbox-container flex items-center text-lg cursor-pointer md:flex-row flex-col ">
-    <span className="mr-2 flex flex-row gap-2 text-sm md:text-base">Дата регистрации </span>
+    <span className="mr-2 flex flex-row gap-2 text-sm md:text-base">Склад в Китае </span>
     <input
       type="checkbox"
       readOnly
-      checked={!!clientData?.deliveredDate} // Using optional chaining to safely access deliveredDate
+      checked={true} // Using optional chaining to safely access deliveredDate
       className="opacity-0 absolute"
     />
     <span className="checkmark"> <br />
     </span> 
-    <span className=" text-gray-500 flex text-xs md:text-sm"> 
+    {/* <span className=" text-gray-500 flex text-xs md:text-sm"> 
       {clientData?.deliveredDate ? new Date(clientData.deliveredDate).toLocaleString() : 'Дата не указана'}
-    </span>
+    </span> */}
   </label>
 </div>
 
@@ -131,9 +125,9 @@ export const OrderList: React.FC<OrderListProps> = ({ orders, onDeleteOrder, cli
     />
     <span className="checkmark"> <br />
     </span> 
-    <span className=" text-gray-500 flex text-xs md:text-sm"> 
+    {/* <span className=" text-gray-500 flex text-xs md:text-sm"> 
       {clientData?.deliveredDate ? new Date(clientData.deliveredDate).toLocaleString() : 'Дата не указана'}
-    </span>
+    </span> */}
   </label>
 </div>
 

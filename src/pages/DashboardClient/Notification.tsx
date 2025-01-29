@@ -1,15 +1,23 @@
 interface NotificationProps {
-  totalOrders: number;
-  totalWeight: number;
-  totalAmount: number;
+  productName: string;
+  clientName: string;
+  trackCode: string;
+  createdDate: string;
 }
 
-const Notification: React.FC<NotificationProps> = ({ totalOrders, totalWeight, totalAmount }) => {
+const Notification: React.FC<NotificationProps> = ({
+  productName,
+  clientName,
+  trackCode,
+  createdDate,
+}) => {
   return (
-    <div className="flex flex-col items-start bg-red-600 text-white p-4 m-3 rounded-lg ">
-      <h3 className="text-white text-lg font-normal mb-2">Счёт за доставку от 2024-11-07</h3>
-      <p className="text-white mb-1">Поступило заказов - {totalOrders} шт</p>
-      <p className="text-white">Вес {totalWeight} кг, сумма к оплате {totalAmount} сом</p>
+    <div className="bg-red-600 p-4 mb-4 rounded-md shadow-md text-white">
+      <h3 className="font-semibold text-lg">Неоплаченный заказ: <br /> {productName}</h3>
+      <p>Клиент: {clientName}</p>
+      <p>Трек-код: {trackCode}</p>
+      <p>Дата заказа: {createdDate}</p>
+      <p>Статус: Неоплачено</p>
     </div>
   );
 };

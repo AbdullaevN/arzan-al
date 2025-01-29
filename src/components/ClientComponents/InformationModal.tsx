@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Toast from "./Toast";
+import { useNavigate } from "react-router-dom";
+import { API } from "../../constants/api";
 
 const InformationModal = ({
   isOpen,
@@ -9,12 +11,56 @@ const InformationModal = ({
   closeModal: () => void;
 }) => {
   const [toastVisible, setToastVisible] = useState(false);
+  const navigate = useNavigate();
+
+  const [client, setClient] = useState<any | null>(null);
+  const clientId = localStorage.getItem("clientId") || "";
+
+  const checkAuthorization = () => {
+    const token = localStorage.getItem("token");
+    const clientIdFromStorage = localStorage.getItem("clientId");
+
+    if (!token || !clientIdFromStorage) {
+      navigate("/login"); // Перенаправляем на страницу логина
+      return false;
+    }
+    return true;
+  };
+
+  const fetchClient = async () => {
+    if (!checkAuthorization()) return;
+
+    try {
+      const res = await API.get(`/api/orders/client/${clientId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      setClient(res.data);
+      console.log("Client data:", res.data);
+    } catch (e: any) {
+      if (e.response?.status === 401) {
+        console.error("Unauthorized, redirecting to login.");
+        navigate("/login"); // Если запрос вернул 401, перенаправляем на страницу логина
+      } else {
+        console.error("Error fetching client:", e);
+      }
+    }
+  };
+
+  // Вызывать fetchClient при открытии модального окна
+  useEffect(() => {
+    if (isOpen) {
+      fetchClient();
+    }
+  }, [isOpen]);
 
   const handleCopy = () => {
     // Copy text to clipboard
-    navigator.clipboard.writeText(
-      "赛字母BBK-BBK-146 18047077231 广东省广州市白云区江高镇南岗三元南路62号安托仓储1119库房"
-    );
+    const clientText = client
+      ? `${client.name}\n${client.phone}\n${client.address}`
+      : "Нет данных";
+    navigator.clipboard.writeText(clientText);
 
     // Show toast
     setToastVisible(true);
@@ -22,7 +68,7 @@ const InformationModal = ({
     // Hide toast after a delay
     setTimeout(() => {
       setToastVisible(false);
-    }, 2000); // Adjust the duration of the toast visibility (in milliseconds)
+    }, 2000);
   };
 
   if (!isOpen) return null;
@@ -31,15 +77,21 @@ const InformationModal = ({
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white p-6 rounded-lg max-w-lg w-full">
         <h2 className="text-xl font-bold mb-4">Информация</h2>
-        <p className="mb-4">
-          赛字母BBK-BBK-146
-          <br />
-          18047077231
-          <br />
-          广东省广州市白云区江高镇南岗三元南路62号安托仓储1119库房
-          <br />
-          赛字母BBK-BBK-146
-        </p>
+        {client ? (
+          <p className="mb-4">
+            <strong>Имя:</strong> {client.name}
+            <br />
+            <strong>Телефон:</strong> {client.phone}
+            <br />
+            <strong>Город:</strong> {client.city}
+            <br />
+            <strong>Код:</strong> {client.clientId}
+            <br />
+            {/* <strong>Город:</strong> {client.city} */}
+          </p>
+        ) : (
+          <p className="mb-4 text-gray-500">Загрузка данных клиента...</p>
+        )}
 
         <div className="flex gap-4">
           <button

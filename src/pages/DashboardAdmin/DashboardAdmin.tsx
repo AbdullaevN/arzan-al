@@ -32,6 +32,26 @@ const DashboardAdmin: React.FC = () => {
     { name: 'Оплата', path: '/payment' },
   ];
 
+
+  const [orders, setOrders] = useState<Order[]>([]);  
+  const [error, setError] = useState('');  
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const response = await API.get('/api/import');  
+        console.log('RES', response.data);  
+        setOrders(response.data); 
+      } catch (err) {
+        setError('Ошибка ');
+        console.error('Ошибка при запросе:', err);
+      }
+    };
+
+    fetchOrders();  
+  }, []);  
+
+
   return (
     <div className="bg-image min-h-svh">
       <div className="p-8 container flex flex-col items-start w-full md:mx-auto">
@@ -62,7 +82,45 @@ const DashboardAdmin: React.FC = () => {
           ))}
         </div>
       </div>
+
+
+
+      <div className="bg-image min-h-screen">
+      <div className="container md:mx-auto px-4 flex flex-col items-start">
+        <h1 className="py-8 text-2xl font-bold">Данные о заказах</h1>
+        {error && <p className="text-red-500">{error}</p>} {/* Выводим ошибку, если она есть */}
+        
+        {/* Отображаем полученные данные */}
+        <div>
+          <h2>Список заказов:</h2>
+          {orders.length > 0 ? (
+            <ul>
+              {orders.map((order, index) => (
+                <li key={index}>
+                  <p><strong>Client ID:</strong> {order.clientId}</p>
+                  <p><strong>Price:</strong> {order.price}</p>
+                  <p><strong>Weight:</strong> {order.weight}</p>
+                  <p><strong>Amount:</strong> {order.amount}</p>
+                  <p><strong>Paid:</strong> {order.paid ? 'Yes' : 'No'}</p>
+                  <p><strong>Timestamp:</strong> {new Date(order.timestamp).toLocaleDateString()}</p>
+                  <hr />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>Нет данных для отображения</p>
+          )}
+        </div>
+      </div>
     </div>
+
+    </div>
+
+
+
+
+
+
   );
 };
 
