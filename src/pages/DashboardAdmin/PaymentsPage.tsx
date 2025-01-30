@@ -1,329 +1,9 @@
-// import { useEffect, useState } from "react";
-// import { Link, useNavigate } from "react-router-dom";
-// import { API } from "../../constants/api";
-// import usePriceStore from "../../store/useClient";
-
-// import * as XLSX from "xlsx";
-// import Breadcrumbs from "../../components/AdminComponents/Breadcrumbs";
-// import ActionButtons from "../../components/AdminComponents/ActionButtons";
-// import SearchComponent from "../../components/AdminComponents/Search";
-// import DateFilters from "../../components/AdminComponents/DateFilters";
-// import OrderTable from "../../components/AdminComponents/OrderTable";
-// import OrderModal from "../../components/AdminComponents/OrderModal";
-// import Statistics from "../../components/AdminComponents/Statistics";
-
-// interface OrderDetails {
-//   id: string;
-//   name: string;
-//   createdDate: string;
-//   price: number;
-//   weight: number;
-//   amount: number;
-//   dateOfPayment: number;
-//   deliveredDate: number;
-//   deliverTo: string;
-//   trackCode: string;
-//   issued: boolean;
-//   paid: boolean;
-//   receiventInChina: boolean;
-//   description?: string;
-//   warehouseChina: boolean;
-//   warehouseTokmok: boolean;
-//   deliveredToClient: boolean;
-// }
-
-// interface Order {
-//   id: string;
-//   trackCode: string;
-//   name: string;
-//   price: number;
-//   weight: number;
-//   amount: number;
-//   paid: boolean;
-//   dateOfPayment?: number;
-// }
-
-// const PaymentsPage: React.FC = () => {
-//   const [isModalOpen, setIsModalOpen] = useState(false);
-//   const [loading, setLoading] = useState<boolean>(false);
-//   const [error, setError] = useState<string | null>(null);
-//   const [addError, setAddError] = useState<string | null>(null);
-//   const [orders, setOrders] = useState<Order[]>([]);
-//   const [searchTerm, setSearchTerm] = useState<string>("");
-//   const [trackCode, setTrackCode] = useState("");
-//   const [code, setCode] = useState("");
-//   const [weight, setWeight] = useState("");
-//   const [amount, setAmount] = useState("");
-//   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-//   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
-//   const { price, fetchPrice } = usePriceStore();
-//   const [stats, setStats] = useState({
-//     clientsCount: 0, 
-//     paidClients: 0,
-//     remainingClients: 0,
-//     totalAmount: 0,
-//     paidAmount: 0,
-//     remainingAmount: 0,
-//     totalWeight: 0,
-//     paidWeight: 0,
-//     remainingWeight: 0,
-//     productCount: 0,
-//     paidProducts: 0,
-//     remainingProducts: 0,
-//   });
-//   const calculateStatistics = () => {
-//     const totalAmount = filterOrders.reduce((sum, order) => sum + order.price, 0);
-//     const paidAmount = filterOrders.filter((order) => order.paid).reduce((sum, order) => sum + order.price, 0);
-//     const remainingAmount = totalAmount - paidAmount;
-  
-//     const totalWeight = filterOrders.reduce((sum, order) => sum + order.weight, 0);
-//     const paidWeight = filterOrders.filter((order) => order.paid).reduce((sum, order) => sum + order.weight, 0);
-//     const remainingWeight = totalWeight - paidWeight;
-  
-//     const productCount = filterOrders.reduce((sum, order) => sum + order.amount, 0);
-//     const paidProducts = filterOrders.filter((order) => order.paid).reduce((sum, order) => sum + order.amount, 0);
-//     const remainingProducts = productCount - paidProducts;
-  
-//     const clientsCount = filterOrders.length;
-//     const paidClients = filterOrders.filter((order) => order.paid).length;
-//     const remainingClients = clientsCount - paidClients;
-  
-//     setStats({
-//       clientsCount,
-//       paidClients,
-//       remainingClients,
-//       totalAmount,
-//       paidAmount,
-//       remainingAmount,
-//       totalWeight,
-//       paidWeight,
-//       remainingWeight,
-//       productCount,
-//       paidProducts,
-//       remainingProducts,
-//     });
-//   };
-  
-
-//   const uniquePaymentDates = Array.from(
-//     new Set(
-//       orders
-//         .filter((order) => order.dateOfPayment)
-//         .map((order) =>
-//           new Date(order.dateOfPayment).toLocaleDateString("en-GB")
-//         )
-//     )
-//   ).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-
-//   const filterOrders = selectedDate
-//     ? orders.filter(
-//         (order) =>
-//           new Date(order.dateOfPayment).toLocaleDateString("en-GB") ===
-//           selectedDate
-//       )
-//     : orders;
-
-//   const navigate = useNavigate();
-
-//   const toggleModal = (order: Order | null) => {
-//     setSelectedOrder(order);
-//     setIsModalOpen((prevState) => !prevState);
-//   };
-
-//   // Загрузка заказов с сервера
-//   useEffect(() => {
-//     const fetchOrders = async () => {
-//       setLoading(true);
-//       try {
-//         const response = await API.get("/api/orders/allClients");
-//         setOrders(response.data);
-//       } catch (error) {
-//         console.error("Error fetching orders:", error);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-//     fetchOrders();
-//   }, []);
-
-//   const handleBack = () => {
-//     navigate(-1); // Go back to the previous page
-//   };
-
-//   const handlePaid = async (selectedOrder: Order) => {
-//     if (!selectedOrder) {
-//       setError("Client ID is missing or no order selected.");
-//       return;
-//     }
-//     const isConfirmed = window.confirm(
-//       `Вы действительно хотите отметить заказ "${selectedOrder.trackCode}" как оплаченный?`
-//     );
-
-//     if (!isConfirmed) {
-//       return;
-//     }
-
-//     try {
-//       const response = await API.put(
-//         `/api/orders/edit-client`,
-//         {
-//           ...selectedOrder,
-//           paid: true,
-//           dateOfPayment: Date.now(),
-//         },
-//         {
-//           headers: {
-//             Authorization: `Bearer ${localStorage.getItem("token")}`,
-//           },
-//         }
-//       );
-
-//       if (response.status === 200) {
-//         setOrders((prevOrders) =>
-//           prevOrders.map((order) =>
-//             order.trackCode === selectedOrder.trackCode
-//               ? { ...order, paid: true, dateOfPayment: Date.now() }
-//               : order
-//           )
-//         );
-//       } else {
-//         setError("Не удалось обновить заказ.");
-//       }
-//     } catch (err: any) {
-//       setError(
-//         "Ошибка при обновлении заказа: " + (err.message || "Неизвестная ошибка")
-//       );
-//       console.error("Ошибка обновления заказа:", err);
-//     }
-//   };
-
-//   const handleDelete = async (order: any) => {
-//     const confirmDelete = window.confirm("Вы уверены, что хотите удалить заказ?");
-//     if (!confirmDelete) return;
-
-//     try {
-//       await API.delete(`/api/orders/delete-orders/${order.clientId}`);
-//       alert("Заказ успешно удален!");
-//       const response = await API.get("/api/orders/allClients");
-//       setOrders(response.data);
-//     } catch (error) {
-//       console.error("Ошибка при удалении заказа:", error);
-//       alert("Не удалось удалить заказ. Пожалуйста, попробуйте еще раз.");
-//     }
-//   };
-
-//   const totalSum = weight ? Number(weight) * Number(price) : 0;
-
-//   // Функция для скачивания данных в Excel
-//   const handleDownload = () => {
-//     if (filterOrders.length === 0) {
-//       alert("Нет данных для скачивания!");
-//       return;
-//     }
-
-//     const formattedData = filterOrders.map((order, idx) => ({
-//       "№": idx + 1,
-//       "Дата оплаты": order.dateOfPayment
-//         ? new Date(order.dateOfPayment).toLocaleDateString()
-//         : "—",
-//       Имя: order.name,
-//       Код: order.trackCode,
-//       "Кол-во": order.amount,
-//       Вес: order.weight,
-//       Сумма: order.price,
-//     }));
-
-//     const ws = XLSX.utils.json_to_sheet(formattedData);
-//     const wb = XLSX.utils.book_new();
-//     XLSX.utils.book_append_sheet(wb, ws, "Заказы");
-
-//     const fileName = selectedDate
-//       ? `${selectedDate}.xlsx`
-//       : `orders_${new Date().toLocaleDateString()}.xlsx`;
-
-//     XLSX.writeFile(wb, fileName);
-//   };
-
-//   const handleAdd = async () => {
-//     try {
-//       const totalSum = Number(weight) * Number(price);
-//       await API.put("/api/orders/edit-client", {
-//         price: totalSum,
-//         weight: weight,
-//         amount: amount,
-//         clientId: code,
-//       });
-//       setIsModalOpen(!isModalOpen);
-//       setAddError(null);
-//     } catch (e: any) {
-//       console.error(e);
-//       setAddError(e.response?.data?.message || "Ошибка: Проверьте данные клиента.");
-//     }
-//   };
-
-//   useEffect(() => {
-//     setFilteredOrders(filterOrders); 
-//   }, [selectedDate, orders]); 
-
-//   useEffect(() => {
-//     if (filterOrders.length > 0) {
-//       calculateStatistics();
-//     }
-//   }, [filterOrders]);
-
-//   useEffect(() => {
-//     fetchPrice();
-//   }, [fetchPrice]);
-
-//   return (
-//     <div className="bg-image min-h-screen">
-//       <div className="p-6 container md:mx-auto">
-//         <Breadcrumbs />
-//         <button onClick={handleBack} className="px-4 py-2 bg-blue-500 text-white rounded-md mb-4">
-//           Назад
-//         </button>
-//         <ActionButtons />
-//         <SearchComponent searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-//         <DateFilters uniquePaymentDates={uniquePaymentDates} selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
-//         <div className="flex justify-between items-center mb-4">
-//           <button onClick={handleDownload} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg">
-//             Скачать
-//           </button>
-//           <button onClick={toggleModal} className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
-//             + Добавить
-//           </button>
-//         </div>
-//         <OrderModal
-//           isModalOpen={isModalOpen}
-//           toggleModal={toggleModal}
-//           code={code}
-//           setCode={setCode}
-//           amount={amount}
-//           setAmount={setAmount}
-//           weight={weight}
-//           setWeight={setWeight}
-//           totalSum={totalSum}
-//           handleAdd={handleAdd}
-//           addError={addError}
-//         />
-//         <OrderTable orders={filteredOrders} handlePaid={handlePaid} handleDelete={handleDelete} />
-//         <Statistics stats={stats} />
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default PaymentsPage;
-
-
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { API } from "../../constants/api";
 import usePriceStore from "../../store/useClient";
+import * as XLSX from "xlsx";
 
-import * as XLSX from "xlsx"; 
-
- 
 interface OrderDetails {
   id: string;
   name: string;
@@ -342,45 +22,41 @@ interface OrderDetails {
   warehouseChina: boolean;
   warehouseTokmok: boolean;
   deliveredToClient: boolean;
+  clientId: string;
+  imports?: any[];
 }
 
 interface Order {
   id: string;
+  clientId: string;
   trackCode: string;
   name: string;
   price: number;
   weight: number;
   amount: number;
   paid: boolean;
-  dateOfPayment?: number; // Поле может быть необязательным
+  dateOfPayment?: number;
+  imports?: any[];
+  
 }
 
 interface AddItemModalProps {
   addNewOrder: (newOrder: OrderDetails) => void;
 }
 
-const PaymentsPage: React.FC<AddItemModalProps> = ({addNewOrder}) => {
+const PaymentsPage: React.FC<AddItemModalProps> = ({ addNewOrder }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const [isPaid, setIsPaid] = useState(false);
-
- 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
-
-
-  const [trackCode, setTrackCode] = useState("");
   const [code, setCode] = useState("");
-
   const [weight, setWeight] = useState("");
   const [amount, setAmount] = useState("");
-
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-
-  const [filteredOrders, setFilteredOrders] = useState<Order[]>(orders);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [processingPayment, setProcessingPayment] = useState<string | null>(null);
   const { price, fetchPrice } = usePriceStore();
 
   const [stats, setStats] = useState({
@@ -398,606 +74,313 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({addNewOrder}) => {
     remainingProducts: 0,
   });
 
-  // Функция для расчета статистики
-  const calculateStatistics = () => {
-    let clientsCount = 0;
-    let paidClients = 0;
-    let remainingClients = 0;
+  const navigate = useNavigate();
 
-    let totalAmount = 0;
-    let paidAmount = 0;
-    let remainingAmount = 0;
+  const calculateStatistics = useCallback((data: Order[]) => {
+    const newStats = {
+      clientsCount: 0,
+      paidClients: 0,
+      remainingClients: 0,
+      totalAmount: 0,
+      paidAmount: 0,
+      remainingAmount: 0,
+      totalWeight: 0,
+      paidWeight: 0,
+      remainingWeight: 0,
+      productCount: 0,
+      paidProducts: 0,
+      remainingProducts: 0,
+    };
 
-    let totalWeight = 0;
-    let paidWeight = 0;
-    let remainingWeight = 0;
+    data.forEach((order) => {
+      if (!(order.amount > 0 || (order.imports?.length > 0))) return;
 
-    let productCount = 0;
-    let paidProducts = 0;
-    let remainingProducts = 0;
+      newStats.clientsCount++;
+      order.paid ? newStats.paidClients++ : newStats.remainingClients++;
 
-    filterOrders.forEach((order) => {
-      // Количество клиентов
-      clientsCount++;
-      if (order.paid) paidClients++;
-      else remainingClients++;
+      newStats.totalAmount += order.price || 0;
+      order.paid 
+        ? (newStats.paidAmount += order.price || 0)
+        : (newStats.remainingAmount += order.price || 0);
 
-      // Общая сумма
-      totalAmount += order.price;
-      if (order.paid) paidAmount += order.price;
-      else remainingAmount += order.price;
+      newStats.totalWeight += order.weight || 0;
+      order.paid 
+        ? (newStats.paidWeight += order.weight || 0)
+        : (newStats.remainingWeight += order.weight || 0);
 
-      // Общий вес
-      totalWeight += order.weight;
-      if (order.paid) paidWeight += order.weight;
-      else remainingWeight += order.weight;
-
-      // Количество товаров
-      productCount += order.amount;
-      if (order.paid) paidProducts += order.amount;
-      else remainingProducts += order.amount;
+      newStats.productCount += order.amount || 0;
+      order.paid 
+        ? (newStats.paidProducts += order.amount || 0)
+        : (newStats.remainingProducts += order.amount || 0);
     });
 
-    setStats({
-      clientsCount,
-      paidClients,
-      remainingClients,
-      totalAmount,
-      paidAmount,
-      remainingAmount,
-      totalWeight,
-      paidWeight,
-      remainingWeight,
-      productCount,
-      paidProducts,
-      remainingProducts,
-    });
-  };
+    setStats(newStats);
+  }, []);
 
+  const uniquePaymentDates = useMemo(() => 
+    Array.from(
+      new Set(
+        orders
+          .filter((order) => order.dateOfPayment)
+          .map((order) =>
+            new Date(order.dateOfPayment).toLocaleDateString("en-GB")
+          )
+      )
+    ).sort((a, b) => new Date(a).getTime() - new Date(b).getTime()),
+    [orders]
+  );
 
- 
+  const filteredOrders = useMemo(() => 
+    orders.filter(order => {
+      const hasActiveOrders = order.amount > 0 || (order.imports?.length > 0);
+      const matchesDate = selectedDate 
+        ? new Date(order.dateOfPayment).toLocaleDateString("en-GB") === selectedDate
+        : true;
+      const matchesSearch = searchTerm 
+        ? order.clientId.toLowerCase().includes(searchTerm.toLowerCase())
+        : true;
 
-  const uniquePaymentDates = Array.from(
-    new Set(
-      orders
-        .filter((order) => order.dateOfPayment)  
-        .map((order) =>
-          new Date(order.dateOfPayment).toLocaleDateString("en-GB")  
-        )
-    )
-  ).sort((a, b) => new Date(a).getTime() - new Date(b).getTime()); 
-  
+      return hasActiveOrders && matchesDate && matchesSearch;
+    }),
+    [orders, selectedDate, searchTerm]
+  );
 
+  useEffect(() => {
+    calculateStatistics(filteredOrders);
+  }, [filteredOrders, calculateStatistics]);
 
-  const filterOrders = selectedDate
-  ? orders.filter((order) =>
-      new Date(order.dateOfPayment).toLocaleDateString("en-GB") === selectedDate
-    )
-  : orders;
-
- 
-   const navigate = useNavigate();
-
-
-   const toggleModal = (order: Order | null) => {
-    setSelectedOrder(order);
-    setIsModalOpen(prevState => !prevState);
-  };
-
- 
-   // Загрузка заказов с сервера
-   const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     setLoading(true);
-    setError(null);
     try {
-        const response = await API.get('/api/orders/allClients');
-     
-      setOrders(response.data);
-       
+      const response = await API.get('/api/orders/allClients');
+      const filtered = response.data.filter((item: Order) => item.clientId !== 'admin');
+      setOrders(filtered);
     } catch (err: any) {
       setError(err.message || 'Не удалось загрузить заказы');
-      console.error('Ошибка загрузки заказов:', err);
     } finally {
       setLoading(false);
     }
-  };  
- 
-    const handleBack = () => {
-      navigate(-1); // Go back to the previous page
-    };
+  }, []);
 
+  useEffect(() => {
+    fetchOrders();
+    fetchPrice();
+  }, [fetchOrders, fetchPrice]);
 
-    const handlePaid = async (selectedOrder: Order) => {
-      if (!selectedOrder) {
-        setError("Client ID is missing or no order selected.");
-        return;
-      }    
-      // Подтверждение действия
-      const isConfirmed = window.confirm(
-        `Вы действительно хотите отметить заказ "${selectedOrder.clientId}" как оплаченный?`
-      );
-    
-      if (!isConfirmed) {
-        return; // Прекращаем выполнение, если пользователь отменил действие
-      }
-    
-      try {
-        // Отправляем PUT-запрос для обновления заказа
-        const response = await API.put(
-          `/api/orders/edit-client`,
-          {
-            ...selectedOrder,
-            paid: true,
-            dateOfPayment: Date.now(), // Добавляем дату оплаты
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`, // Авторизация через токен
-            },
-          }
-        );
-    
-        if (response.status === 200) {
-          // Если успешно, обновляем локальное состояние заказов
-          setOrders((prevOrders) =>
-            prevOrders.map((order) =>
-              order.trackCode === trackCode
-                ? { ...order, paid: true, dateOfPayment: Date.now() } // Обновляем заказ
-                : order
-            )
-          );
-        } else {
-          setError("Не удалось обновить заказ.");
-        }
-      } catch (err: any) {
-        // Ловим и обрабатываем ошибки
-        setError("Ошибка при обновлении заказа: " + (err.message || "Неизвестная ошибка"));
-        console.error("Ошибка обновления заказа:", err);
-      }
-    };
-    
-
-    const handleDelete = async (order: any) => {
-      const confirmDelete = window.confirm("Вы уверены, что хотите удалить заказ?");
-      if (!confirmDelete) return;
-    
-      try {
-        // Запрос на удаление заказа
-        await API.delete(`/api/orders/delete-orders/${order.clientId}`);
-        alert("Заказ успешно удален!");
-        const response = await API.get('/api/orders/allClients');
-        setOrders(response.data); // Обновляем состояние клиентов
-        // Дополнительно можно обновить список заказов на фронтенде
-        // Например, вызвать функцию обновления данных или удалить заказ из локального состояния
-      } catch (error) {
-        console.error("Ошибка при удалении заказа:", error);
-        alert("Не удалось удалить заказ. Пожалуйста, попробуйте еще раз.");
-      }
-    };
-
-
-    
- 
-  
-    const totalSum = weight * price;  
-   
-
-  // Функция для скачивания данных в Excel
-  const handleDownload = () => {
-    if (filterOrders.length === 0) {
-      alert("Нет данных для скачивания!");
+  const handlePaid = async (order: Order) => {
+    if (!order?.clientId) {
+      setError("Ошибка: заказ не найден");
       return;
     }
 
-    // Преобразуем данные таблицы в формат, который можно экспортировать
-    const formattedData = filterOrders.map((order, idx) => ({
-      "№": idx + 1,
-      "Дата оплаты": order.dateOfPayment
-        ? new Date(order.dateOfPayment).toLocaleDateString()
-        : "—",
-        "Имя": order.name,
-      "Код": order.trackCode,
-      "Кол-во": order.amount,
-      "Вес": order.weight,
-      "Сумма": order.price,
-      // Действие: order.paid ? "Оплачено" : "Оплатить",
-    }));
+    setProcessingPayment(order.clientId);
+    const isConfirmed = window.confirm(
+      `Отметить заказ ${order.clientId} как оплаченный?`
+    );
 
-    // Преобразуем таблицу в формат Excel
-    const ws = XLSX.utils.json_to_sheet(formattedData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Заказы");
+    if (!isConfirmed) {
+      setProcessingPayment(null);
+      return;
+    }
 
-    const fileName = selectedDate ? `${selectedDate}.xlsx` : `orders_${new Date().toLocaleDateString()}.xlsx`;
+    try {
+      const response = await API.put(
+        `/api/orders/edit-client`,
+        {
+          clientId: order.clientId,
+          paid: true,
+          dateOfPayment: Date.now(),
+        },
+        {
+          headers: { 
+            Authorization: `Bearer ${localStorage.getItem("token")}` 
+          },
+        }
+      );
 
-    // Скачиваем файл Excel
-    XLSX.writeFile(wb, fileName);
+      if (response.status === 200) {
+        setOrders(prev => prev.map(item => 
+          item.clientId === order.clientId 
+            ? { ...item, ...response.data }
+            : item
+        ));
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Ошибка при оплате заказа");
+    } finally {
+      setProcessingPayment(null);
+    }
   };
-// 
+
+  const handleDelete = async (order: Order) => {
+    if (!order?.clientId) {
+      alert("Ошибка: заказ не найден");
+      return;
+    }
   
-const handleAdd = async () => {
-  try {
-    const totalSum = Number(weight) * Number(price);  
-
- 
-    const res = await API.put("/api/orders/edit-client", {
-      price: totalSum,  
-      
-      weight: weight,
-      amount: amount,
-      clientId: code, 
-      
-    });
-    console.log(res);
-
-    
-   setIsModalOpen(!isModalOpen);
-    fetchOrders();
-  } catch (e) {
-    console.error(e);
-  }
-};
-
-
-
-
-
-useEffect(() => {
-  setFilteredOrders(filterOrders); // Применяем фильтрацию
-}, [selectedDate, orders]); // Перезапуск при изменении выбранной даты или заказов
-
-
- useEffect(() => {
-  if (filterOrders.length > 0) {
-    calculateStatistics(filterOrders);
-    
-  }
-}, [filterOrders]); // Только когда filterOrders изменяется
-
-    useEffect(() => {
-    fetchOrders();
-     
-  }, [searchTerm]);
-
-
-  useEffect(() => {
-    fetchPrice();  
-    
-  }, [fetchPrice]);   
-
-
-
-  const filterOrders2 = orders.filter(order => order.amount > 0 && order.weight > 0);
+    const confirmDelete = window.confirm("Вы уверены, что хотите удалить заказ и все связанные импорты?");
+    if (!confirmDelete) return;
   
-  return (
-  <div className="bg-image min-h-screen">
-      <div className="p-6 container md:mx-auto">
-      {/* Breadcrumbs */}
-      <nav className="text-sm mb-4">
-        <ol className="list-reset flex text-gray-500 text-lg">
-          <li>
-            <a href="/dashboard" className="text-blue-500 hover:underline">
-            Главная
-            </a>
-          </li>
-          <li>
-            <span className="mx-2">/</span>
-          </li>
-          <li>Оплата</li>
-        </ol>
-      </nav>
-
-      <button
-        onClick={handleBack}
-        className="px-4 py-2 bg-blue-500 text-white rounded-md mb-4"
-      >
-        Назад
-      </button>
-
-      {/* Action Buttons */}
-      <div className="flex gap-4 mb-4">
-         
-       <Link to={'/unpaid'}>
-
-        <button className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg">
-          Неоплаченные
-        </button>
-       </Link>
-
-      <Link to={'/paid'}>
-      <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
-          Оплаченные
-        </button>
-      </Link>
-      </div>
-
+    setDeletingId(order.clientId);
+    
+    try {
+      // Удаляем все импорты
+      if (order.imports?.length) {
+        await Promise.all(
+          order.imports.map(async (imp) => {
+            await API.delete(`/api/imports/${imp._id}`);
+          })
+        );
+      }
+  
+      // Удаляем основной заказ
+      const response = await API.delete(`/api/orders/delete-orders/${order.clientId}`);
       
+      if (response.status === 200) {
+        setOrders(prev => prev.filter(item => item.clientId !== order.clientId));
+        alert("Заказ и все связанные импорты успешно удалены!");
+      }
+    } catch (error) {
+      console.error("Ошибка удаления:", error);
+      alert("Ошибка при удалении заказа");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
-   {/* Search */}
-<div className="flex gap-4 mb-4">
-  <input
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)} // Просто обновляем состояние
-    type="text"
-    className="w-full text-sm text-gray-900 border border-gray-300 rounded-lg p-2"
-    placeholder="Поиск"
-  />
- 
-</div>
-
-   
-
-      <div className="flex gap-2 overflow-x-auto mb-4 p-2 border-b">
-      {uniquePaymentDates.map((date) => (
+  const memoizedTableRows = useMemo(() => 
+    filteredOrders.map((order, idx) => (
+      <tr key={order.clientId}>
+        <td className="py-3 px-4 border-b text-gray-700">{idx + 1}</td>
+        <td className="py-3 px-4 border-b text-gray-700">
+          {order.dateOfPayment 
+            ? new Date(order.dateOfPayment).toLocaleDateString() 
+            : "—"}
+        </td>
+        <td className="py-3 px-4 border-b text-gray-700">{order.name}</td>
+        <td className="py-3 px-4 border-b text-gray-700">{order.clientId}</td>
+        <td className="py-3 px-4 border-b text-gray-700">{order.amount}</td>
+        <td className="py-3 px-4 border-b text-gray-700">{order.weight}</td>
+        <td className="py-3 px-4 border-b text-gray-700">{order.price}</td>
+        <td className="py-3 px-4 border-b text-gray-700 gap-4 flex items-center justify-end">
           <button
-            key={date}
-            className={`px-4 py-2 rounded-lg text-sm ${
-              selectedDate === date
-                ? "bg-blue-500 text-white"
-                : "bg-gray-200 text-gray-700"
+            className={`font-semibold py-2 px-4 rounded-lg ${
+              order.paid 
+                ? "bg-green-500 text-white cursor-not-allowed" 
+                : "bg-blue-500 hover:bg-blue-600 text-white"
             }`}
-            onClick={() => setSelectedDate(date) 
-              
-            }
+            disabled={order.paid || processingPayment === order.clientId}
+            onClick={() => handlePaid(order)}
           >
-            {date}
-          </button>
-      ))}
-    </div>
-
-      {/* Download Button and Add Button */}
-      <div className="flex justify-between items-center mb-4">
-        <button 
-         onClick={handleDownload}
-        className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg">
-          Скачать
-        </button>
-        <button onClick={toggleModal} className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
-          + Добавить
-        </button>
-       </div>
-
-
-       {isModalOpen && (
-  <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
-    <div className="bg-white rounded-lg shadow-lg w-96 p-6">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Добавление заказа</h2>
-
-      <form>
-        {/* Поля формы */}
-        {/* <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Трек код</label>
-          <input
-            type="text"
-            value={trackCode}
-            onChange={(e) => setTrackCode(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            placeholder="Введите трек код"
-          />
-        </div> */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Код клиента</label>
-          <input
-            type="text"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            placeholder="Введите код клиента"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Количество</label>
-          <input
-            type="text"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            placeholder="Введите количество"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Вес (кг)</label>
-          <input
-            type="number"
-            value={weight}
-            onChange={(e) => setWeight(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            placeholder="Введите вес"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Итоговая сумма</label>
-          <input
-            type="number"
-            value={totalSum.toFixed(2)}
-            readOnly
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          />
-        </div>
-
-        {/* Кнопки */}
-        <div className="flex justify-end gap-4">
-          <button
-            type="button"
-            className="bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded-lg"
-            onClick={() => toggleModal(null)}
-          >
-            Отмена
+            {processingPayment === order.clientId ? "Обработка..." : (order.paid ? "Оплачено" : "Оплатить")}
           </button>
           <button
-            type="button"
-            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg"
-            onClick={handleAdd}
+            className="font-semibold py-2 px-4 rounded-lg bg-red-500 hover:bg-red-600 text-white"
+            disabled={deletingId === order.clientId}
+            onClick={() => handleDelete(order)}
           >
-            Сохранить
+            {deletingId === order.clientId ? "Удаление..." : "Удалить"}
           </button>
+        </td>
+      </tr>
+    )),
+    [filteredOrders, processingPayment, deletingId]
+  );
+
+  if (loading) return <div className="text-center p-4">Загрузка...</div>;
+  if (error) return <div className="text-red-500 text-center p-4">Ошибка: {error}</div>;
+
+  return (
+    <div className="bg-image min-h-screen">
+      <div className="p-6 container md:mx-auto">
+        <nav className="text-sm mb-4">
+          <ol className="list-reset flex text-gray-500 text-lg">
+            <li><Link to="/dashboard" className="text-blue-500 hover:underline">Главная</Link></li>
+            <li><span className="mx-2">/</span></li>
+            <li>Оплата</li>
+          </ol>
+        </nav>
+
+        <button onClick={() => navigate(-1)} className="mb-4 bg-blue-500 text-white px-4 py-2 rounded">
+          Назад
+        </button>
+
+        <div className="flex gap-4 mb-4">
+          <Link to="/unpaid" className="bg-red-500 text-white px-4 py-2 rounded">Неоплаченные</Link>
+          <Link to="/paid" className="bg-blue-500 text-white px-4 py-2 rounded">Оплаченные</Link>
         </div>
-      </form>
-    </div>
-  </div>
-)}
 
+        <input
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Поиск по коду клиента"
+          className="w-full p-2 mb-4 border rounded"
+        />
 
+        <div className="flex gap-2 overflow-x-auto mb-4 p-2 border-b">
+          {uniquePaymentDates.map(date => (
+            <button
+              key={date}
+              onClick={() => setSelectedDate(date)}
+              className={`px-4 py-2 rounded ${
+                selectedDate === date ? "bg-blue-500 text-white" : "bg-gray-200"
+              }`}
+            >
+              {date}
+            </button>
+          ))}
+        </div>
 
-
-
-
-      {/* Payment Table */}
-      <div className="border border-gray-300 rounded-lg bg-white shadow-md mb-6 overflow-x-auto flex text-center">
-        <table className="min-w-full bg-white">
-        <thead>
-    <tr >
-      {["№", "Дата оплаты", "Имя пользователя", "Код", "Кол-во", "Вес",  "Сумма",  "Действие"].map((header) => (
-        <th key={header} className="py-3 px-4 border-b text-center text-sm font-semibold text-gray-700  ">
-          {header}
-        </th>
-      ))}
-    </tr>
-  </thead>
-  <tbody>
-            {filterOrders2.length > 0 ? (
-              filterOrders2.map((order, idx) => (
-                <tr key={order.id}>
-                  <td className="py-3 px-4 border-b text-gray-700">
-                    {idx + 1}
-                  </td>
-                  <td className="py-3 px-4 border-b text-gray-700">
-                    {order.dateOfPayment
-                      ? new Date(order.dateOfPayment).toLocaleDateString()
-                      : "—"}
-                  </td>
-                  <td className="py-3 px-4 border-b text-gray-700">
-                    {order.name}
-                  </td>
-                  <td className="py-3 px-4 border-b text-gray-700">
-                    {order.clientId}
-                  </td>
-                  <td className="py-3 px-4 border-b text-gray-700">
-                    {order.amount}
-                  </td>
-                  <td className="py-3 px-4 border-b text-gray-700">
-                    {order.weight}
-                  </td>
-                  <td className="py-3 px-4 border-b text-gray-700">
-                    {order.price}
-                  </td>
-               
-                 
-                  <td className="py-3 px-4 border-b text-gray-700 gap-4 flex flex-row  items-end justify-end">
-  <button
-    className={`font-semibold py-2 px-4 rounded-lg ${
-      order.paid
-        ? "bg-green-500 text-white cursor-not-allowed"
-        : "bg-blue-500 hover:bg-blue-600 text-white"
-    }`}
-    disabled={order.paid} // Кнопка отключается, если заказ уже оплачен
-    onClick={() => handlePaid(order)} // Вызывается функция handlePaid
-  >
-    {order.paid ? "Оплачено" : "Оплатить"} {/* Динамическая метка */}
-  </button>
-
-  <button
-    className={`font-semibold py-2 px-4 rounded-lg text-white   bg-red-500 hover:bg-red-600 text-white"
-    }`}
-    // disabled={order.paid} // Кнопка отключается, если заказ уже оплачен
-    onClick={() => handleDelete(order)} // Вызывается функция handlePaid
-  >
-   Удалить
-  </button>
-</td>
-
-                </tr>
-              ))
-            ) : (
+        <div className="bg-white rounded-lg shadow-md mb-6 overflow-x-auto">
+          <table className="min-w-full">
+            <thead>
               <tr>
-                <td
-                  colSpan={8}
-                  className="py-3 px-4 text-center border-b text-gray-700"
-                >
-                  Нет заказов для выбранной даты
-                </td>
+                {["№", "Дата оплаты", "Имя", "Код", "Кол-во", "Вес", "Сумма", "Действия"].map(header => (
+                  <th key={header} className="py-3 px-4 border-b text-center text-sm font-semibold">
+                    {header}
+                  </th>
+                ))}
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {memoizedTableRows.length > 0 ? (
+                memoizedTableRows
+              ) : (
+                <tr>
+                  <td colSpan={8} className="py-3 px-4 text-center border-b">
+                    Нет активных заказов
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Блоки статистики */}
+          <div className="p-4 bg-blue-100 rounded-lg">
+            <div className="text-sm">Клиенты: {stats.clientsCount}</div>
+            <div className="text-sm">Оплатили: {stats.paidClients}</div>
+            <div className="text-sm">Осталось: {stats.remainingClients}</div>
+          </div>
+          <div className="p-4 bg-green-100 rounded-lg">
+            <div className="text-sm">Сумма: {stats.totalAmount}</div>
+            <div className="text-sm">Оплачено: {stats.paidAmount}</div>
+            <div className="text-sm">Осталось: {stats.remainingAmount}</div>
+          </div>
+          <div className="p-4 bg-yellow-100 rounded-lg">
+            <div className="text-sm">Вес: {stats.totalWeight.toFixed(2)}</div>
+            <div className="text-sm">Оплачено: {stats.paidWeight.toFixed(2)}</div>
+            <div className="text-sm">Осталось: {stats.remainingWeight.toFixed(2)}</div>
+          </div>
+          <div className="p-4 bg-red-100 rounded-lg">
+            <div className="text-sm">Товары: {stats.productCount}</div>
+            <div className="text-sm">Оплачено: {stats.paidProducts}</div>
+            <div className="text-sm">Осталось: {stats.remainingProducts}</div>
+          </div>
+        </div>
       </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-{/* STATISTIC */}
-<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-bold text-xl">
-  {/* Clients Count */}
-  <div className="p-4 bg-blue-300 rounded-lg">
-    <div className="text-sm text-gray-700">
-      Кол-во клиентов: {stats.clientsCount || 0} шт
     </div>
-    <div className="text-sm text-gray-700">
-      Оплатил: {stats.paidClients || 0} шт
-    </div>
-    <div className="text-sm text-gray-700">
-      Осталось: {stats.remainingClients || 0} шт
-    </div>
-  </div>
-  {/* Total Amount */}
-  <div className="p-4 bg-green-300 rounded-lg">
-    <div className="text-sm text-gray-700">
-      Общая сумма: {stats.totalAmount || 0} сом
-    </div>
-    <div className="text-sm text-gray-700">
-      Оплатил: {stats.paidAmount || 0} сом
-    </div>
-    <div className="text-sm text-gray-700">
-      Осталось: {stats.remainingAmount || 0} сом
-    </div>
-  </div>
-  {/* Total Weight */}
-  <div className="p-4 bg-yellow-300 rounded-lg">
-    <div className="text-sm text-gray-700">
-      Общий вес: {(stats.totalWeight || 0).toFixed(2)} кг
-    </div>
-    <div className="text-sm text-gray-700">
-      Оплатил за: {(stats.paidWeight || 0).toFixed(2)} кг
-    </div>
-    <div className="text-sm text-gray-700">
-      Осталось: {(stats.remainingWeight || 0).toFixed(2)} кг
-    </div>
-  </div>
-  {/* Product Count */}
-  <div className="p-4 bg-red-300 rounded-lg">
-    <div className="text-sm text-gray-700">
-      Кол-во товаров: {stats.productCount || 0} шт
-    </div>
-    <div className="text-sm text-gray-700">
-      Оплачено за: {stats.paidProducts || 0} шт
-    </div>
-    <div className="text-sm text-gray-700">
-      Осталось: {stats.remainingProducts || 0} шт
-    </div>
-  </div>
-</div>
-
-    </div>
-
-  </div>
-
-
-
-
-
-
-
   );
 };
 

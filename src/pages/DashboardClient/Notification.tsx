@@ -3,6 +3,8 @@ interface NotificationProps {
   clientName: string;
   trackCode: string;
   createdDate: string;
+  weight: string;
+  price: string;
 }
 
 const Notification: React.FC<NotificationProps> = ({
@@ -10,14 +12,17 @@ const Notification: React.FC<NotificationProps> = ({
   clientName,
   trackCode,
   createdDate,
+  weight,
+  price
 }) => {
   return (
-    <div className="bg-red-600 p-4 mb-4 rounded-md shadow-md text-white">
-      <h3 className="font-semibold text-lg">Неоплаченный заказ: <br /> {productName}</h3>
+    <div className='bg-red-500 border border-red-400 text-white-700 px-4 py-3 rounded relative mb-2'>
+      <p><strong>{productName}</strong></p>
       <p>Клиент: {clientName}</p>
-      <p>Трек-код: {trackCode}</p>
-      <p>Дата заказа: {createdDate}</p>
-      <p>Статус: Неоплачено</p>
+      <p>Трек-номер: {trackCode}</p>
+      <p>Дата: {createdDate}</p>
+      <p>Вес: {weight}</p>
+      <p>Цена: {price}</p>
     </div>
   );
 };

@@ -168,6 +168,8 @@ const DashboardClient: React.FC = () => {
       clientName={client?.name || 'Неизвестный клиент'}
       trackCode={order._id}
       createdDate={new Date(order.timestamp).toLocaleDateString('ru-RU')} // Форматируем дату
+      weight={`${order.weight} кг`} // Выводим вес
+      price={`${order.price} $`} // Выводим цену
     />
   ))}
 </div>
