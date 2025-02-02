@@ -167,53 +167,119 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({ addNewOrder }) => {
     fetchPrice();
   }, [fetchOrders, fetchPrice]);
 
+  // const handlePaid = async (order: Order) => {
+  //   if (!order?.clientId) {
+  //     setError("Ошибка: заказ не найден");
+  //     return;
+  //   }
+  
+  //   setProcessingPayment(order.clientId);
+  //   const isConfirmed = window.confirm(
+  //     `Отметить заказ ${order.clientId} как оплаченный?`
+  //   );
+  
+  //   if (!isConfirmed) {
+  //     setProcessingPayment(null);
+  //     return;
+  //   }
+  
+  //   try {
+  //     // Формируем обновленные импорты с paid: true
+  //     const updatedImports = order.imports.map(importItem => ({
+  //       ...importItem,
+  //       paid: true,
+  //     }));
+  
+  //     const response = await API.put(
+  //       `/api/orders/edit-client`,
+  //       {
+  //         clientId: order.clientId,
+  //         imports: updatedImports, // Отправляем обновленные импорты
+  //         dateOfPayment: Date.now(),
+  //       },
+  //       {
+  //         headers: { 
+  //           Authorization: `Bearer ${localStorage.getItem("token")}` 
+  //         },
+  //       }
+  //     );
+  
+  //     if (response.status === 200) {
+  //       setOrders(prev => prev.map(item => 
+  //         item.clientId === order.clientId 
+  //           ? { ...item, imports: updatedImports, ...response.data } // Обновляем состояние
+  //           : item
+  //       ));
+  //     }
+  //   } catch (err: any) {
+  //     setError(err.response?.data?.message || "Ошибка при оплате заказа");
+  //   } finally {
+  //     setProcessingPayment(null);
+  //   }
+  // };
+
+
+
   const handlePaid = async (order: Order) => {
     if (!order?.clientId) {
       setError("Ошибка: заказ не найден");
       return;
     }
-
+  
     setProcessingPayment(order.clientId);
+  
     const isConfirmed = window.confirm(
       `Отметить заказ ${order.clientId} как оплаченный?`
     );
-
+  
     if (!isConfirmed) {
       setProcessingPayment(null);
       return;
     }
-
+  
     try {
+      // Проверяем, есть ли импорты
+      const updatedImports = order.imports?.map(importItem => ({
+        ...importItem,
+        paid: true,
+      })) || [];
+  
+      // Отправляем обновление на сервер
       const response = await API.put(
         `/api/orders/edit-client`,
         {
           clientId: order.clientId,
-          paid: true,
+          imports: updatedImports,
           dateOfPayment: Date.now(),
+          paid: true // Добавляем статус оплаты для самого заказа
         },
         {
-          headers: { 
-            Authorization: `Bearer ${localStorage.getItem("token")}` 
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
-
+  
       if (response.status === 200) {
-        setOrders(prev => prev.map(item => 
-          item.clientId === order.clientId 
-            ? { ...item, ...response.data }
+        // Обновляем состояние заказа в UI
+        setOrders(prev => prev.map(item =>
+          item.clientId === order.clientId
+            ? { ...item, paid: true, imports: updatedImports, dateOfPayment: Date.now() }
             : item
         ));
+      } else {
+        setError("Ошибка при обновлении статуса оплаты");
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || "Ошибка при оплате заказа");
+      console.error("Ошибка при обновлении оплаты:", err);
+      setError(err.response?.data?.message || "Не удалось обновить оплату");
     } finally {
       setProcessingPayment(null);
     }
   };
-
+  
   const handleDelete = async (order: Order) => {
-    if (!order?.clientId) {
+    if (!order?.clientId) {  // Проверка на наличие order.id вместо clientId
       alert("Ошибка: заказ не найден");
       return;
     }
@@ -221,10 +287,10 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({ addNewOrder }) => {
     const confirmDelete = window.confirm("Вы уверены, что хотите удалить заказ и все связанные импорты?");
     if (!confirmDelete) return;
   
-    setDeletingId(order.clientId);
-    
+    setDeletingId(order.id);  // Используем order.id для отслеживания процесса удаления
+  
     try {
-      // Удаляем все импорты
+      // Удаляем все импорты, если они существуют
       if (order.imports?.length) {
         await Promise.all(
           order.imports.map(async (imp) => {
@@ -234,19 +300,24 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({ addNewOrder }) => {
       }
   
       // Удаляем основной заказ
-      const response = await API.delete(`/api/orders/delete-orders/${order.clientId}`);
-      
+      const response = await API.delete(`/api/orders/delete-orders/${order.id}`);
+  
       if (response.status === 200) {
-        setOrders(prev => prev.filter(item => item.clientId !== order.clientId));
+        setOrders(prev => prev.filter(item => item.id !== order.id));  // Фильтрация по id
         alert("Заказ и все связанные импорты успешно удалены!");
+      } else {
+        alert(`Ошибка при удалении заказа: ${response.statusText}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Ошибка удаления:", error);
-      alert("Ошибка при удалении заказа");
+      alert(`Ошибка при удалении заказа: ${error.message}`);
     } finally {
       setDeletingId(null);
     }
   };
+  
+  
+  
 
   const memoizedTableRows = useMemo(() => 
     filteredOrders.map((order, idx) => (
