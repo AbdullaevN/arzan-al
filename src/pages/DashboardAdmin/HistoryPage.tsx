@@ -2,19 +2,20 @@ import React, { useState, useEffect, useCallback } from "react";
 import { API } from "../../constants/api";
 import { useNavigate } from "react-router-dom";
 
-interface Order {
-  name: string;
-  price: number;
-  createdDate: number;
+interface ImportOrder {
+  timestamp: number;
   paid: boolean;
-  issued: boolean;
+  price: number;
+  weight: number;
+  clientId: string;
+  amount: number;
 }
 
 interface Client {
   clientId: string;
   name: string;
   city: string;
-  orders: Order[];
+  imports: ImportOrder[]; // Assuming imports is inside each client
 }
 
 const HistoryPage: React.FC = () => {
@@ -29,16 +30,16 @@ const HistoryPage: React.FC = () => {
     setError(null);
     try {
       const response = await API.get("/api/orders/allClients");
-      console.log(response.data,'9');
+      console.log(response.data);
 
       if (Array.isArray(response.data)) {
-        setClients(response.data); // Устанавливаем всех клиентов с заказами
+        setClients(response.data); // Set all clients with their imports
       } else {
-        setClients([]); // Если ответ не массив, устанавливаем пустой список
+        setClients([]); // If response is not an array, set an empty list
       }
     } catch (err: any) {
-      setError(err.message || "Не удалось загрузить заказы");
-      console.error("Ошибка загрузки заказов:", err);
+      setError(err.message || "Не удалось загрузить данные");
+      console.error("Ошибка загрузки данных:", err);
     } finally {
       setLoading(false);
     }
@@ -50,18 +51,23 @@ const HistoryPage: React.FC = () => {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value);
 
-  const handleBack = () => navigate(-1); // Go back to the previous page
+  const handleBack = () => navigate(-1);
 
-  // Фильтрация заказов по трек-коду для всех клиентов
-  const filteredOrders = clients
-    .flatMap(client => 
-      client.orders.filter(order =>
-        order.name.toLowerCase().includes(searchTerm.toLowerCase())
-      ).map(order => ({ ...order, clientName: client.name, clientCity: client.city }))
+  // Filter imports across all clients
+  const filteredImports = clients
+    .flatMap(client =>
+      client.imports
+        .filter(importOrder =>
+          importOrder.clientId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          importOrder.timestamp.toString().includes(searchTerm) ||
+          importOrder.price.toString().includes(searchTerm)
+        )
+        .map(importOrder => ({
+          ...importOrder,
+          clientName: client.name,
+          clientCity: client.city,
+        }))
     );
-
-    console.log(filteredOrders,'0');
-    
 
   return (
     <div className="min-h-screen p-8 container md:mx-auto">
@@ -87,7 +93,7 @@ const HistoryPage: React.FC = () => {
         type="text"
         value={searchTerm}
         onChange={handleSearchChange}
-        placeholder="Поиск по названию товара"
+        placeholder="Поиск по ID клиента или цене"
         className="px-4 py-2 border rounded w-full mb-4"
       />
 
@@ -100,23 +106,25 @@ const HistoryPage: React.FC = () => {
             <thead>
               <tr>
                 <th className="px-4 py-2 border-b">№</th>
-                <th className="px-4 py-2 border-b">Название</th>
-                {/* <th className="px-4 py-2 border-b">Цена</th> */}
-                <th className="px-4 py-2 border-b">Город</th>
-                <th className="px-4 py-2 border-b">Дата создания</th>
+                <th className="px-4 py-2 border-b">ID клиента</th>
+                <th className="px-4 py-2 border-b">Цена</th>
+                <th className="px-4 py-2 border-b">Вес</th>
+                <th className="px-4 py-2 border-b">Дата</th>
                 <th className="px-4 py-2 border-b">Статус</th>
               </tr>
             </thead>
             <tbody>
-              {filteredOrders.map((order, index) => (
+              {filteredImports.map((importOrder, index) => (
                 <tr key={index}>
                   <td className="px-4 py-2 border-b text-center">{index + 1}</td>
-                  <td className="px-4 py-2 border-b text-center">{order.name}</td>
-                  {/* <td className="px-4 py-2 border-b text-center">{order.price} сом</td> */}
-                  <td className="px-4 py-2 border-b text-center">{order.clientCity}</td>
-                  <td className="px-4 py-2 border-b text-center">{new Date(order.createdDate).toLocaleDateString()}</td>
+                  <td className="px-4 py-2 border-b text-center">{importOrder.clientId}</td>
+                  <td className="px-4 py-2 border-b text-center">{importOrder.price} сом</td>
+                  <td className="px-4 py-2 border-b text-center">{importOrder.weight} кг</td>
                   <td className="px-4 py-2 border-b text-center">
-                    {order.paid ? "Оплачено" : "Не оплачено"}
+                    {new Date(importOrder.timestamp).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-2 border-b text-center">
+                    {importOrder.paid ? "Оплачено" : "Не оплачено"}
                   </td>
                 </tr>
               ))}

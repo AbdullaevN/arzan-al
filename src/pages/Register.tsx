@@ -13,6 +13,7 @@ const Register: React.FC = () => {
   });
   const [responseMessage, setResponseMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -21,22 +22,16 @@ const Register: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setResponseMessage(null); // Reset response message before a new request
+    setResponseMessage(null);
 
     try {
-      const res = await API.post('/api/auth/registration', {
-        name: formData.name, 
-        clientId: formData.clientId,
-        city: formData.city, 
-        phone: formData.phone,   
-        password: formData.password,
-      });
+      const res = await API.post('/api/auth/registration', formData);
 
       if (res.status === 200) {
         setResponseMessage('Регистрация успешна! Перенаправление на страницу входа...');
         setTimeout(() => {
           navigate('/login');
-        }, 2000);  
+        }, 2000);
       }
     } catch (e) {
       console.error(e);
@@ -53,7 +48,7 @@ const Register: React.FC = () => {
           <h2 className="text-2xl font-semibold text-center mb-6">Регистрация</h2>
 
           <form onSubmit={handleSubmit}>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">Полное имя</label>
+            <label className="block text-sm font-medium text-gray-700">Полное имя</label>
             <input
               type="text"
               name="name"
@@ -63,7 +58,7 @@ const Register: React.FC = () => {
               className="w-full mt-2 px-4 py-2 my-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-300"
             />
 
-            <label htmlFor="clientId" className="block text-sm font-medium text-gray-700">Код</label>
+            <label className="block text-sm font-medium text-gray-700">Код</label>
             <input
               type="text"
               name="clientId"
@@ -73,7 +68,7 @@ const Register: React.FC = () => {
               className="w-full mt-2 px-4 py-2 my-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-300"
             />
 
-            <label htmlFor="city" className="block text-sm font-medium text-gray-700">Город</label>
+            <label className="block text-sm font-medium text-gray-700">Город</label>
             <input
               type="text"
               name="city"
@@ -83,7 +78,7 @@ const Register: React.FC = () => {
               className="w-full mt-2 px-4 py-2 my-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-300"
             />
 
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Номер телефона</label>
+            <label className="block text-sm font-medium text-gray-700">Номер телефона</label>
             <input
               type="text"
               name="phone"
@@ -93,21 +88,29 @@ const Register: React.FC = () => {
               className="w-full mt-2 px-4 py-2 my-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-300"
             />
 
-            <div className="mb-6">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Пароль</label>
+            <label className="block text-sm font-medium text-gray-700">Пароль</label>
+            <input
+              type={showPassword ? 'text' : 'password'}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Введите пароль"
+              className="w-full mt-2 px-4 py-2 my-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-300"
+            />
+
+            <label className="flex items-center text-sm text-gray-700">
               <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Введите пароль"
-                className="w-full mt-2 px-4 py-2 my-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lime-300"
+                type="checkbox"
+                checked={showPassword}
+                onChange={() => setShowPassword(!showPassword)}
+                className="mr-2"
               />
-            </div>
+              Показать пароль
+            </label>
 
             <button
               type="submit"
-              className="w-full py-2 bg-lime-500 text-white font-semibold rounded-md hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-orange-300"
+              className="w-full py-2 bg-lime-500 text-white font-semibold rounded-md hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-orange-300 mt-4"
               disabled={loading}
             >
               {loading ? 'Загрузка...' : 'Зарегистрироваться'}
@@ -115,11 +118,9 @@ const Register: React.FC = () => {
           </form>
 
           {responseMessage && (
-            <p
-              className={`text-center text-sm mt-4 ${
-                responseMessage.includes('Ошибка') ? 'text-red-600 font-bold text-4xl' : 'text-green-500 font-bold text-4xl'
-              }`}
-            >
+            <p className={`text-center text-sm mt-4 ${
+              responseMessage.includes('Ошибка') ? 'text-red-600 font-bold text-4xl' : 'text-green-500 font-bold text-4xl'
+            }`}>
               {responseMessage}
             </p>
           )}

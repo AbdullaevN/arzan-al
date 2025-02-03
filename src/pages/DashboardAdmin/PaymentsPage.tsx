@@ -93,31 +93,35 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({ addNewOrder }) => {
       paidProducts: 0,
       remainingProducts: 0,
     };
-
+  
     data.forEach((order) => {
       if (!(order.amount > 0 || (order.imports?.length > 0))) return;
-
+  
+      const orderPrice = order.price && price ? order.price * price : 0; // Проверка на корректность price
+  
       newStats.clientsCount++;
-      order.paid ? newStats.paidClients++ : newStats.remainingClients++;
-
-      newStats.totalAmount += order.price || 0;
-      order.paid 
-        ? (newStats.paidAmount += order.price || 0)
-        : (newStats.remainingAmount += order.price || 0);
-
+  
+      if (order.paid) {
+        newStats.paidClients++;
+        newStats.paidAmount += orderPrice;
+        newStats.paidWeight += order.weight || 0;
+        newStats.paidProducts += order.amount || 0;
+      } else {
+        newStats.remainingClients++;
+        newStats.remainingAmount += orderPrice;
+        newStats.remainingWeight += order.weight || 0;
+        newStats.remainingProducts += order.amount || 0;
+      }
+  
+      // Общие суммы
+      newStats.totalAmount += orderPrice;
       newStats.totalWeight += order.weight || 0;
-      order.paid 
-        ? (newStats.paidWeight += order.weight || 0)
-        : (newStats.remainingWeight += order.weight || 0);
-
       newStats.productCount += order.amount || 0;
-      order.paid 
-        ? (newStats.paidProducts += order.amount || 0)
-        : (newStats.remainingProducts += order.amount || 0);
     });
-
+  
     setStats(newStats);
-  }, []);
+  }, [price]); // Добавляем price в зависимости
+  
 
   const uniquePaymentDates = useMemo(() => 
     Array.from(
@@ -168,60 +172,11 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({ addNewOrder }) => {
     fetchOrders();
     fetchPrice();
   }, [fetchOrders, fetchPrice]);
-
-  // const handlePaid = async (order: Order) => {
-  //   if (!order?.clientId) {
-  //     setError("Ошибка: заказ не найден");
-  //     return;
-  //   }
-  
-  //   setProcessingPayment(order.clientId);
-  //   const isConfirmed = window.confirm(
-  //     `Отметить заказ ${order.clientId} как оплаченный?`
-  //   );
-  
-  //   if (!isConfirmed) {
-  //     setProcessingPayment(null);
-  //     return;
-  //   }
-  
-  //   try {
-  //     // Формируем обновленные импорты с paid: true
-  //     const updatedImports = order.imports.map(importItem => ({
-  //       ...importItem,
-  //       paid: true,
-  //     }));
-  
-  //     const response = await API.put(
-  //       `/api/orders/edit-client`,
-  //       {
-  //         clientId: order.clientId,
-  //         imports: updatedImports, // Отправляем обновленные импорты
-  //         dateOfPayment: Date.now(),
-  //       },
-  //       {
-  //         headers: { 
-  //           Authorization: `Bearer ${localStorage.getItem("token")}` 
-  //         },
-  //       }
-  //     );
-  
-  //     if (response.status === 200) {
-  //       setOrders(prev => prev.map(item => 
-  //         item.clientId === order.clientId 
-  //           ? { ...item, imports: updatedImports, ...response.data } // Обновляем состояние
-  //           : item
-  //       ));
-  //     }
-  //   } catch (err: any) {
-  //     setError(err.response?.data?.message || "Ошибка при оплате заказа");
-  //   } finally {
-  //     setProcessingPayment(null);
-  //   }
-  // };
+ 
 
 
 
+  
   const handlePaid = async (order: Order) => {
     if (!order?.clientId) {
       setError("Ошибка: заказ не найден");
@@ -240,20 +195,20 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({ addNewOrder }) => {
     }
   
     try {
-      // Проверяем, есть ли импорты
+      // Обновляем только внутренние импорты
       const updatedImports = order.imports?.map(importItem => ({
         ...importItem,
-        paid: true,
+        paid: true, // Обновляем только это поле
       })) || [];
   
-      // Отправляем обновление на сервер
+      // Отправляем на сервер только изменения для imports
       const response = await API.put(
         `/api/orders/edit-client`,
         {
           clientId: order.clientId,
           imports: updatedImports,
-          dateOfPayment: Date.now(),
-          paid: true // Добавляем статус оплаты для самого заказа
+          dateOfPayment: Date.now(), // Сохраняем дату оплаты
+          // paid: true - УДАЛЁНО, чтобы не менять внешний paid
         },
         {
           headers: {
@@ -263,12 +218,14 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({ addNewOrder }) => {
       );
   
       if (response.status === 200) {
-        // Обновляем состояние заказа в UI
-        setOrders(prev => prev.map(item =>
-          item.clientId === order.clientId
-            ? { ...item, paid: true, imports: updatedImports, dateOfPayment: Date.now() }
-            : item
-        ));
+        // Обновляем только imports в UI
+        setOrders(prev =>
+          prev.map(item =>
+            item.clientId === order.clientId
+              ? { ...item, imports: updatedImports, dateOfPayment: Date.now() }
+              : item
+          )
+        );
       } else {
         setError("Ошибка при обновлении статуса оплаты");
       }
@@ -279,6 +236,7 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({ addNewOrder }) => {
       setProcessingPayment(null);
     }
   };
+  
   
   const handleDelete = async (order: Order) => {
     if (!order?.clientId) {
@@ -292,78 +250,95 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({ addNewOrder }) => {
     setDeletingId(order.clientId);
   
     try {
-      // Отправляем запрос на "редактирование" заказа с пустыми данными
       const response = await API.put(
         "/api/orders/edit-client",
         {
           clientId: order.clientId,
+          paid: false,
           amount: 0,
           price: 0,
           weight: 0,
-          imports: [], // Очищаем привязанные импорты
-          paid: false,
-          dateOfPayment: null
+          dateOfPayment: null,
+          imports: [],
         },
         {
-          headers: { 
-            Authorization: `Bearer ${localStorage.getItem("token")}` 
-          }
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
-  
+      console.log("Response:", response); // Логируем ответ от сервера
+    
       if (response.status === 200) {
-        // Фильтруем удаленный заказ из состояния
-        setOrders(prev => prev.filter(item => item.clientId !== order.clientId));
-        alert("Заказ успешно удален!");
+        setOrders((prev) =>
+          prev.map((item) =>
+            item.clientId === order.clientId
+              ? {
+                  ...item,
+                  paid: false,
+                  amount: 0,
+                  price: 0,
+                  weight: 0,
+                  imports: [],
+                  dateOfPayment: null,
+                }
+              : item
+          )
+        );
+        alert("Заказ полностью удален!");
       }
     } catch (error: any) {
       console.error("Ошибка удаления:", error);
-      alert(`Ошибка при удалении: ${error.response?.data?.message || error.message}`);
-    } finally {
+      alert(`Ошибка: ${error.response?.data?.message || "Не удалось удалить заказ"}`);
+    }
+    finally {
       setDeletingId(null);
     }
   };
   
   
+  
+  
 
   const memoizedTableRows = useMemo(() => 
-    filteredOrders.map((order, idx) => (
-      <tr key={order.clientId}>
-        <td className="py-3 px-4 border-b text-gray-700">{idx + 1}</td>
-        <td className="py-3 px-4 border-b text-gray-700">
-          {order.dateOfPayment 
-            ? new Date(order.dateOfPayment).toLocaleDateString() 
-            : "—"}
-        </td>
-        <td className="py-3 px-4 border-b text-gray-700">{order.name}</td>
-        <td className="py-3 px-4 border-b text-gray-700">{order.clientId}</td>
-        <td className="py-3 px-4 border-b text-gray-700">{order.amount}</td>
-        <td className="py-3 px-4 border-b text-gray-700">{order.weight}</td>
-        <td className="py-3 px-4 border-b text-gray-700">{order.price*price}</td>
-        <td className="py-3 px-4 border-b text-gray-700 gap-4 flex items-center justify-end">
-          <button
-            className={`font-semibold py-2 px-4 rounded-lg ${
-              order.paid 
-                ? "bg-green-500 text-white cursor-not-allowed" 
-                : "bg-blue-500 hover:bg-blue-600 text-white"
-            }`}
-            disabled={order.paid || processingPayment === order.clientId}
-            onClick={() => handlePaid(order)}
-          >
-            {processingPayment === order.clientId ? "Обработка..." : (order.paid ? "Оплачено" : "Оплатить")}
-          </button>
-          <button
-  className="font-semibold py-2 px-4 rounded-lg bg-red-500 hover:bg-red-600 text-white"
-  disabled={deletingId === order.clientId}
-  onClick={() => handleDelete(order)}
->
-  {deletingId === order.clientId ? "Удаление..." : "Удалить"}
-</button>
-        </td>
-      </tr>
-    )),
-    [filteredOrders, processingPayment, deletingId]
+    filteredOrders.map((order, idx) => {
+      const importItem = order.imports?.[0]; // Предполагаем, что есть хотя бы один импорт
+  
+      return (
+        <tr key={order.clientId}>
+          <td className="py-3 px-4 border-b text-gray-700">{idx + 1}</td>
+          <td className="py-3 px-4 border-b text-gray-700">
+            {order.dateOfPayment ? new Date(order.dateOfPayment).toLocaleDateString() : "—"}
+          </td>
+          <td className="py-3 px-4 border-b text-gray-700">{order.name}</td>
+          <td className="py-3 px-4 border-b text-gray-700">{order.clientId}</td>
+          <td className="py-3 px-4 border-b text-gray-700">{importItem?.amount || "—"}</td>
+          <td className="py-3 px-4 border-b text-gray-700">{importItem?.weight || "—"}</td>
+          <td className="py-3 px-4 border-b text-gray-700">{(importItem?.price || 0) * price}</td>
+          <td className="py-3 px-4 border-b text-gray-700 gap-4 flex items-center justify-end">
+            <button
+              className={`font-semibold py-2 px-4 rounded-lg ${
+                importItem?.paid ? "bg-green-500 text-white cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600 text-white"
+              }`}
+              disabled={importItem?.paid || processingPayment === order.clientId}
+              onClick={() => handlePaid(order)}
+            >
+              {processingPayment === order.clientId ? "Обработка..." : (importItem?.paid ? "Оплачено" : "Оплатить")}
+            </button>
+            <button
+              className="font-semibold py-2 px-4 rounded-lg bg-red-500 hover:bg-red-600 text-white"
+              disabled={deletingId === order.clientId}
+              onClick={() => handleDelete(order)}
+            >
+              {deletingId === order.clientId ? "Удаление..." : "Удалить"}
+            </button>
+          </td>
+        </tr>
+      );
+    }),
+    [filteredOrders, processingPayment, deletingId, price]
   );
+  
 
   if (loading) return <div className="text-center p-4">Загрузка...</div>;
   if (error) return <div className="text-red-500 text-center p-4">Ошибка: {error}</div>;
@@ -434,29 +409,28 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({ addNewOrder }) => {
           </table>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Блоки статистики */}
-          <div className="p-4 bg-blue-100 rounded-lg">
-            <div className="text-sm">Клиенты: {stats.clientsCount}</div>
-            <div className="text-sm">Оплатили: {stats.paidClients}</div>
-            <div className="text-sm">Осталось: {stats.remainingClients}</div>
-          </div>
-          <div className="p-4 bg-green-100 rounded-lg">
-            <div className="text-sm">Сумма: {stats.totalAmount}</div>
-            <div className="text-sm">Оплачено: {stats.paidAmount}</div>
-            <div className="text-sm">Осталось: {stats.remainingAmount}</div>
-          </div>
-          <div className="p-4 bg-yellow-100 rounded-lg">
-            <div className="text-sm">Вес: {stats.totalWeight.toFixed(2)}</div>
-            <div className="text-sm">Оплачено: {stats.paidWeight.toFixed(2)}</div>
-            <div className="text-sm">Осталось: {stats.remainingWeight.toFixed(2)}</div>
-          </div>
-          <div className="p-4 bg-red-100 rounded-lg">
-            <div className="text-sm">Товары: {stats.productCount}</div>
-            <div className="text-sm">Оплачено: {stats.paidProducts}</div>
-            <div className="text-sm">Осталось: {stats.remainingProducts}</div>
-          </div>
-        </div>
+        {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+  <div className="p-4 bg-blue-100 rounded-lg">
+    <div className="text-sm">Клиенты: {stats.clientsCount}</div>
+    <div className="text-sm">Оплатили: {stats.paidClients}</div>
+    <div className="text-sm">Осталось: {stats.remainingClients}</div>
+  </div>
+  <div className="p-4 bg-green-100 rounded-lg">
+    <div className="text-sm">Сумма: {stats.totalAmount.toLocaleString()} </div>
+    <div className="text-sm">Оплачено: {stats.paidAmount.toLocaleString()} </div>
+    <div className="text-sm">Осталось: {stats.remainingAmount.toLocaleString()} </div>
+  </div>
+  <div className="p-4 bg-yellow-100 rounded-lg">
+    <div className="text-sm">Вес: {stats.totalWeight.toFixed(2)} кг</div>
+    <div className="text-sm">Оплачено: {stats.paidWeight.toFixed(2)} кг</div>
+    <div className="text-sm">Осталось: {stats.remainingWeight.toFixed(2)} кг</div>
+  </div>
+  <div className="p-4 bg-red-100 rounded-lg">
+    <div className="text-sm">Товары: {stats.productCount}</div>
+    <div className="text-sm">Оплачено: {stats.paidProducts}</div>
+    <div className="text-sm">Осталось: {stats.remainingProducts}</div>
+  </div>
+</div> */}
       </div>
     </div>
   );

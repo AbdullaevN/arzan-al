@@ -5,6 +5,7 @@ import AddItemModal from '../../components/ClientComponents/AddItemModal';
 import InformationModal from '../../components/ClientComponents/InformationModal';
 import { API } from '../../constants/api';
 import Notification from './Notification';
+import usePriceStore from '../../store/useClient';
 
 interface Order {
   id: string;
@@ -35,6 +36,8 @@ const DashboardClient: React.FC = () => {
   const [clientId, setClientId] = useState(localStorage.getItem('clientId') || '');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { price, fetchPrice } = usePriceStore();
+  console.log(price,'i');
 
   const checkAuthorization = () => {
     const token = localStorage.getItem('token');
@@ -101,8 +104,9 @@ const DashboardClient: React.FC = () => {
     if (checkAuthorization()) {
       fetchOrders();
       fetchClient();
+      fetchPrice()
     }
-  }, []);
+  }, [fetchPrice]);
 
   const openAddModal = () => setIsAddModalOpen(true);
   const closeAddModal = () => setIsAddModalOpen(false);
@@ -142,8 +146,7 @@ const DashboardClient: React.FC = () => {
   const unpaidImports = client?.imports?.filter((order: any) => !order.paid) || [];
 
 
-  console.log(client,'7777777777777777777777');
-  
+   
 
   return (
     <div className="bg-image min-h-screen">
@@ -162,15 +165,15 @@ const DashboardClient: React.FC = () => {
 
 <div className='flex flex-wrap'>
   {unpaidImports.map((order, index) => (
-    <Notification
-      key={order._id || index} // Уникальный ключ
-      productName={`Заказ №${order._id}`}
-      clientName={client?.name || 'Неизвестный клиент'}
-      trackCode={order._id}
-      createdDate={new Date(order.timestamp).toLocaleDateString('ru-RU')} // Форматируем дату
-      weight={`${order.weight} кг`} // Выводим вес
-      price={`${order.price} $`} // Выводим цену
-    />
+   <Notification
+   key={order._id || index}
+   productName={`Заказ №${order._id}`}
+   clientName={client?.name || 'Неизвестный клиент'}
+   trackCode={order._id}
+   createdDate={new Date(order.timestamp).toLocaleDateString('ru-RU')}
+   weight={`${order.weight} кг`}
+   price={order.price.toString()}  // Удаляем символ $
+ />
   ))}
 </div>
 
