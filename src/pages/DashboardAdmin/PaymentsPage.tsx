@@ -58,6 +58,8 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({ addNewOrder }) => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [processingPayment, setProcessingPayment] = useState<string | null>(null);
   const { price, fetchPrice } = usePriceStore();
+  console.log(price,'i');
+  
 
   const [stats, setStats] = useState({
     clientsCount: 0,
@@ -279,43 +281,48 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({ addNewOrder }) => {
   };
   
   const handleDelete = async (order: Order) => {
-    if (!order?.clientId) {  // Проверка на наличие order.id вместо clientId
+    if (!order?.clientId) {
       alert("Ошибка: заказ не найден");
       return;
     }
   
-    const confirmDelete = window.confirm("Вы уверены, что хотите удалить заказ и все связанные импорты?");
+    const confirmDelete = window.confirm("Вы уверены, что хотите удалить заказ?");
     if (!confirmDelete) return;
   
-    setDeletingId(order.id);  // Используем order.id для отслеживания процесса удаления
+    setDeletingId(order.clientId);
   
     try {
-      // Удаляем все импорты, если они существуют
-      if (order.imports?.length) {
-        await Promise.all(
-          order.imports.map(async (imp) => {
-            await API.delete(`/api/imports/${imp._id}`);
-          })
-        );
-      }
-  
-      // Удаляем основной заказ
-      const response = await API.delete(`/api/orders/delete-orders/${order.id}`);
+      // Отправляем запрос на "редактирование" заказа с пустыми данными
+      const response = await API.put(
+        "/api/orders/edit-client",
+        {
+          clientId: order.clientId,
+          amount: 0,
+          price: 0,
+          weight: 0,
+          imports: [], // Очищаем привязанные импорты
+          paid: false,
+          dateOfPayment: null
+        },
+        {
+          headers: { 
+            Authorization: `Bearer ${localStorage.getItem("token")}` 
+          }
+        }
+      );
   
       if (response.status === 200) {
-        setOrders(prev => prev.filter(item => item.id !== order.id));  // Фильтрация по id
-        alert("Заказ и все связанные импорты успешно удалены!");
-      } else {
-        alert(`Ошибка при удалении заказа: ${response.statusText}`);
+        // Фильтруем удаленный заказ из состояния
+        setOrders(prev => prev.filter(item => item.clientId !== order.clientId));
+        alert("Заказ успешно удален!");
       }
     } catch (error: any) {
       console.error("Ошибка удаления:", error);
-      alert(`Ошибка при удалении заказа: ${error.message}`);
+      alert(`Ошибка при удалении: ${error.response?.data?.message || error.message}`);
     } finally {
       setDeletingId(null);
     }
   };
-  
   
   
 
@@ -332,7 +339,7 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({ addNewOrder }) => {
         <td className="py-3 px-4 border-b text-gray-700">{order.clientId}</td>
         <td className="py-3 px-4 border-b text-gray-700">{order.amount}</td>
         <td className="py-3 px-4 border-b text-gray-700">{order.weight}</td>
-        <td className="py-3 px-4 border-b text-gray-700">{order.price}</td>
+        <td className="py-3 px-4 border-b text-gray-700">{order.price*price}</td>
         <td className="py-3 px-4 border-b text-gray-700 gap-4 flex items-center justify-end">
           <button
             className={`font-semibold py-2 px-4 rounded-lg ${
@@ -346,12 +353,12 @@ const PaymentsPage: React.FC<AddItemModalProps> = ({ addNewOrder }) => {
             {processingPayment === order.clientId ? "Обработка..." : (order.paid ? "Оплачено" : "Оплатить")}
           </button>
           <button
-            className="font-semibold py-2 px-4 rounded-lg bg-red-500 hover:bg-red-600 text-white"
-            disabled={deletingId === order.clientId}
-            onClick={() => handleDelete(order)}
-          >
-            {deletingId === order.clientId ? "Удаление..." : "Удалить"}
-          </button>
+  className="font-semibold py-2 px-4 rounded-lg bg-red-500 hover:bg-red-600 text-white"
+  disabled={deletingId === order.clientId}
+  onClick={() => handleDelete(order)}
+>
+  {deletingId === order.clientId ? "Удаление..." : "Удалить"}
+</button>
         </td>
       </tr>
     )),
