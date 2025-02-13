@@ -67,8 +67,8 @@ const ImportPage = () => {
           }
           currentClientId = row[0].toString();
           currentTrackCodes = [];
-          currentWeight = parseFloat(row[2]) || 0;
-          currentPrice = parseFloat(row[3]) || 0;
+          currentWeight = parseFloat(row[2]?.toString().replace(",", ".")) || 0;
+          currentPrice = parseFloat(row[3]?.toString().replace(",", ".")) || 0;
         }
         if (row[1]) {
           currentTrackCodes.push(row[1].toString());
